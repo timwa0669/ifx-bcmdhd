@@ -5776,7 +5776,7 @@ wl_android_set_auto_channel(struct net_device *dev, const char* cmd_str,
 			if (wl_cfg80211_get_ioctl_version() == 1) {
 				channel = LCHSPEC_CHANNEL((chanspec_t)chosen);
 			} else {
-				channel = CHSPEC_CHANNEL((chanspec_t)chosen);
+				channel = wf_chspec_primary20_chan((chanspec_t)chosen);
 			}
 #else
 			channel = CHSPEC_CHANNEL((chanspec_t)chosen);
