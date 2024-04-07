@@ -23314,6 +23314,10 @@ static int wl_construct_reginfo(struct bcm_cfg80211 *cfg, u32 bw_cap[])
 		ht40_allowed = false;
 		c = (chanspec_t)dtoh32(list->element[i]);
 		c = wl_chspec_driver_to_host(c);
+		if (wf_chspec_malformed(c)) {
+			WL_DBG(("invalid chanspec 0x%x from firmware, ignoring it.\n", c));
+			continue;
+		}
 		channel = wf_chspec_ctlchan(c);
 
 		if (!CHSPEC_IS40(c) && ! CHSPEC_IS20(c)) {
@@ -26861,7 +26865,6 @@ int wl_chspec_chandef(chanspec_t chanspec,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
 	struct cfg80211_chan_def *chandef,
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION (3, 5, 0) && (LINUX_VERSION_CODE <= (3, 7, \
-	\
 	0)))
 	struct chan_info *chaninfo,
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)) */
@@ -26873,9 +26876,12 @@ int wl_chspec_chandef(chanspec_t chanspec,
 	struct ieee80211_channel *chan;
 	uint16 sb = 0;
 
-	if (!chandef) {
-		return -1;
-	}
+	if (!wiphy)
+		return -EINVAL;
+
+	if (!chandef)
+		return -EINVAL;
+
 	channel = CHSPEC_CHANNEL(chanspec);
 
 	switch (CHSPEC_BW(chanspec)) {
@@ -26936,14 +26942,16 @@ int wl_chspec_chandef(chanspec_t chanspec,
 	else
 		freq = ieee80211_channel_to_frequency(channel, NL80211_BAND_2GHZ);
 
+	if (!freq)
+		return -EINVAL;
+
 	chan = ieee80211_get_channel(wiphy, freq);
-	WL_DBG(("channel:%d freq:%d chan_type: %d chan_ptr:%p \n",
-		channel, freq, chan_type, chan));
+	WL_DBG(("channel:%d freq:%d chan_type: %d chan_ptr:%p chanspec: %x\n",
+		channel, freq, chan_type, chan, chanspec));
 
 	if (unlikely(!chan)) {
 		/* fw and cfg80211 channel lists are not in sync */
 		WL_ERR(("Couldn't find matching channel in wiphy channel list \n"));
-		ASSERT(0);
 		return -EINVAL;
 	}
 
@@ -26975,7 +26983,6 @@ int wl_chspec_chandef(chanspec_t chanspec,
 		}
 	}
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION (3, 5, 0) && (LINUX_VERSION_CODE <= (3, 7, \
-	\
 	0)))
 	chaninfo->freq = freq;
 	chaninfo->chan_type = chan_type;

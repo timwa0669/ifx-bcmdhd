@@ -10528,6 +10528,8 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	char* iov_buf = NULL;
 	int ret2 = 0;
 	uint32 wnm_cap = 0;
+	u8 *chspecs_pbuf = NULL;
+	wl_uint32_list_t *chspecs_list;
 #if defined(BCMSUP_4WAY_HANDSHAKE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
 	uint32 sup_wpa = 1;
 #endif /* BCMSUP_4WAY_HANDSHAKE || BCMSUP_4WAY_HANDSHAKE_SAE */
@@ -10854,6 +10856,29 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	if ((ret = dhd_apply_default_clm(dhd, clm_path)) < 0) {
 		DHD_ERROR(("%s: CLM set failed. Abort initialization.\n", __FUNCTION__));
 		goto done;
+	}
+
+	chspecs_pbuf = (u8 *)MALLOCZ(dhd->osh, 2048);
+	if (chspecs_pbuf == NULL) {
+		DHD_ERROR(("failed to allocate local buf\n"));
+		return -ENOMEM;
+	}
+
+	chspecs_list = (wl_uint32_list_t *)(void *)chspecs_pbuf;
+	ret = dhd_iovar(dhd, 0, "chanspecs", NULL, 0, (char *)chspecs_pbuf, 2048, FALSE);
+	if (ret < 0) {
+		DHD_ERROR(("%s: Get chanspecs failed (error=%d)\n",
+			__FUNCTION__, ret));
+	} else {
+		if (dtoh32(chspecs_list->count)) {
+			if ((ret = dhd_iovar(dhd, 0, "chanspec",
+					(char *)&dtoh32(chspecs_list->element[0]),
+					sizeof(dtoh32(chspecs_list->element[0])),
+					NULL, 0, TRUE))) {
+				DHD_ERROR(("%s init chanspec error %d\n",
+						__FUNCTION__, ret));
+			}
+		}
 	}
 
 	/* get a capabilities from firmware */
@@ -12120,7 +12145,10 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #endif /* CONFIG_SILENT_ROAM */
 
 done:
-
+	if (chspecs_pbuf) {
+		MFREE(dhd->osh, chspecs_pbuf, 2048);
+		chspecs_pbuf = NULL;
+	}
 	if (eventmask_msg) {
 		MFREE(dhd->osh, eventmask_msg, msglen);
 		eventmask_msg = NULL;
