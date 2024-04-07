@@ -275,10 +275,13 @@ void
 	}
 
 	if ((section < 0) || (section >= PREALLOC_WLAN_SEC_NUM)) {
+		pr_err("%s: bad section %d", __FUNCTION__, section);
 		return NULL;
 	}
 
 	if (wlan_mem_array[section].size < size) {
+		pr_err("%s: request %lu but prealloced %lu, section = %d\n",
+				__FUNCTION__, wlan_mem_array[section].size, size, section);
 		return NULL;
 	}
 

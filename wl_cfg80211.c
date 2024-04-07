@@ -185,7 +185,9 @@ module_param(us_ap_select, uint, 0660);
 
 static struct device *cfg80211_parent_dev = NULL;
 static struct bcm_cfg80211 *g_bcmcfg = NULL;
-u32 wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION | WL_DBG_INFO;
+
+uint wl_dbg_level = WL_DBG_ERR | WL_DBG_P2P_ACTION | WL_DBG_INFO;
+module_param(wl_dbg_level, uint, 0);
 
 #define	MAX_VIF_OFFSET	15
 #define MAX_WAIT_TIME 1500
@@ -23011,15 +23013,21 @@ static void wl_get_bwcap(struct bcm_cfg80211 *cfg, u32 bw_cap[])
 				bw_cap[NL80211_BAND_6GHZ] = band;
 				return;
 			}
+#if 0
 			WARN_ON(1);
+#endif /* 0 */
 #else
 			return;
 #endif /* WL_6E */
 		}
+#if 0
 		WARN_ON(1);
+#endif /* 0 */
 		return;
 	}
+#if 0
 	WARN_ON(1);
+#endif /* 0 */
 
 	WL_ERR(("fallback to mimo_bw_cap info\n"));
 	mimo_bwcap = 0;
@@ -27300,9 +27308,11 @@ wl_cfg80211_set_rekey_data(struct wiphy *wiphy, struct net_device *dev,
 	}
 #endif /* WL_DHD_XR_MASTER */
 
-	prhex("kck", (const u8 *) (data->kck), RSN_KCK_LENGTH);
-	prhex("kek", (const u8 *) (data->kek), RSN_KEK_LENGTH);
-	prhex("replay_ctr", (const u8 *) (data->replay_ctr), RSN_REPLAY_LEN);
+	if (wl_dbg_level & WL_DBG_INFO) {
+		prhex("kck", (const u8 *) (data->kck), RSN_KCK_LENGTH);
+		prhex("kek", (const u8 *) (data->kek), RSN_KEK_LENGTH);
+		prhex("replay_ctr", (const u8 *) (data->replay_ctr), RSN_REPLAY_LEN);
+	}
 	bcopy(data->kck, keyinfo.KCK, RSN_KCK_LENGTH);
 	bcopy(data->kek, keyinfo.KEK, RSN_KEK_LENGTH);
 	bcopy(data->replay_ctr, keyinfo.ReplayCounter, RSN_REPLAY_LEN);

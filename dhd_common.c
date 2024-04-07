@@ -117,6 +117,9 @@
 int log_print_threshold = 0;
 #endif /* DHD_LOG_PRINT_RATE_LIMIT */
 uint dhd_msg_level = DHD_ERROR_VAL | DHD_FWLOG_VAL | DHD_EVENT_VAL
+	| DHD_WL_VAL | DHD_WL_VAL2 | DHD_DBGIF_VAL | DHD_DNGL_IOVAR_SET_VAL;
+#if 0
+uint dhd_msg_level = DHD_ERROR_VAL | DHD_FWLOG_VAL | DHD_EVENT_VAL
 	/* For CUSTOMER_HW4 do not enable DHD_IOVAR_MEM_VAL by default */
 #if !defined(BOARD_HIKEY)
 	| DHD_IOVAR_MEM_VAL
@@ -125,6 +128,7 @@ uint dhd_msg_level = DHD_ERROR_VAL | DHD_FWLOG_VAL | DHD_EVENT_VAL
 	| DHD_MSGTRACE_VAL
 #endif /* OEM_ANDROID */
 	| DHD_PKT_MON_VAL;
+#endif /* 0 */
 
 #if defined(OEM_ANDROID) && defined(WL_WIRELESS_EXT)
 #include <wl_iw.h>

@@ -27,6 +27,21 @@
 #
 
 #####################
+# Patches
+#####################
+
+# SDLX_MSG(x) debug message
+#DHDCFLAGS += -DDHD_SDLX_MSG
+# KSO_DBG(x) debug message
+#DHDCFLAGS += -DDHD_KSO_DEBUG
+# SI_VMSG(args) debug message
+#DHDCFLAGS += -DBCMDBG_SI
+# SI_MSG(args) debug message
+#DHDCFLAGS += -DDHD_SI_MSG
+# SI_ERROR(args) debug message
+DHDCFLAGS += -DSI_ERROR_ENFORCE
+
+#####################
 # SDIO Basic feature
 #####################
 

@@ -188,7 +188,7 @@ ai_scan(si_t *sih, void *regs, uint32 erombase, uint devid)
 
 	SI_VMSG(("ai_scan: regs = 0x%p, erombase = 0x%08x, eromptr = 0x%p, eromlim = 0x%p\n",
 	         OSL_OBFUSCATE_BUF(regs), erombase,
-		OSL_OBFUSCATE_BUF(eromptr), OSL_OBFUSATE_BUF(eromlim)));
+		OSL_OBFUSCATE_BUF(eromptr), OSL_OBFUSCATE_BUF(eromlim)));
 	while (eromptr < eromlim) {
 		uint32 cia, cib, cid, mfg, crev, nmw, nsw, nmp, nsp;
 		uint32 mpd, asd, addrl, addrh, sizel, sizeh;

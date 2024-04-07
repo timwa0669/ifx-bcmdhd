@@ -3615,7 +3615,7 @@ s32 wl_cfg80211_custom_scan_time(struct net_device *dev,
 
 #ifdef CUSTOMER_HW4_DEBUG
 uint prev_dhd_console_ms = 0;
-u32 prev_wl_dbg_level = 0;
+uint prev_wl_dbg_level = 0;
 static void wl_scan_timeout_dbg_set(void);
 
 static void wl_scan_timeout_dbg_set(void)

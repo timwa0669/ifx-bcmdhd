@@ -1215,7 +1215,11 @@ dhdsdio_clk_kso_init(dhd_bus_t *bus)
 	return 0;
 }
 
+#if defined(DHD_KSO_DEBUG)
+#define KSO_DBG(x) printf x
+#else
 #define KSO_DBG(x)
+#endif // endif
 #define KSO_WAIT_US 50
 #define KSO_WAIT_MS 1
 #define KSO_SLEEP_RETRY_COUNT 20

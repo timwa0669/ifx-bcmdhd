@@ -48,7 +48,11 @@
 
 #endif /* ENABLE_CORECAPTURE */
 
+#ifdef DHD_SI_MSG
+#define	SI_MSG(args)	printf args
+#else /* DHD_SI_MSG */
 #define	SI_MSG(args)
+#endif /* DHD_SI_MSG */
 
 #ifdef BCMDBG_SI
 #define	SI_VMSG(args)	printf args

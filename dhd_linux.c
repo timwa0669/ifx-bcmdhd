@@ -579,6 +579,9 @@ module_param(dhd_watchdog_ms, uint, 0);
 #ifdef DHD_PCIE_RUNTIMEPM
 uint dhd_runtimepm_ms = CUSTOM_DHD_RUNTIME_MS;
 #endif /* DHD_PCIE_RUNTIMEPMT */
+uint dhd_console_ms = 10;
+module_param(dhd_console_ms, uint, 0644);
+#if 0
 #if defined(DHD_DEBUG)
 /* Console poll interval */
 #if defined(OEM_ANDROID)
@@ -590,6 +593,7 @@ module_param(dhd_console_ms, uint, 0644);
 #else
 uint dhd_console_ms = 0;
 #endif /* DHD_DEBUG */
+#endif /* 0 */
 
 uint dhd_slpauto = TRUE;
 module_param(dhd_slpauto, uint, 0);
@@ -893,7 +897,7 @@ module_param(dhd_tcm_test_enable, uint, 0644);
 
 /* WAR to avoid system hang during FW trap */
 #ifdef DHD_FW_COREDUMP
-uint disable_bug_on = FALSE;
+uint disable_bug_on = TRUE;
 module_param(disable_bug_on, uint, 0);
 #endif /* DHD_FW_COREDUMP */
 
@@ -14210,6 +14214,8 @@ uint8* dhd_os_prealloc(dhd_pub_t *dhdpub, int section, uint size, bool kmalloc_i
 	uint8* buf;
 	gfp_t flags = CAN_SLEEP() ? GFP_KERNEL: GFP_ATOMIC;
 
+	DHD_ERROR(("%s: trying to prealloc section %d for size %u\n",
+			__FUNCTION__, section, size));
 	buf = (uint8*)wifi_platform_prealloc(dhdpub->info->adapter, section, size);
 	if (buf == NULL && kmalloc_if_fail)
 		buf = kmalloc(size, flags);

@@ -455,8 +455,8 @@ si_buscore_setup(si_info_t *sii, chipcregs_t *cc, uint bustype, uint32 savewin,
 
 		/* Display cores found */
 		SI_VMSG(("CORE[%d]: id 0x%x rev %d base 0x%x size:%x regs 0x%p\n",
-			i, cid, crev, sii->coresba[i], sii->coresba_size[i],
-			OSL_OBFUSCATE_BUF(sii->regs[i])));
+			i, cid, crev, sii->cores_info->coresba[i], sii->cores_info->coresba_size[i],
+			OSL_OBFUSCATE_BUF(sii->cores_info->regs[i])));
 
 		if (BUSTYPE(bustype) == SI_BUS) {
 			/* now look at the chipstatus register to figure the pacakge */

@@ -34,7 +34,7 @@
 #include <p2p.h>
 
 struct bcm_cfg80211;
-extern u32 wl_dbg_level;
+extern uint wl_dbg_level;
 
 typedef struct wifi_p2p_ie wifi_wfd_ie_t;
 /* Enumeration of the usages of the BSSCFGs used by the P2P Library.  Do not

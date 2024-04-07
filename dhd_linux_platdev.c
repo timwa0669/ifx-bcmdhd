@@ -140,7 +140,8 @@ void* wifi_platform_prealloc(wifi_adapter_info_t *adapter, int section, unsigned
 				bzero(alloc_ptr, size);
 			return alloc_ptr;
 		}
-	}
+	} else
+		DHD_ERROR(("%s: No mem_prealloc function provided\n", __FUNCTION__));
 
 	DHD_ERROR(("%s: failed to alloc static mem section %d\n", __FUNCTION__, section));
 	return NULL;
