@@ -3132,9 +3132,14 @@ si_socram_srmem_size(si_t *sih)
 	uint32 coreinfo;
 	uint memsize = 0;
 
+#ifdef DEPRECATED
+	if ((CHIPID(sih->chip) == BCM4334_CHIP_ID) && (CHIPREV(sih->chiprev) < 2)) {
+		return (32 * 1024);
+	}
+#endif
+
 	if (CHIPID(sih->chip) == BCM43430_CHIP_ID ||
 		CHIPID(sih->chip) == BCM43439_CHIP_ID ||
-		CHIPID(sih->chip) == BCM4345_CHIP_ID ||
 		CHIPID(sih->chip) == BCM43018_CHIP_ID) {
 		return (64 * 1024);
 	}
@@ -3700,7 +3705,6 @@ si_pll_closeloop(si_t *sih)
 		case BCM43018_CHIP_ID:
 		case BCM43430_CHIP_ID:
 		case BCM43439_CHIP_ID:
-		case BCM4345_CHIP_ID:
 			if (SR_ENAB() && sr_isenab(sih)) {
 				/* read back the pll openloop state */
 				data = si_pmu_pllcontrol(sih, PMU1_PLL0_PLLCTL8, 0, 0);

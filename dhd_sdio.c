@@ -1047,7 +1047,6 @@ dhdsdio_sr_cap(dhd_bus_t *bus)
 
 	if (bus->sih->chip == BCM43430_CHIP_ID ||
 		bus->sih->chip == BCM43439_CHIP_ID ||
-		bus->sih->chip == BCM4345_CHIP_ID ||
 		bus->sih->chip == BCM43018_CHIP_ID) {
 		/* check if fw initialized sr engine */
 		addr = SI_ENUM_BASE(bus->sih) + OFFSETOF(chipcregs_t, sr_control1);
@@ -5074,7 +5073,6 @@ dhdsdio_download_state(dhd_bus_t *bus, bool enter)
 
 			if (CHIPID(bus->sih->chip) == BCM43430_CHIP_ID ||
 				CHIPID(bus->sih->chip) == BCM43439_CHIP_ID ||
-				CHIPID(bus->sih->chip) == BCM43455_CHIP_ID ||
 				CHIPID(bus->sih->chip) == BCM43018_CHIP_ID) {
 				/* Disabling Remap for SRAM_3 */
 				si_socram_set_bankpda(bus->sih, 0x3, 0x0);
