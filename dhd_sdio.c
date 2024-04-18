@@ -460,6 +460,8 @@ typedef struct dhd_bus {
 	uint32		resetinstr;
 	uint32		dongle_ram_base;
 
+	ulong		shared_addr;
+	sdpcm_shared_t	*sh;
 	void		*glom_pkt_arr[SDPCM_MAXGLOM_SIZE];	/* Array of pkts for glomming */
 	uint32		txglom_cnt;	/* Number of pkts in the glom array */
 	uint32		txglom_total_len;	/* Total length of pkts in glom array */
@@ -3624,11 +3626,6 @@ dhdsdio_readshared(dhd_bus_t *bus, sdpcm_shared_t *sh)
 	int rv, i;
 	uint32 shaddr = 0;
 
-	/* This temporary WAR for now */
-#if defined(PLATFORM_IMX)
-	return BCME_ERROR;
-#endif /* defined(PLATFORM_IMX) */
-
 	if (bus->sih == NULL) {
 		if (bus->dhd && bus->dhd->dongle_reset) {
 			DHD_ERROR(("%s: Dongle is in reset state\n", __FUNCTION__));
@@ -3665,13 +3662,14 @@ dhdsdio_readshared(dhd_bus_t *bus, sdpcm_shared_t *sh)
 		 * NVRAM length at the end of memory should have been overwritten.
 		 */
 		if (addr == 0 || ((~addr >> 16) & 0xffff) == (addr & 0xffff)) {
-			if ((bus->srmemsize > 0) && (i++ == 0)) {
+			if ((bus->srmemsize > 0) && (i == 0)) {
 				shaddr -= bus->srmemsize;
 			} else {
 				DHD_ERROR(("%s: address (0x%08x) of sdpcm_shared invalid\n",
 					__FUNCTION__, addr));
 				return BCME_ERROR;
 			}
+			i++;
 		} else
 			break;
 	} while (i < 2);
@@ -3688,6 +3686,9 @@ dhdsdio_readshared(dhd_bus_t *bus, sdpcm_shared_t *sh)
 	sh->assert_line = ltoh32(sh->assert_line);
 	sh->console_addr = ltoh32(sh->console_addr);
 	sh->msgtrace_addr = ltoh32(sh->msgtrace_addr);
+
+	DHD_INFO(("%s hndrte_shared address 0x%08X\n",
+			__FUNCTION__, sh->console_addr));
 
 	if ((sh->flags & SDPCM_SHARED_VERSION_MASK) == 3 && SDPCM_SHARED_VERSION == 1)
 		return BCME_OK;
@@ -3709,14 +3710,15 @@ dhdsdio_readshared_console(dhd_bus_t *bus)
 	uint32 addr;
 	int rv, i;
 	uint32 shaddr = 0;
-	sdpcm_shared_t sh_info;
-	sdpcm_shared_t *sh = &sh_info;
+	sdpcm_shared_t *sh = bus->sh;
 #ifndef BCMSPI
 #ifdef DHD_43022
 	int retry = READ_SHARED_CONSOLE_INIT_RETRY;
 #else
 	int retry = 10;
 #endif /* DHD_43022 */
+#else
+	int retry = MAX_READSHARED_RETRY;
 #endif /* BCMSPI */
 
 #ifdef DHD_43022
@@ -3745,40 +3747,19 @@ dhdsdio_readshared_console(dhd_bus_t *bus)
 			} else {
 				DHD_ERROR(("%s: address (0x%08x) of sdpcm_shared invalid\n",
 					__FUNCTION__, addr));
-
-#ifdef DHD_43022
 #if defined(BCMQT)
 				OSL_SLEEP(500);
 #else
 				OSL_SLEEP(50);
 #endif /* BCMQT */
-
-				/*
-				 * It was identified that if this conditional break was not given
-				 * then FW used to crash while accessing some bits in H2D register.
-				 */
-				if (i >= retry)
-					break;
-#else
-				 OSL_SLEEP(50);
-#endif /* DHD_43022 */
 			}
 			i++;
 		} else
 			break;
-#ifndef BCMSPI
 	} while (i < retry);
-#else
-	} while (++i < MAX_READSHARED_RETRY);
-#endif /* BCMSPI */
 
-#ifndef BCMSPI
 	if (i == retry)
 		return BCME_ERROR;
-#else
-	if (i == MAX_READSHARED_RETRY)
-		return BCME_ERROR;
-#endif /* BCMSPI */
 
 	/* Read hndrte_shared structure */
 	if ((rv = dhdsdio_membytes(bus, FALSE, addr, (uint8 *)sh, sizeof(sdpcm_shared_t))) < 0)
@@ -3788,6 +3769,9 @@ dhdsdio_readshared_console(dhd_bus_t *bus)
 	sh->console_addr = ltoh32(sh->console_addr);
 	/* load bus console address */
 	bus->console_addr = sh->console_addr;
+
+	DHD_INFO(("%s hndrte_shared address 0x%08X\n",
+			__FUNCTION__, sh->console_addr));
 
 	return BCME_OK;
 }
@@ -3804,14 +3788,14 @@ dhdsdio_readconsole(dhd_bus_t *bus)
 	int rv;
 
 	if (!DHD_FWLOG_ON())
-		return 0;
+		return BCME_OK;
 
 	/* Don't do anything until FWREADY updates console address */
 	if (bus->console_addr == 0)
-		return 0;
+		return BCME_OK;
 
 	if (!KSO_ENAB(bus))
-		return 0;
+		return BCME_OK;
 
 	/* Read console log struct */
 	addr = bus->console_addr + OFFSETOF(hnd_cons_t, log);
@@ -3850,11 +3834,15 @@ dhdsdio_readconsole(dhd_bus_t *bus)
 	if (idx == c->last)
 		return BCME_OK;
 
-	DHD_ERROR(("conlog: addr=0x%x, idx=0x%x, last=0x%x \n", c->log.buf,
-	   idx, c->last));
-
 	/* Read the console buffer */
 	addr = ltoh32(c->log.buf);
+
+	DHD_INFO(("conlog: addr=0x%x, idx=0x%x, last=0x%x \n", addr,
+			idx, c->last));
+
+	if (!addr)
+		return BCME_OK;
+
 	if ((rv = dhdsdio_membytes(bus, FALSE, addr, c->buf, c->bufsize)) < 0)
 		return rv;
 
@@ -3881,7 +3869,13 @@ dhdsdio_readconsole(dhd_bus_t *bus)
 			if (line[n - 1] == '\r')
 				n--;
 			line[n] = 0;
+#if !defined(WL_DHD_XR_LOG) && !defined(WL_DHD_DUAL_LOG)
 			printf("CONSOLE: %s\n", line);
+#elif defined(WL_DHD_XR_LOG)
+			printf("%d CONSOLE: %s\n", XR_ROLE, line);
+#else
+			printf("%d CONSOLE: %s\n", DUAL_ROLE, line);
+#endif /* !WL_DHD_XR_LOG  && !WL_DHD_DUAL_LOG */
 #ifdef LOG_INTO_TCPDUMP
 			dhd_sendup_log(bus->dhd, line, n);
 #endif /* LOG_INTO_TCPDUMP */
@@ -3902,7 +3896,7 @@ dhdsdio_checkdied(dhd_bus_t *bus, char *data, uint size)
 	char *console_buffer = NULL;
 	uint maxstrlen = 256;
 	char *str = NULL;
-	sdpcm_shared_t l_sdpcm_shared;
+	sdpcm_shared_t *l_sdpcm_shared = bus->sh;
 	struct bcmstrbuf strbuf;
 	uint32 console_ptr, console_size, console_index;
 	uint8 line[CONSOLE_LINE_MAX], ch;
@@ -3934,36 +3928,36 @@ dhdsdio_checkdied(dhd_bus_t *bus, char *data, uint size)
 		goto done;
 	}
 
-	if ((bcmerror = dhdsdio_readshared(bus, &l_sdpcm_shared)) < 0)
+	if ((bcmerror = dhdsdio_readshared(bus, l_sdpcm_shared)) < 0)
 		goto done;
 
 	bcm_binit(&strbuf, data, size);
 
 	bcm_bprintf(&strbuf, "msgtrace address : 0x%08X\nconsole address  : 0x%08X\n",
-	            l_sdpcm_shared.msgtrace_addr, l_sdpcm_shared.console_addr);
+	            l_sdpcm_shared->msgtrace_addr, l_sdpcm_shared->console_addr);
 
-	if ((l_sdpcm_shared.flags & SDPCM_SHARED_ASSERT_BUILT) == 0) {
+	if ((l_sdpcm_shared->flags & SDPCM_SHARED_ASSERT_BUILT) == 0) {
 		/* NOTE: Misspelled assert is intentional - DO NOT FIX.
 		 * (Avoids conflict with real asserts for programmatic parsing of output.)
 		 */
 		bcm_bprintf(&strbuf, "Assrt not built in dongle\n");
 	}
 
-	if ((l_sdpcm_shared.flags & (SDPCM_SHARED_ASSERT|SDPCM_SHARED_TRAP)) == 0) {
+	if ((l_sdpcm_shared->flags & (SDPCM_SHARED_ASSERT|SDPCM_SHARED_TRAP)) == 0) {
 		/* NOTE: Misspelled assert is intentional - DO NOT FIX.
 		 * (Avoids conflict with real asserts for programmatic parsing of output.)
 		 */
 		bcm_bprintf(&strbuf, "No trap%s in dongle",
-		          (l_sdpcm_shared.flags & SDPCM_SHARED_ASSERT_BUILT)
+		          (l_sdpcm_shared->flags & SDPCM_SHARED_ASSERT_BUILT)
 		          ?"/assrt" :"");
 	} else {
-		if (l_sdpcm_shared.flags & SDPCM_SHARED_ASSERT) {
+		if (l_sdpcm_shared->flags & SDPCM_SHARED_ASSERT) {
 			/* Download assert */
 			bcm_bprintf(&strbuf, "Dongle assert");
-			if (l_sdpcm_shared.assert_exp_addr != 0) {
+			if (l_sdpcm_shared->assert_exp_addr != 0) {
 				str[0] = '\0';
 				if ((bcmerror = dhdsdio_membytes(bus, FALSE,
-				                                 l_sdpcm_shared.assert_exp_addr,
+				                                 l_sdpcm_shared->assert_exp_addr,
 				                                 (uint8 *)str, maxstrlen)) < 0)
 					goto done;
 
@@ -3971,10 +3965,10 @@ dhdsdio_checkdied(dhd_bus_t *bus, char *data, uint size)
 				bcm_bprintf(&strbuf, " expr \"%s\"", str);
 			}
 
-			if (l_sdpcm_shared.assert_file_addr != 0) {
+			if (l_sdpcm_shared->assert_file_addr != 0) {
 				str[0] = '\0';
 				if ((bcmerror = dhdsdio_membytes(bus, FALSE,
-				                   l_sdpcm_shared.assert_file_addr,
+				                   l_sdpcm_shared->assert_file_addr,
 				                                 (uint8 *)str, maxstrlen)) < 0)
 					goto done;
 
@@ -3982,32 +3976,32 @@ dhdsdio_checkdied(dhd_bus_t *bus, char *data, uint size)
 				bcm_bprintf(&strbuf, " file \"%s\"", str);
 			}
 
-			bcm_bprintf(&strbuf, " line %d ", l_sdpcm_shared.assert_line);
+			bcm_bprintf(&strbuf, " line %d ", l_sdpcm_shared->assert_line);
 		}
 
-		if (l_sdpcm_shared.flags & SDPCM_SHARED_TRAP) {
+		if (l_sdpcm_shared->flags & SDPCM_SHARED_TRAP) {
 			trap_t *tr = &bus->dhd->last_trap_info;
 			bus->dhd->dongle_trap_occured = TRUE;
 			if ((bcmerror = dhdsdio_membytes(bus, FALSE,
-			                                 l_sdpcm_shared.trap_addr,
+			                                 l_sdpcm_shared->trap_addr,
 			                                 (uint8*)tr, sizeof(trap_t))) < 0)
 				goto done;
 
-			bus->dongle_trap_addr = ltoh32(l_sdpcm_shared.trap_addr);
+			bus->dongle_trap_addr = ltoh32(l_sdpcm_shared->trap_addr);
 
 			dhd_bus_dump_trap_info(bus, &strbuf);
 
-			addr = l_sdpcm_shared.console_addr + OFFSETOF(hnd_cons_t, log);
+			addr = l_sdpcm_shared->console_addr + OFFSETOF(hnd_cons_t, log);
 			if ((rv = dhdsdio_membytes(bus, FALSE, addr,
 				(uint8 *)&console_ptr, sizeof(console_ptr))) < 0)
 				goto printbuf;
 
-			addr = l_sdpcm_shared.console_addr + OFFSETOF(hnd_cons_t, log.buf_size);
+			addr = l_sdpcm_shared->console_addr + OFFSETOF(hnd_cons_t, log.buf_size);
 			if ((rv = dhdsdio_membytes(bus, FALSE, addr,
 				(uint8 *)&console_size, sizeof(console_size))) < 0)
 				goto printbuf;
 
-			addr = l_sdpcm_shared.console_addr + OFFSETOF(hnd_cons_t, log.idx);
+			addr = l_sdpcm_shared->console_addr + OFFSETOF(hnd_cons_t, log.idx);
 			if ((rv = dhdsdio_membytes(bus, FALSE, addr,
 				(uint8 *)&console_index, sizeof(console_index))) < 0)
 				goto printbuf;
@@ -4049,12 +4043,12 @@ dhdsdio_checkdied(dhd_bus_t *bus, char *data, uint size)
 	}
 
 printbuf:
-	if (l_sdpcm_shared.flags & (SDPCM_SHARED_ASSERT | SDPCM_SHARED_TRAP)) {
+	if (l_sdpcm_shared->flags & (SDPCM_SHARED_ASSERT | SDPCM_SHARED_TRAP)) {
 		DHD_ERROR(("%s: %s\n", __FUNCTION__, strbuf.origbuf));
 	}
 
 #if defined(DHD_FW_COREDUMP)
-	if (bus->dhd->memdump_enabled && (l_sdpcm_shared.flags & SDPCM_SHARED_TRAP)) {
+	if (bus->dhd->memdump_enabled && (l_sdpcm_shared->flags & SDPCM_SHARED_TRAP)) {
 		/* Mem dump to a file on device */
 		bus->dhd->memdump_type = DUMP_TYPE_DONGLE_TRAP;
 		dhd_os_sdunlock(bus->dhd);
@@ -5967,12 +5961,16 @@ dhd_bus_init(dhd_pub_t *dhdp, bool enforce_mutex)
 	if (!bus->dhd)
 		return 0;
 
-	if ((ret = dhdsdio_readshared_console(bus)) >= 0) {
-		DHD_ERROR(("initialized console"));
+	if (!(bus->sih->chip == BCM43018_CHIP_ID ||
+		bus->sih->chip == BCM43430_CHIP_ID ||
+		bus->sih->chip == BCM43439_CHIP_ID)) {
+		if ((ret = dhdsdio_readshared_console(bus)) == 0) {
+			DHD_ERROR(("%s: Initialized console\n", __FUNCTION__));
 #ifdef DHD_DEBUG
-		if ((ret = dhdsdio_readconsole(bus)) < 0) {
-			DHD_ERROR(("%s: Console buffer read failed\n",
-				__FUNCTION__));
+			if ((ret = dhdsdio_readconsole(bus)) < 0) {
+				DHD_ERROR(("%s: Console buffer read failed\n",
+					__FUNCTION__));
+			}
 		}
 #endif /* DHD_DEBUG */
 	}
@@ -6127,6 +6125,20 @@ dhd_bus_init(dhd_pub_t *dhdp, bool enforce_mutex)
 		/* Disable F2 again */
 		enable = SDIO_FUNC_ENABLE_1;
 		bcmsdh_cfg_write(bus->sdh, SDIO_FUNC_0, SDIOD_CCCR_IOEN, enable, NULL);
+	}
+
+	if (bus->sih->chip == BCM43018_CHIP_ID ||
+		bus->sih->chip == BCM43430_CHIP_ID ||
+		bus->sih->chip == BCM43439_CHIP_ID) {
+		if ((ret = dhdsdio_readshared_console(bus)) == 0) {
+			DHD_ERROR(("%s: Initialized console\n", __FUNCTION__));
+#ifdef DHD_DEBUG
+			if ((ret = dhdsdio_readconsole(bus)) < 0) {
+				DHD_ERROR(("%s: Console buffer read failed\n",
+					__FUNCTION__));
+			}
+		}
+#endif /* DHD_DEBUG */
 	}
 
 #ifdef DHD_FW_COREDUMP
@@ -7526,6 +7538,9 @@ dhdsdio_hostmail(dhd_bus_t *bus, uint32 *hmbd)
 	uint32 hmb_data;
 	uint8 fcbits;
 	uint retries = 0;
+#ifdef DHD_DEBUG
+	sdpcm_shared_t *shared = bus->sh;
+#endif /* DHD_DEBUG */
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
@@ -7572,11 +7587,8 @@ dhdsdio_hostmail(dhd_bus_t *bus, uint32 *hmbd)
 
 #ifdef DHD_DEBUG
 		/* Retrieve console state address now that firmware should have updated it */
-		{
-			sdpcm_shared_t shared;
-			if (dhdsdio_readshared(bus, &shared) == 0)
-				bus->console_addr = shared.console_addr;
-			}
+		if (dhdsdio_readshared(bus, shared) == 0)
+			bus->console_addr = shared->console_addr;
 #endif /* DHD_DEBUG */
 	}
 
@@ -8981,6 +8993,16 @@ dhdsdio_probe_attach(struct dhd_bus *bus, osl_t *osh, void *sdh, void *regsva,
 	}
 #endif /* BCMSPI */
 
+	/* Attach sdio shared structure.
+	 * Due to blhs, the sdpcm_shared malloc is
+	 * placed here before dhdsdio_probe_malloc()
+	 */
+	if (!(bus->sh = MALLOCZ(osh, sizeof(sdpcm_shared_t)))) {
+		DHD_ERROR(("%s: MALLOC of bus->sh failed\n", __FUNCTION__));
+		err = BCME_NORESOURCE;
+		goto fail;
+	}
+
 #ifndef DHD_43022
 	if (bus->secureboot) {
 		/* Should not do any backplane access before bootloader is ready */
@@ -9377,6 +9399,12 @@ fail:
 		si_detach(bus->sih);
 		bus->sih = NULL;
 	}
+
+	if (bus->sh != NULL) {
+		MFREE(osh, bus->sh, sizeof(sdpcm_shared_t));
+		bus->sh = NULL;
+	}
+
 	return FALSE;
 }
 
@@ -9618,6 +9646,9 @@ dhdsdio_release(dhd_bus_t *bus, osl_t *osh)
 		if (bus->pad_pkt)
 			PKTFREE(osh, bus->pad_pkt, FALSE);
 #endif /* DHDENABLE_TAILPAD */
+
+		if (bus->sh)
+			MFREE(osh, bus->sh, sizeof(sdpcm_shared_t));
 
 		MFREE(osh, bus, sizeof(dhd_bus_t));
 	}

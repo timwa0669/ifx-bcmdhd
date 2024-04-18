@@ -3459,11 +3459,11 @@ dhdpcie_bus_readconsole(dhd_bus_t *bus)
 	uint i = 0;
 
 	if (!DHD_FWLOG_ON())
-		return 0;
+		return BCME_OK;
 
 	/* Don't do anything until FWREADY updates console address */
 	if (bus->console_addr == 0)
-		return -1;
+		return BCME_ERROR;
 
 	/* Read console log struct */
 	addr = bus->console_addr + OFFSETOF(hnd_cons_t, log);
@@ -3490,7 +3490,7 @@ dhdpcie_bus_readconsole(dhd_bus_t *bus)
 		c->bufsize = ltoh32(c->log.buf_size);
 		if ((c->buf = MALLOC(bus->dhd->osh, c->bufsize)) == NULL)
 			return BCME_NOMEM;
-		DHD_ERROR(("conlog: bufsize=0x%x\n", c->bufsize));
+		DHD_INFO(("conlog: bufsize=0x%x\n", c->bufsize));
 	}
 	idx = ltoh32(c->log.idx);
 
@@ -3502,19 +3502,17 @@ dhdpcie_bus_readconsole(dhd_bus_t *bus)
 	if (idx == c->last)
 		return BCME_OK;
 
-	DHD_ERROR(("conlog: addr=0x%x, idx=0x%x, last=0x%x \n", c->log.buf,
-	   idx, c->last));
-
 	/* Read the console buffer data to a local buffer */
 	/* optimize and read only the portion of the buffer needed, but
 	 * important to handle wrap-around.
 	 */
 	addr = ltoh32(c->log.buf);
 
-#ifdef CONFIG_ARCH_BCM2835
+	DHD_INFO(("conlog: addr=0x%x, idx=0x%x, last=0x%x \n", addr,
+	   idx, c->last));
+
 	if (!addr)
 		return BCME_OK;
-#endif // endif
 
 	/* wrap around case - write ptr < read ptr */
 	if (idx < c->last) {
@@ -3560,11 +3558,11 @@ dhdpcie_bus_readconsole(dhd_bus_t *bus)
 				n--;
 			line[n] = 0;
 #if !defined(WL_DHD_XR_LOG) && !defined(WL_DHD_DUAL_LOG)
-			DHD_FWLOG(("CONSOLE: %s\n", line));
+			printf("CONSOLE: %s\n", line);
 #elif defined(WL_DHD_XR_LOG)
-			DHD_FWLOG(("%d CONSOLE: %s\n", XR_ROLE, line));
+			printf("%d CONSOLE: %s\n", XR_ROLE, line);
 #else
-			DHD_FWLOG(("%d CONSOLE: %s\n", DUAL_ROLE, line));
+			printf("%d CONSOLE: %s\n", DUAL_ROLE, line);
 #endif /* !WL_DHD_XR_LOG  && !WL_DHD_DUAL_LOG */
 		}
 	}
@@ -9576,6 +9574,9 @@ dhdpcie_readshared_console(dhd_bus_t *bus)
 	/* load bus console address */
 	bus->console_addr = sh->console_addr;
 
+	DHD_INFO(("%s hndrte_shared address 0x%08X\n",
+			__FUNCTION__, sh->console_addr));
+
 	return BCME_OK;
 } /* dhdpcie_readshared_console */
 
@@ -9657,6 +9658,9 @@ dhdpcie_readshared(dhd_bus_t *bus)
 
 	/* load bus console address */
 	bus->console_addr = sh->console_addr;
+
+	DHD_INFO(("%s hndrte_shared address 0x%08X\n",
+			__FUNCTION__, sh->console_addr));
 
 	/* Read the dma rx offset */
 	bus->dma_rxoffset = bus->pcie_sh->dma_rxoffset;
