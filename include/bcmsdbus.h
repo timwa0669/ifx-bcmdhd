@@ -160,4 +160,7 @@ extern SDIOH_API_RC sdioh_gpioouten(sdioh_info_t *sd, uint32 gpio);
 extern SDIOH_API_RC sdioh_gpioout(sdioh_info_t *sd, uint32 gpio, bool enab);
 extern uint sdioh_set_mode(sdioh_info_t *sd, uint mode);
 
+/* mmc host retune control support */
+extern void sdioh_disable_clk_retune(sdioh_info_t *sd, bool on);
+extern void sdioh_enable_clk_retune(sdioh_info_t *sd, bool on);
 #endif /* _sdio_api_h_ */

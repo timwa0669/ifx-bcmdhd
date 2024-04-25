@@ -865,3 +865,27 @@ bcmsdh_set_mode(void *sdh, uint mode)
 	sdioh_info_t *sd = (sdioh_info_t *)(p->sdioh);
 	return (sdioh_set_mode(sd, mode));
 }
+
+void
+bcmsdh_disable_clk_retune(void *sdh, bool on) {
+#ifdef BCMLXSDMMC
+	bcmsdh_info_t *p = (bcmsdh_info_t *)sdh;
+	sdioh_info_t *sd = (sdioh_info_t *)(p->sdioh);
+
+	sdioh_disable_clk_retune(sd, on);
+#else /* BCMLXSDMMC */
+	return;
+#endif /* BCMLXSDMMC */
+}
+
+void
+bcmsdh_enable_clk_retune(void *sdh, bool on) {
+#ifdef BCMLXSDMMC
+	bcmsdh_info_t *p = (bcmsdh_info_t *)sdh;
+	sdioh_info_t *sd = (sdioh_info_t *)(p->sdioh);
+
+	sdioh_enable_clk_retune(sd, on);
+#else /* BCMLXSDMMC */
+	return;
+#endif /* BCMLXSDMMC */
+}

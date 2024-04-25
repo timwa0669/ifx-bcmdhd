@@ -279,4 +279,6 @@ extern bool bcmsdh_gpioin(void *sd, uint32 gpio);
 extern int bcmsdh_gpioouten(void *sd, uint32 gpio);
 extern int bcmsdh_gpioout(void *sd, uint32 gpio, bool enab);
 
+extern void bcmsdh_disable_clk_retune(void *sdh, bool on);
+extern void bcmsdh_enable_clk_retune(void *sdh, bool on);
 #endif	/* _bcmsdh_h_ */

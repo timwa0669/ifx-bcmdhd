@@ -1237,6 +1237,8 @@ dhdsdio_clk_kso_enab(dhd_bus_t *bus, bool on)
 
 	KSO_DBG(("%s> op:%s\n", __FUNCTION__, (on ? "KSO_SET" : "KSO_CLR")));
 
+	bcmsdh_disable_clk_retune(bus->sdh, on);
+
 	wr_val |= (on << SBSDIO_FUNC1_SLEEPCSR_KSO_SHIFT);
 
 	bcmsdh_cfg_write(bus->sdh, SDIO_FUNC_1, SBSDIO_FUNC1_SLEEPCSR, wr_val, &err);
@@ -1249,6 +1251,7 @@ dhdsdio_clk_kso_enab(dhd_bus_t *bus, bool on)
 			bus->sih->chip == CYW55500_CHIP_ID ||
 			bus->sih->chip == CYW55530_CHIP_ID ||
 			bus->sih->chip == CYW55560_CHIP_ID)) {
+		bcmsdh_enable_clk_retune(bus->sdh, on);
 		return err;
 	}
 
@@ -1288,6 +1291,7 @@ dhdsdio_clk_kso_enab(dhd_bus_t *bus, bool on)
 			__FUNCTION__, (on ? "KSO_SET" : "KSO_CLR"), try_cnt, rd_val, err));
 	}
 
+	bcmsdh_enable_clk_retune(bus->sdh, on);
 	return err;
 }
 

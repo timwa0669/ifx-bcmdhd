@@ -1743,3 +1743,45 @@ sdmmc_set_clock_divisor(sdioh_info_t *sd, uint sd_div)
 	hz = sd->sd_clk_rate / sd_div;
 	sdmmc_set_clock_rate(sd, hz);
 }
+
+void
+sdioh_disable_clk_retune(sdioh_info_t *sd, bool on)
+{
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0))
+	struct sdio_func *func = sd->func[1];
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
+	sdio_retune_crc_disable(func);
+	if (on) {
+		sdio_retune_hold_now(func);
+	}
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0)) */
+	struct mmc_host *host = func->card->host;
+	if (on) {
+		host->retune_now = 0;
+		host->hold_retune += 1;
+	}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0)) */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)) */
+}
+
+void
+sdioh_enable_clk_retune(sdioh_info_t *sd, bool on)
+{
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0))
+	struct sdio_func *func = sd->func[1];
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
+	if (on) {
+		sdio_retune_release(func);
+	}
+	sdio_retune_crc_enable(func);
+#else /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0) */
+	struct mmc_host *host = func->card->host;
+	if (on) {
+		if (host->hold_retune)
+			host->hold_retune -= 1;
+		else
+			WARN_ON(1);
+	}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0) */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)) */
+}
