@@ -136,13 +136,13 @@ int dhd_wifi_init_gpio(void)
 #endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
 	if (gpio_is_valid(wlan_reg_on)) {
 		if (gpio_request_one(wlan_reg_on, GPIOF_OUT_INIT_LOW, "WLAN_REG_ON")) {
-	                printk(KERN_ERR "%s: Faiiled to request gpio %d for WL_REGON\n",
-	                        __FUNCTION__, wlan_reg_on);
+			printk(KERN_ERR "%s: Faiiled to request gpio %d for WL_REGON\n",
+				__FUNCTION__, wlan_reg_on);
 		}
 		else {
 			dhd_wlan_power(1);
-		        /* Wait for WIFI_TURNON_DELAY due to power stability */
-		        msleep(WIFI_TURNON_DELAY);
+			/* Wait for WIFI_TURNON_DELAY due to power stability */
+			msleep(WIFI_TURNON_DELAY);
 
 			printk(KERN_INFO "%s: Initial WL_REG_ON: [%d]\n", __FUNCTION__,
 				gpio_get_value(wlan_reg_on));
@@ -182,11 +182,11 @@ struct resource dhd_wlan_resources = {
 	.start	= 0, /* Dummy */
 	.end	= 0, /* Dummy */
 	.flags	= IORESOURCE_IRQ | IORESOURCE_IRQ_SHAREABLE |
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 	IORESOURCE_IRQ_HIGHEDGE,
 #else
 	IORESOURCE_IRQ_HIGHLEVEL,
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 };
 // EXPORT_SYMBOL(dhd_wlan_resources);
 
@@ -200,8 +200,7 @@ struct wifi_platform_data dhd_wlan_control = {
 };
 // EXPORT_SYMBOL(dhd_wlan_control);
 
-int
-dhd_wlan_deinit(void)
+int dhd_wlan_deinit(void)
 {
 #ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
 	gpio_free(wlan_host_wake_up);
@@ -211,7 +210,7 @@ dhd_wlan_deinit(void)
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
 	dhd_exit_wlan_mem();
 #endif /*  CONFIG_BROADCOM_WIFI_RESERVED_MEM */
-return 0;
+	return 0;
 }
 
 int dhd_wlan_init(void)

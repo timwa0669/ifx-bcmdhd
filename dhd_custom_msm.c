@@ -87,7 +87,7 @@ static int wlan_reg_on = -1;
 	  || CONFIG_ARCH_SDM845 || CONFIG_ARCH_SM8150
 	*/
 
-#ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
+#ifdef BCMPCIE_OOB_HOST_WAKE
 static int wlan_host_wake_up = -1;
 static int wlan_host_wake_irq = 0;
 #ifdef CUSTOMER_HW2
@@ -95,7 +95,7 @@ static int wlan_host_wake_irq = 0;
 #else
 #define WIFI_WLAN_HOST_WAKE_PROPNAME    "wlan-host-wake-gpio"
 #endif /* CUSTOMER_HW2 */
-#endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
+#endif /* BCMPCIE_OOB_HOST_WAKE */
 
 #ifndef USE_CUSTOM_MSM_PCIE
 int __init
@@ -139,7 +139,7 @@ dhd_wifi_init_gpio(void)
 	/* Wait for WIFI_TURNON_DELAY due to power stability */
 	msleep(WIFI_TURNON_DELAY);
 
-#ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
+#ifdef BCMPCIE_OOB_HOST_WAKE
 	/* ========== WLAN_HOST_WAKE ============ */
 	wlan_host_wake_up = of_get_named_gpio(root_node, WIFI_WLAN_HOST_WAKE_PROPNAME, 0);
 	printk(KERN_INFO "%s: gpio_wlan_host_wake : %d\n", __FUNCTION__, wlan_host_wake_up);
@@ -158,7 +158,7 @@ dhd_wifi_init_gpio(void)
 
 	gpio_direction_input(wlan_host_wake_up);
 	wlan_host_wake_irq = gpio_to_irq(wlan_host_wake_up);
-#endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
+#endif /* BCMPCIE_OOB_HOST_WAKE */
 
 #if defined(CONFIG_BCM4359) || defined(CONFIG_BCM4361) || defined(CONFIG_BCM4375) || \
 	defined(USE_CUSTOM_MSM_PCIE)
@@ -244,11 +244,11 @@ struct resource dhd_wlan_resources = {
 	.start	= 0, /* Dummy */
 	.end	= 0, /* Dummy */
 	.flags	= IORESOURCE_IRQ | IORESOURCE_IRQ_SHAREABLE |
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 	IORESOURCE_IRQ_HIGHEDGE,
 #else
 	IORESOURCE_IRQ_HIGHLEVEL,
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 };
 EXPORT_SYMBOL(dhd_wlan_resources);
 

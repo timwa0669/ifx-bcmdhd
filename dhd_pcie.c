@@ -1238,8 +1238,8 @@ skip_intstatus_read:
 		DHD_OS_WAKE_UNLOCK(bus->dhd);
 #else
 		bus->dpc_sched = TRUE;
-		dhd_sched_dpc(bus->dhd);     /* queue DPC now!! */
-#endif /* defined(SDIO_ISR_THREAD) */
+		dhd_sched_dpc(bus->dhd); /* queue DPC now!! */
+#endif /* defined(PCIE_ISR_THREAD) */
 
 		DHD_TRACE(("%s: Exit Success DPC Queued\n", __FUNCTION__));
 		return TRUE;

@@ -75,7 +75,7 @@
 #define PREALLOC_WLAN_BUF_NUM		160
 #define PREALLOC_WLAN_SECTION_HEADER	24
 
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 #define DHD_SKB_1PAGE_BUFSIZE	(PAGE_SIZE*1)
 #define DHD_SKB_2PAGE_BUFSIZE	(PAGE_SIZE*2)
 #define DHD_SKB_4PAGE_BUFSIZE	(PAGE_SIZE*4)
@@ -103,7 +103,7 @@
 #define DHD_SKB_1PAGE_BUF_NUM	8
 #define DHD_SKB_2PAGE_BUF_NUM	8
 #define DHD_SKB_4PAGE_BUF_NUM	1
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 
 #define WLAN_SKB_1_2PAGE_BUF_NUM	((DHD_SKB_1PAGE_BUF_NUM) + \
 		(DHD_SKB_2PAGE_BUF_NUM))
@@ -295,14 +295,14 @@ dhd_init_wlan_mem(void)
 	int i;
 	int j;
 
-#if !defined(CONFIG_BCMDHD_PCIE)
+#if !defined(BCMPCIE)
 	for (i = 0; i < DHD_SKB_1PAGE_BUF_NUM; i++) {
 		wlan_static_skb[i] = __dev_alloc_skb(DHD_SKB_1PAGE_BUFSIZE, GFP_KERNEL);
 		if (!wlan_static_skb[i]) {
 			goto err_skb_alloc;
 		}
 	}
-#endif /* !CONFIG_BCMDHD_PCIE */
+#endif /* !BCMPCIE */
 
 	for (i = DHD_SKB_1PAGE_BUF_NUM; i < WLAN_SKB_1_2PAGE_BUF_NUM; i++) {
 		wlan_static_skb[i] = __dev_alloc_skb(DHD_SKB_2PAGE_BUFSIZE, GFP_KERNEL);
@@ -311,12 +311,12 @@ dhd_init_wlan_mem(void)
 		}
 	}
 
-#if !defined(CONFIG_BCMDHD_PCIE)
+#if !defined(BCMPCIE)
 	wlan_static_skb[i] = __dev_alloc_skb(DHD_SKB_4PAGE_BUFSIZE, GFP_KERNEL);
 	if (!wlan_static_skb[i]) {
 		goto err_skb_alloc;
 	}
-#endif /* !CONFIG_BCMDHD_PCIE */
+#endif /* !BCMPCIE */
 
 	for (i = 0; i < PREALLOC_WLAN_SEC_NUM; i++) {
 		if (wlan_mem_array[i].size > 0) {
@@ -359,7 +359,7 @@ dhd_init_wlan_mem(void)
 		goto err_mem_alloc;
 	}
 
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 	wlan_static_if_flow_lkup = kmalloc(WLAN_DHD_IF_FLOW_LKUP_SIZE,
 		GFP_KERNEL);
 	if (!wlan_static_if_flow_lkup) {
@@ -396,7 +396,7 @@ dhd_init_wlan_mem(void)
 		pr_err("Failed to alloc wlan_static_dhd_wlfc_hanger\n");
 		goto err_mem_alloc;
 	}
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 
 #ifdef CONFIG_BCMDHD_PREALLOC_MEMDUMP
 	wlan_static_dhd_memdump_ram = kmalloc(WLAN_DHD_MEMDUMP_SIZE, GFP_KERNEL);
@@ -423,7 +423,7 @@ err_mem_alloc:
 
 #endif /* CONFIG_BCMDHD_PREALLOC_MEMDUMP */
 
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 	if (wlan_static_if_flow_lkup) {
 		kfree(wlan_static_if_flow_lkup);
 	}
@@ -445,7 +445,7 @@ err_mem_alloc:
 	if (wlan_static_dhd_wlfc_hanger) {
 		kfree(wlan_static_dhd_wlfc_hanger);
 	}
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 	if (wlan_static_dhd_info_buf) {
 		kfree(wlan_static_dhd_info_buf);
 	}
@@ -500,7 +500,7 @@ dhd_exit_wlan_mem(void)
 
 #endif /* CONFIG_BCMDHD_PREALLOC_MEMDUMP */
 
-#ifdef CONFIG_BCMDHD_PCIE
+#ifdef BCMPCIE
 	if (wlan_static_if_flow_lkup) {
 		kfree(wlan_static_if_flow_lkup);
 	}
@@ -522,7 +522,7 @@ dhd_exit_wlan_mem(void)
 	if (wlan_static_dhd_wlfc_hanger) {
 		kfree(wlan_static_dhd_wlfc_hanger);
 	}
-#endif /* CONFIG_BCMDHD_PCIE */
+#endif /* BCMPCIE */
 	if (wlan_static_dhd_info_buf) {
 		kfree(wlan_static_dhd_info_buf);
 	}

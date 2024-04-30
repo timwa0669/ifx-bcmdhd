@@ -93,11 +93,11 @@ static int dhd_wifi_platform_load(void);
 
 extern void* wl_cfg80211_get_dhdp(struct net_device *dev);
 
-#if defined(BOARD_HIKEY) || defined(USE_CUSTOM_MSM_PCIE) || defined(BOARD_VIM3)
+#ifdef DHD_OF_SUPPORT
 extern int dhd_wlan_init(void);
 extern int dhd_wlan_deinit(void);
 extern void post_power_operation(int on);
-#endif /* defined(BOARD_HIKEY) || defined(USE_CUSTOM_MSM_PCIE) */
+#endif /* DHD_OF_SUPPORT */
 
 #ifdef ENABLE_4335BT_WAR
 extern int bcm_bt_lock(int cookie);
@@ -492,11 +492,14 @@ static int wifi_ctrlfunc_register_drv(void)
 	dev1 = bus_find_device(&platform_bus_type, NULL, WIFI_PLAT_NAME, wifi_platdev_match);
 	dev2 = bus_find_device(&platform_bus_type, NULL, WIFI_PLAT_NAME2, wifi_platdev_match);
 
-#if defined(BOARD_HIKEY_MODULAR) || defined(USE_CUSTOM_MSM_PCIE) || defined(BOARD_VIM3)
-	dhd_wlan_init();
-#endif /* defined(BOARD_HIKEY_MODULAR) || defined(USE_CUSTOM_MSM_PCIE) */
-
 #if !defined(CONFIG_DTS)
+#ifdef DHD_OF_SUPPORT
+	if ((err = dhd_wlan_init())) {
+		DHD_ERROR(("%s: dhd_wlan_init() failed(%d)\n", __FUNCTION__, err));
+		return err;
+	}
+#endif /* DHD_OF_SUPPORT */
+
 	if (!dts_enabled) {
 		if (dev1 == NULL && dev2 == NULL) {
 			DHD_ERROR(("no wifi platform data, skip\n"));
@@ -590,9 +593,9 @@ void wifi_ctrlfunc_unregister_drv(void)
 			wifi_platform_bus_enumerate(adapter, FALSE);
 		}
 	}
-#if defined(BOARD_HIKEY_MODULAR) || defined(BOARD_VIM3)
+#ifdef DHD_OF_SUPPORT
 	dhd_wlan_deinit();
-#endif /* BOARD_HIKEY_MODULAR */
+#endif /* DHD_OF_SUPPORT */
 #endif /* !defined(CONFIG_DTS) */
 
 	kfree(dhd_wifi_platdata->adapters);
