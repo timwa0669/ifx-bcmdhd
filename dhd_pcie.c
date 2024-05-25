@@ -12455,7 +12455,7 @@ dhd_pcie_intr_count_dump(dhd_pub_t *dhd)
 	struct dhd_bus *bus = dhd->bus;
 	uint64 current_time;
 
-	DHD_ERROR(("\n ------- DUMPING INTR enable/disable counters  ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING INTR enable/disable counters  ------- \n"));
 	DHD_ERROR(("resume_intr_enable_count=%lu dpc_intr_enable_count=%lu\n",
 		bus->resume_intr_enable_count, bus->dpc_intr_enable_count));
 	DHD_ERROR(("isr_intr_disable_count=%lu suspend_intr_disable_count=%lu\n",
@@ -12658,11 +12658,11 @@ dhd_pcie_dma_info_dump(dhd_pub_t *dhd)
 {
 	if (dhd->bus->is_linkdown) {
 		DHD_ERROR(("\n ------- SKIP DUMPING DMA Registers "
-			"due to PCIe link down ------- \r\n"));
+			"due to PCIe link down ------- \n"));
 		return 0;
 	}
 
-	DHD_ERROR(("\n ------- DUMPING DMA Registers ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING DMA Registers ------- \n"));
 
 	//HostToDev
 	DHD_ERROR(("HostToDev TX: XmtCtrl=0x%08x XmtPtr=0x%08x\n",
@@ -12717,7 +12717,7 @@ dhd_pcie_dump_int_regs(dhd_pub_t *dhd)
 	uint32 d2h_db0 = 0;
 	uint32 d2h_mb_data = 0;
 
-	DHD_ERROR(("\n ------- DUMPING INTR Status and Masks ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING INTR Status and Masks ------- \n"));
 	intstatus = si_corereg(dhd->bus->sih, dhd->bus->sih->buscoreidx,
 		dhd->bus->pcie_mailbox_int, 0, 0);
 	if (intstatus == (uint32)-1) {
@@ -12743,7 +12743,7 @@ dhd_pcie_dump_int_regs(dhd_pub_t *dhd)
 	DHD_ERROR(("intstatus=0x%x intmask=0x%x d2h_db0=0x%x\n",
 		intstatus, intmask, d2h_db0));
 	dhd_bus_cmn_readshared(dhd->bus, &d2h_mb_data, D2H_MB_DATA, 0);
-	DHD_ERROR(("d2h_mb_data=0x%x def_intmask=0x%x \r\n", d2h_mb_data,
+	DHD_ERROR(("d2h_mb_data=0x%x def_intmask=0x%x \n", d2h_mb_data,
 		dhd->bus->def_intmask));
 
 	return TRUE;
@@ -12752,7 +12752,7 @@ dhd_pcie_dump_int_regs(dhd_pub_t *dhd)
 void
 dhd_pcie_dump_rc_conf_space_cap(dhd_pub_t *dhd)
 {
-	DHD_ERROR(("\n ------- DUMPING PCIE RC config space Registers ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING PCIE RC config space Registers ------- \n"));
 	DHD_ERROR(("Pcie RC Uncorrectable Error Status Val=0x%x\n",
 		dhdpcie_rc_access_cap(dhd->bus, PCIE_EXTCAP_ID_ERR,
 		PCIE_EXTCAP_AER_UCERR_OFFSET, TRUE, FALSE, 0)));
@@ -12780,7 +12780,7 @@ dhd_pcie_debug_info_dump(dhd_pub_t *dhd)
 	dhd_print_tasklet_status(dhd);
 	dhd_pcie_intr_count_dump(dhd);
 
-	DHD_ERROR(("\n ------- DUMPING PCIE EP Resouce Info ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING PCIE EP Resouce Info ------- \n"));
 	dhdpcie_dump_resource(dhd->bus);
 
 	dhd_pcie_dump_rc_conf_space_cap(dhd);
@@ -12794,7 +12794,7 @@ dhd_pcie_debug_info_dump(dhd_pub_t *dhd)
 		return 0;
 	}
 
-	DHD_ERROR(("\n ------- DUMPING PCIE EP config space Registers ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING PCIE EP config space Registers ------- \n"));
 	DHD_ERROR(("Status Command(0x%x)=0x%x, BaseAddress0(0x%x)=0x%x BaseAddress1(0x%x)=0x%x "
 		"PCIE_CFG_PMCSR(0x%x)=0x%x\n",
 		PCIECFGREG_STATUS_CMD,
@@ -12844,7 +12844,7 @@ dhd_pcie_debug_info_dump(dhd_pub_t *dhd)
 		return 0;
 	}
 
-	DHD_ERROR(("\n ------- DUMPING PCIE core Registers ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING PCIE core Registers ------- \n"));
 
 	DHD_ERROR(("ClkReq0(0x%x)=0x%x ClkReq1(0x%x)=0x%x ClkReq2(0x%x)=0x%x "
 		"ClkReq3(0x%x)=0x%x\n", PCIECFGREG_PHY_DBG_CLKREQ0,

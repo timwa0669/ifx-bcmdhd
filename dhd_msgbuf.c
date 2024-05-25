@@ -1323,19 +1323,19 @@ dhd_prot_d2h_sync_init(dhd_pub_t *dhd)
 #ifdef EWP_EDL
 		prot->d2h_edl_sync_cb = dhd_prot_d2h_sync_edl;
 #endif /* EWP_EDL */
-		DHD_ERROR(("%s(): D2H sync mechanism is SEQNUM \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): D2H sync mechanism is SEQNUM \n", __FUNCTION__));
 	} else if (dhd->d2h_sync_mode & PCIE_SHARED_D2H_SYNC_XORCSUM) {
 		prot->d2h_sync_cb = dhd_prot_d2h_sync_xorcsum;
 #ifdef EWP_EDL
 		prot->d2h_edl_sync_cb = dhd_prot_d2h_sync_edl;
 #endif /* EWP_EDL */
-		DHD_ERROR(("%s(): D2H sync mechanism is XORCSUM \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): D2H sync mechanism is XORCSUM \n", __FUNCTION__));
 	} else {
 		prot->d2h_sync_cb = dhd_prot_d2h_sync_none;
 #ifdef EWP_EDL
 		prot->d2h_edl_sync_cb = dhd_prot_d2h_sync_edl_none;
 #endif /* EWP_EDL */
-		DHD_ERROR(("%s(): D2H sync mechanism is NONE \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): D2H sync mechanism is NONE \n", __FUNCTION__));
 	}
 }
 
@@ -2090,7 +2090,7 @@ dhd_pktid_map_init(dhd_pub_t *dhd, uint32 num_items)
 	/* Initialize the lock that protects this structure */
 	map->pktid_lock = DHD_PKTID_LOCK_INIT(osh);
 	if (map->pktid_lock == NULL) {
-		DHD_ERROR(("%s:%d: Lock init failed \r\n", __FUNCTION__, __LINE__));
+		DHD_ERROR(("%s:%d: Lock init failed \n", __FUNCTION__, __LINE__));
 		goto error;
 	}
 
@@ -2105,7 +2105,7 @@ dhd_pktid_map_init(dhd_pub_t *dhd, uint32 num_items)
 		/* Incarnate a hierarchical multiword bitmap for auditing pktid allocator */
 		map->pktid_audit = bcm_mwbmap_init(osh, map_items + 1);
 		if (map->pktid_audit == (struct bcm_mwbmap *)NULL) {
-			DHD_ERROR(("%s:%d: pktid_audit init failed\r\n", __FUNCTION__, __LINE__));
+			DHD_ERROR(("%s:%d: pktid_audit init failed\n", __FUNCTION__, __LINE__));
 			goto error;
 		} else {
 			DHD_ERROR(("%s:%d: pktid_audit init succeeded %d\n",
@@ -5330,14 +5330,14 @@ dhd_prot_process_msgbuf_edl(dhd_pub_t *dhd)
 		return FALSE;
 	}
 	if (items > ring->max_items) {
-		DHD_ERROR(("\r\n======================= \r\n"));
-		DHD_ERROR(("%s(): ring %p, ring->name %s, ring->max_items %d, items %d \r\n",
+		DHD_ERROR(("\n======================= \n"));
+		DHD_ERROR(("%s(): ring %p, ring->name %s, ring->max_items %d, items %d \n",
 			__FUNCTION__, ring, ring->name, ring->max_items, items));
-		DHD_ERROR(("wr: %d,  rd: %d,  depth: %d  \r\n",
+		DHD_ERROR(("wr: %d,  rd: %d,  depth: %d  \n",
 			ring->wr, ring->rd, depth));
-		DHD_ERROR(("dhd->busstate %d bus->wait_for_d3_ack %d \r\n",
+		DHD_ERROR(("dhd->busstate %d bus->wait_for_d3_ack %d \n",
 			dhd->busstate, dhd->bus->wait_for_d3_ack));
-		DHD_ERROR(("\r\n======================= \r\n"));
+		DHD_ERROR(("\n======================= \n"));
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 		if (ring->wr >= ring->max_items) {
 			dhd->bus->read_shm_fail = TRUE;
@@ -7611,7 +7611,7 @@ dhd_msgbuf_query_ioctl(dhd_pub_t *dhd, int ifidx, uint cmd, void *buf, uint len,
 	ret = dhd_fillup_ioct_reqst(dhd, (uint16)len, cmd, buf, ifidx);
 
 	if (ret < 0) {
-		DHD_ERROR(("%s(): dhd_fillup_ioct_reqst failed \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): dhd_fillup_ioct_reqst failed \n", __FUNCTION__));
 		goto done;
 	}
 
@@ -7805,7 +7805,7 @@ dhd_msgbuf_set_ioctl(dhd_pub_t *dhd, int ifidx, uint cmd, void *buf, uint len, u
 	ret = dhd_fillup_ioct_reqst(dhd, (uint16)len, cmd, buf, ifidx);
 
 	if (ret < 0) {
-		DHD_ERROR(("%s(): dhd_fillup_ioct_reqst failed \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): dhd_fillup_ioct_reqst failed \n", __FUNCTION__));
 		goto done;
 	}
 
@@ -9207,13 +9207,13 @@ dhd_prot_get_read_addr(dhd_pub_t *dhd, msgbuf_ring_t *ring, uint32 *available_le
 	 * happens.
 	 */
 	if (items > ring->max_items) {
-		DHD_ERROR(("\r\n======================= \r\n"));
-		DHD_ERROR(("%s(): ring %p, ring->name %s, ring->max_items %d, items %d \r\n",
+		DHD_ERROR(("\n======================= \n"));
+		DHD_ERROR(("%s(): ring %p, ring->name %s, ring->max_items %d, items %d \n",
 			__FUNCTION__, ring, ring->name, ring->max_items, items));
-		DHD_ERROR(("wr: %d,  rd: %d,  depth: %d  \r\n", wr, rd, depth));
-		DHD_ERROR(("dhd->busstate %d bus->wait_for_d3_ack %d \r\n",
+		DHD_ERROR(("wr: %d,  rd: %d,  depth: %d  \n", wr, rd, depth));
+		DHD_ERROR(("dhd->busstate %d bus->wait_for_d3_ack %d \n",
 			dhd->busstate, dhd->bus->wait_for_d3_ack));
-		DHD_ERROR(("\r\n======================= \r\n"));
+		DHD_ERROR(("\n======================= \n"));
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 		if (wr >= ring->max_items) {
 			dhd->bus->read_shm_fail = TRUE;
@@ -10434,11 +10434,11 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 	ulong ring_tcm_rd_addr; /* dongle address */
 	ulong ring_tcm_wr_addr; /* dongle address */
 
-	DHD_ERROR(("\n ------- DUMPING VERSION INFORMATION ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING VERSION INFORMATION ------- \n"));
 	DHD_ERROR(("DHD: %s\n", dhd_version));
 	DHD_ERROR(("Firmware: %s\n", fw_version));
 
-	DHD_ERROR(("\n ------- DUMPING PROTOCOL INFORMATION ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING PROTOCOL INFORMATION ------- \n"));
 	DHD_ERROR(("ICPrevs: Dev %d, Host %d, active %d\n",
 		prot->device_ipc_version,
 		prot->host_ipc_version,
@@ -10473,45 +10473,45 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		dhd->bus->is_linkdown = TRUE;
 	}
 
-	DHD_ERROR(("\n ------- DUMPING IOCTL RING RD WR Pointers ------- \r\n"));
+	DHD_ERROR(("\n ------- DUMPING IOCTL RING RD WR Pointers ------- \n"));
 
 	ring = &prot->h2dring_ctrl_subn;
 	dma_buf_len = ring->max_items * ring->item_len;
 	ring_tcm_rd_addr = dhd->bus->ring_sh[ring->idx].ring_state_r;
 	ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 	DHD_ERROR(("CtrlPost: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-		"SIZE %d \r\n",
+		"SIZE %d \n",
 		ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 		ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr, dma_buf_len));
-	DHD_ERROR(("CtrlPost: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+	DHD_ERROR(("CtrlPost: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 	if (dhd->bus->is_linkdown) {
 		DHD_ERROR(("CtrlPost: From Shared Mem: RD and WR are invalid"
-			" due to PCIe link down\r\n"));
+			" due to PCIe link down\n"));
 	} else {
 		dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 		dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-		DHD_ERROR(("CtrlPost: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+		DHD_ERROR(("CtrlPost: From Shared Mem: RD: %d WR %d \n", rd, wr));
 	}
-	DHD_ERROR(("CtrlPost: seq num: %d \r\n", ring->seqnum % H2D_EPOCH_MODULO));
+	DHD_ERROR(("CtrlPost: seq num: %d \n", ring->seqnum % H2D_EPOCH_MODULO));
 
 	ring = &prot->d2hring_ctrl_cpln;
 	dma_buf_len = ring->max_items * ring->item_len;
 	ring_tcm_rd_addr = dhd->bus->ring_sh[ring->idx].ring_state_r;
 	ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 	DHD_ERROR(("CtrlCpl: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-		"SIZE %d \r\n",
+		"SIZE %d \n",
 		ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 		ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr, dma_buf_len));
-	DHD_ERROR(("CtrlCpl: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+	DHD_ERROR(("CtrlCpl: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 	if (dhd->bus->is_linkdown) {
 		DHD_ERROR(("CtrlCpl: From Shared Mem: RD and WR are invalid"
-			" due to PCIe link down\r\n"));
+			" due to PCIe link down\n"));
 	} else {
 		dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 		dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-		DHD_ERROR(("CtrlCpl: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+		DHD_ERROR(("CtrlCpl: From Shared Mem: RD: %d WR %d \n", rd, wr));
 	}
-	DHD_ERROR(("CtrlCpl: Expected seq num: %d \r\n", ring->seqnum % H2D_EPOCH_MODULO));
+	DHD_ERROR(("CtrlCpl: Expected seq num: %d \n", ring->seqnum % H2D_EPOCH_MODULO));
 
 	ring = prot->h2dring_info_subn;
 	if (ring) {
@@ -10519,20 +10519,20 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		ring_tcm_rd_addr = dhd->bus->ring_sh[ring->idx].ring_state_r;
 		ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 		DHD_ERROR(("InfoSub: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-			"SIZE %d \r\n",
+			"SIZE %d \n",
 			ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 			ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr,
 			dma_buf_len));
-		DHD_ERROR(("InfoSub: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+		DHD_ERROR(("InfoSub: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 		if (dhd->bus->is_linkdown) {
 			DHD_ERROR(("InfoSub: From Shared Mem: RD and WR are invalid"
-				" due to PCIe link down\r\n"));
+				" due to PCIe link down\n"));
 		} else {
 			dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 			dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-			DHD_ERROR(("InfoSub: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+			DHD_ERROR(("InfoSub: From Shared Mem: RD: %d WR %d \n", rd, wr));
 		}
-		DHD_ERROR(("InfoSub: seq num: %d \r\n", ring->seqnum % H2D_EPOCH_MODULO));
+		DHD_ERROR(("InfoSub: seq num: %d \n", ring->seqnum % H2D_EPOCH_MODULO));
 	}
 	ring = prot->d2hring_info_cpln;
 	if (ring) {
@@ -10540,20 +10540,20 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		ring_tcm_rd_addr = dhd->bus->ring_sh[ring->idx].ring_state_r;
 		ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 		DHD_ERROR(("InfoCpl: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-			"SIZE %d \r\n",
+			"SIZE %d \n",
 			ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 			ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr,
 			dma_buf_len));
-		DHD_ERROR(("InfoCpl: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+		DHD_ERROR(("InfoCpl: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 		if (dhd->bus->is_linkdown) {
 			DHD_ERROR(("InfoCpl: From Shared Mem: RD and WR are invalid"
-				" due to PCIe link down\r\n"));
+				" due to PCIe link down\n"));
 		} else {
 			dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 			dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-			DHD_ERROR(("InfoCpl: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+			DHD_ERROR(("InfoCpl: From Shared Mem: RD: %d WR %d \n", rd, wr));
 		}
-		DHD_ERROR(("InfoCpl: Expected seq num: %d \r\n", ring->seqnum % D2H_EPOCH_MODULO));
+		DHD_ERROR(("InfoCpl: Expected seq num: %d \n", ring->seqnum % D2H_EPOCH_MODULO));
 	}
 
 	ring = &prot->d2hring_tx_cpln;
@@ -10562,20 +10562,20 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 		dma_buf_len = ring->max_items * ring->item_len;
 		DHD_ERROR(("TxCpl: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-			"SIZE %d \r\n",
+			"SIZE %d \n",
 			ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 			ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr,
 			dma_buf_len));
-		DHD_ERROR(("TxCpl: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+		DHD_ERROR(("TxCpl: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 		if (dhd->bus->is_linkdown) {
 			DHD_ERROR(("TxCpl: From Shared Mem: RD and WR are invalid"
-				" due to PCIe link down\r\n"));
+				" due to PCIe link down\n"));
 		} else {
 			dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 			dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-			DHD_ERROR(("TxCpl: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+			DHD_ERROR(("TxCpl: From Shared Mem: RD: %d WR %d \n", rd, wr));
 		}
-		DHD_ERROR(("TxCpl: Expected seq num: %d \r\n", ring->seqnum % D2H_EPOCH_MODULO));
+		DHD_ERROR(("TxCpl: Expected seq num: %d \n", ring->seqnum % D2H_EPOCH_MODULO));
 	}
 
 	ring = &prot->d2hring_rx_cpln;
@@ -10584,20 +10584,20 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 		dma_buf_len = ring->max_items * ring->item_len;
 		DHD_ERROR(("RxCpl: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-			"SIZE %d \r\n",
+			"SIZE %d \n",
 			ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 			ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr,
 			dma_buf_len));
-		DHD_ERROR(("RxCpl: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+		DHD_ERROR(("RxCpl: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 		if (dhd->bus->is_linkdown) {
 			DHD_ERROR(("RxCpl: From Shared Mem: RD and WR are invalid"
-				" due to PCIe link down\r\n"));
+				" due to PCIe link down\n"));
 		} else {
 			dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 			dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-			DHD_ERROR(("RxCpl: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+			DHD_ERROR(("RxCpl: From Shared Mem: RD: %d WR %d \n", rd, wr));
 		}
-		DHD_ERROR(("RxCpl: Expected seq num: %d \r\n", ring->seqnum % D2H_EPOCH_MODULO));
+		DHD_ERROR(("RxCpl: Expected seq num: %d \n", ring->seqnum % D2H_EPOCH_MODULO));
 	}
 #ifdef EWP_EDL
 	ring = prot->d2hring_edl;
@@ -10606,20 +10606,20 @@ dhd_prot_debug_info_print(dhd_pub_t *dhd)
 		ring_tcm_wr_addr = dhd->bus->ring_sh[ring->idx].ring_state_w;
 		dma_buf_len = ring->max_items * ring->item_len;
 		DHD_ERROR(("EdlRing: Mem Info: BASE(VA) %p BASE(PA) %x:%x tcm_rd_wr 0x%lx:0x%lx "
-			"SIZE %d \r\n",
+			"SIZE %d \n",
 			ring->dma_buf.va, ltoh32(ring->base_addr.high_addr),
 			ltoh32(ring->base_addr.low_addr), ring_tcm_rd_addr, ring_tcm_wr_addr,
 			dma_buf_len));
-		DHD_ERROR(("EdlRing: From Host mem: RD: %d WR %d \r\n", ring->rd, ring->wr));
+		DHD_ERROR(("EdlRing: From Host mem: RD: %d WR %d \n", ring->rd, ring->wr));
 		if (dhd->bus->is_linkdown) {
 			DHD_ERROR(("EdlRing: From Shared Mem: RD and WR are invalid"
-				" due to PCIe link down\r\n"));
+				" due to PCIe link down\n"));
 		} else {
 			dhd_bus_cmn_readshared(dhd->bus, &rd, RING_RD_UPD, ring->idx);
 			dhd_bus_cmn_readshared(dhd->bus, &wr, RING_WR_UPD, ring->idx);
-			DHD_ERROR(("EdlRing: From Shared Mem: RD: %d WR %d \r\n", rd, wr));
+			DHD_ERROR(("EdlRing: From Shared Mem: RD: %d WR %d \n", rd, wr));
 		}
-		DHD_ERROR(("EdlRing: Expected seq num: %d \r\n",
+		DHD_ERROR(("EdlRing: Expected seq num: %d \n",
 			ring->seqnum % D2H_EPOCH_MODULO));
 	}
 #endif /* EWP_EDL */

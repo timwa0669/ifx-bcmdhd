@@ -6755,7 +6755,7 @@ dhd_bus_get(wlan_bt_handle_t handle, bus_owner_t owner)
 			DHD_ERROR(("%s(): Failed to download, err=%d\n", __FUNCTION__, ret));
 		}
 	} else {
-		DHD_ERROR(("%s(): BUS is already acquired, just increase the count %d \r\n",
+		DHD_ERROR(("%s(): BUS is already acquired, just increase the count %d \n",
 			__FUNCTION__, dhd->bus_user_count));
 	}
 exit:
@@ -6787,7 +6787,7 @@ dhd_bus_put(wlan_bt_handle_t handle, bus_owner_t owner)
 
 	if (dhd->bus_user_count == 0) {
 		/* Last user, stop the bus and turn Off WL_REG */
-		DHD_ERROR(("%s(): There are no owners left Trunf Off WL_REG & stop the bus \r\n",
+		DHD_ERROR(("%s(): There are no owners left Trunf Off WL_REG & stop the bus \n",
 			__FUNCTION__));
 #ifdef PROP_TXSTATUS
 		if (dhd->pub.wlfc_enabled) {
@@ -6815,7 +6815,7 @@ dhd_bus_put(wlan_bt_handle_t handle, bus_owner_t owner)
 			wifi_platform_set_power(dhd->adapter, FALSE, WIFI_TURNOFF_DELAY);
 		}
 	} else {
-		DHD_ERROR(("%s(): Other owners using bus, decrease the count %d \r\n",
+		DHD_ERROR(("%s(): Other owners using bus, decrease the count %d \n",
 			__FUNCTION__, dhd->bus_user_count));
 	}
 exit:
@@ -17093,7 +17093,7 @@ void dhd_wk_lock_stats_dump(dhd_pub_t *dhdp)
 	dhd_info_t *dhd = (dhd_info_t *)(dhdp->info);
 	unsigned long flags;
 
-	printk(KERN_ERR"DHD Printing wl_wake Lock/Unlock Record \r\n");
+	printk(KERN_ERR"DHD Printing wl_wake Lock/Unlock Record \n");
 	spin_lock_irqsave(&dhd->wakelock_spinlock, flags);
 	dhd_wk_lock_rec_dump();
 	spin_unlock_irqrestore(&dhd->wakelock_spinlock, flags);

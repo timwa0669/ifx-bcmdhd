@@ -235,7 +235,7 @@ int dhd_cpu_startup_callback(unsigned int cpu)
 {
 	dhd_info_t *dhd = g_dhd_pub->info;
 
-	DHD_INFO(("%s(): \r\n cpu:%d", __FUNCTION__, cpu));
+	DHD_INFO(("%s(): \n cpu:%d", __FUNCTION__, cpu));
 	DHD_LB_STATS_INCR(dhd->cpu_online_cnt[cpu]);
 	cpumask_set_cpu(cpu, dhd->cpumask_curr_avail);
 	dhd_select_cpu_candidacy(dhd);
@@ -247,7 +247,7 @@ int dhd_cpu_teardown_callback(unsigned int cpu)
 {
 	dhd_info_t *dhd = g_dhd_pub->info;
 
-	DHD_INFO(("%s(): \r\n cpu:%d", __FUNCTION__, cpu));
+	DHD_INFO(("%s(): \n cpu:%d", __FUNCTION__, cpu));
 	DHD_LB_STATS_INCR(dhd->cpu_offline_cnt[cpu]);
 	cpumask_clear_cpu(cpu, dhd->cpumask_curr_avail);
 	dhd_select_cpu_candidacy(dhd);
@@ -306,7 +306,7 @@ int dhd_register_cpuhp_callback(dhd_info_t *dhd)
 		dhd_cpu_startup_callback, dhd_cpu_teardown_callback);
 
 	if (dhd->cpuhp_setup_state < 0) {
-		DHD_ERROR(("%s(): cpuhp_setup_state failed %d RX LB won't happen \r\n",
+		DHD_ERROR(("%s(): cpuhp_setup_state failed %d RX LB won't happen \n",
 			__FUNCTION__, dhd->cpuhp_setup_state));
 	} else {
 		DHD_INFO(("%s(): cpuhp_setup_state returned %d\n",
@@ -1290,7 +1290,7 @@ dhd_lb_sendpkt(dhd_info_t *dhd, struct net_device *net,
 	/* Enqueue the skb into tx_pend_queue */
 	skb_queue_tail(&dhd->tx_pend_queue, skb);
 
-	DHD_TRACE(("%s(): Added skb %p for netdev %p \r\n", __FUNCTION__, skb, net));
+	DHD_TRACE(("%s(): Added skb %p for netdev %p \n", __FUNCTION__, skb, net));
 
 	/* Dispatch the Tx job to be processed by the tx_tasklet */
 	dhd_lb_tx_dispatch(&dhd->pub);
@@ -1313,9 +1313,9 @@ dhd_lb_tx_process(dhd_info_t *dhd)
 	int ifidx;
 	bool resched = FALSE;
 
-	DHD_TRACE(("%s(): TX Processing \r\n", __FUNCTION__));
+	DHD_TRACE(("%s(): TX Processing \n", __FUNCTION__));
 	if (dhd == NULL) {
-		DHD_ERROR((" Null pointer DHD \r\n"));
+		DHD_ERROR((" Null pointer DHD \n"));
 		return resched;
 	}
 
@@ -1327,7 +1327,7 @@ dhd_lb_tx_process(dhd_info_t *dhd)
 	do {
 		skb = skb_dequeue(&dhd->tx_pend_queue);
 		if (skb == NULL) {
-			DHD_TRACE(("Dequeued a Null Packet \r\n"));
+			DHD_TRACE(("Dequeued a Null Packet \n"));
 			break;
 		}
 		cnt++;
@@ -1335,7 +1335,7 @@ dhd_lb_tx_process(dhd_info_t *dhd)
 		net =  DHD_LB_TX_PKTTAG_NETDEV((dhd_tx_lb_pkttag_fr_t *)PKTTAG(skb));
 		ifidx = DHD_LB_TX_PKTTAG_IFIDX((dhd_tx_lb_pkttag_fr_t *)PKTTAG(skb));
 
-		DHD_TRACE(("Processing skb %p for net %p index %d \r\n", skb,
+		DHD_TRACE(("Processing skb %p for net %p index %d \n", skb,
 			net, ifidx));
 
 		__dhd_sendpkt(&dhd->pub, ifidx, skb);
@@ -1347,7 +1347,7 @@ dhd_lb_tx_process(dhd_info_t *dhd)
 
 	} while (1);
 
-	DHD_INFO(("%s(): Processed %d packets \r\n", __FUNCTION__, cnt));
+	DHD_INFO(("%s(): Processed %d packets \n", __FUNCTION__, cnt));
 
 	return resched;
 }

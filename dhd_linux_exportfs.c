@@ -1501,7 +1501,7 @@ int dhd_sysfs_init(dhd_info_t *dhd)
 	int ret = -1;
 
 	if (dhd == NULL) {
-		DHD_ERROR(("%s(): dhd is NULL \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): dhd is NULL \n", __FUNCTION__));
 		return ret;
 	}
 
@@ -1509,14 +1509,14 @@ int dhd_sysfs_init(dhd_info_t *dhd)
 	ret = kobject_init_and_add(&dhd->dhd_kobj, &dhd_ktype, NULL, SYSFS_DIR_BCMDHD);
 	if (ret) {
 		kobject_put(&dhd->dhd_kobj);
-		DHD_ERROR(("%s(): Unable to allocate kobject \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): Unable to allocate kobject \n", __FUNCTION__));
 		return ret;
 	}
 	ret = kobject_init_and_add(&dhd->dhd_conf_file_kobj,
 			&dhd_cntl_file_ktype, NULL, SYSFS_DIR_WIFI);
 	if (ret) {
 		kobject_put(&dhd->dhd_conf_file_kobj);
-		DHD_ERROR(("%s(): Unable to allocate kobject \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): Unable to allocate kobject \n", __FUNCTION__));
 		return ret;
 	}
 
@@ -1534,7 +1534,7 @@ int dhd_sysfs_init(dhd_info_t *dhd)
 void dhd_sysfs_exit(dhd_info_t *dhd)
 {
 	if (dhd == NULL) {
-		DHD_ERROR(("%s(): dhd is NULL \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): dhd is NULL \n", __FUNCTION__));
 		return;
 	}
 

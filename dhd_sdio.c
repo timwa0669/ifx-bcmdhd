@@ -1843,14 +1843,14 @@ dhdsdio_clkctl(dhd_bus_t *bus, uint target, bool pendok)
 		 * nothing is to be done & Bt has finished using the bus.
 		 */
 		if (bus->bt_use_count != 0) {
-			DHD_INFO(("%s(): Req CLK_SDONLY, BT is active %d not switching off \r\n",
+			DHD_INFO(("%s(): Req CLK_SDONLY, BT is active %d not switching off \n",
 				__FUNCTION__, bus->bt_use_count));
 			ret = BCME_OK;
 			dhd_os_wd_timer(bus->dhd, dhd_watchdog_ms);
 			break;
 		}
 
-		DHD_INFO(("%s(): Request CLK_NONE BT is NOT active switching off \r\n",
+		DHD_INFO(("%s(): Request CLK_NONE BT is NOT active switching off \n",
 			__FUNCTION__));
 #endif /* BT_OVER_SDIO */
 
@@ -1878,13 +1878,13 @@ dhdsdio_clkctl(dhd_bus_t *bus, uint target, bool pendok)
 		 * nothing is to be done & Bt has finished using the bus.
 		 */
 		if (bus->bt_use_count != 0) {
-			DHD_INFO(("%s(): Request CLK_NONE BT is active %d not switching off \r\n",
+			DHD_INFO(("%s(): Request CLK_NONE BT is active %d not switching off \n",
 				__FUNCTION__, bus->bt_use_count));
 			ret = BCME_OK;
 			break;
 		}
 
-		DHD_INFO(("%s(): Request CLK_NONE BT is NOT active switching off \r\n",
+		DHD_INFO(("%s(): Request CLK_NONE BT is NOT active switching off \n",
 			__FUNCTION__));
 #endif /* BT_OVER_SDIO */
 
@@ -1955,7 +1955,7 @@ dhdsdio_bussleep(dhd_bus_t *bus, bool sleep)
 		 * another WLAN context is active they are any way serialized with sdlock.
 		 */
 		if (bus->bt_use_count != 0) {
-			DHD_INFO(("%s(): Cannot sleep BT is active \r\n", __FUNCTION__));
+			DHD_INFO(("%s(): Cannot sleep BT is active \n", __FUNCTION__));
 			return BCME_BUSY;
 		}
 #endif /* !BT_OVER_SDIO */
@@ -2091,7 +2091,7 @@ int __dhdsdio_clk_enable(struct dhd_bus *bus, bus_owner_t owner, int can_wait)
 	 */
 	ret = dhdsdio_clkctl(bus, CLK_AVAIL, can_wait);
 
-	DHD_INFO(("%s():bt_use_count %d \r\n", __FUNCTION__,
+	DHD_INFO(("%s():bt_use_count %d \n", __FUNCTION__,
 		bus->bt_use_count));
 	return ret;
 }
@@ -2111,7 +2111,7 @@ int __dhdsdio_clk_disable(struct dhd_bus *bus, bus_owner_t owner, int can_wait)
 	BCM_REFERENCE(can_wait);
 
 	if (bus->bt_use_count == 0) {
-		DHD_ERROR(("%s(): Clocks are already turned off \r\n",
+		DHD_ERROR(("%s(): Clocks are already turned off \n",
 			__FUNCTION__));
 		return ret;
 	}
@@ -2128,7 +2128,7 @@ int __dhdsdio_clk_disable(struct dhd_bus *bus, bus_owner_t owner, int can_wait)
 	 */
 
 	ret = BCME_OK;
-	DHD_INFO(("%s():bt_use_count %d \r\n", __FUNCTION__,
+	DHD_INFO(("%s():bt_use_count %d \n", __FUNCTION__,
 		bus->bt_use_count));
 	return ret;
 }
@@ -11442,7 +11442,7 @@ bool
 dhd_bus_set_default_min_res_mask(struct dhd_bus *bus)
 {
 	if ((bus == NULL) || (bus->sih == NULL)) {
-		DHD_ERROR(("%s(): Invalid Arguments \r\n", __FUNCTION__));
+		DHD_ERROR(("%s(): Invalid Arguments \n", __FUNCTION__));
 		return FALSE;
 	}
 

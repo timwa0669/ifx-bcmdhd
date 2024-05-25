@@ -1530,7 +1530,7 @@ dhdpcie_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	if (dhdpcie_init_succeeded == TRUE) {
-		DHD_ERROR(("%s(): === Driver Already attached to a BRCM device === \r\n",
+		DHD_ERROR(("%s(): === Driver Already attached to a BRCM device === \n",
 			__FUNCTION__));
 		return -ENODEV;
 	}
