@@ -715,6 +715,12 @@ char *st_str_file_path = "/data/misc/wifi/rtecdc.bin";
 static char *map_file_path = "/data/misc/wifi/rtecdc.map";
 static char *rom_st_str_file_path = "/data/misc/wifi/roml.bin";
 static char *rom_map_file_path = "/data/misc/wifi/roml.map";
+#elif defined(OEM_ANDROID) && defined(CONFIG_DHD_PLAT_ROCKCHIP)
+static char *logstrs_path = "/data/misc/wifi/logstrs.bin";
+char *st_str_file_path = "/data/misc/wifi/rtecdc.bin";
+static char *map_file_path = "/data/misc/wifi/rtecdc.map";
+static char *rom_st_str_file_path = "/data/misc/wifi/roml.bin";
+static char *rom_map_file_path = "/data/misc/wifi/roml.map";
 #elif defined(OEM_ANDROID) /* For Brix KK Live Image */
 static char *logstrs_path = "/installmedia/logstrs.bin";
 char *st_str_file_path = "/installmedia/rtecdc.bin";
@@ -16803,6 +16809,11 @@ write_dump_to_file(dhd_pub_t *dhd, uint8 *buf, int size, char *fname)
 		DHD_COMMON_DUMP_PATH, fname, memdump_type,  dhd->debug_dump_time_str);
 	file_mode = O_CREAT | O_WRONLY;
 #elif defined(OEM_ANDROID)
+#ifdef CONFIG_DHD_PLAT_ROCKCHIP
+	snprintf(memdump_path, sizeof(memdump_path), "%s%s_%s_" "%s",
+		DHD_COMMON_DUMP_PATH, fname, memdump_type,	dhd->debug_dump_time_str);
+	file_mode = O_CREAT | O_WRONLY | O_SYNC;
+#else /* CONFIG_DHD_PLAT_ROCKCHIP */
 	snprintf(memdump_path, sizeof(memdump_path), "%s%s_%s_" "%s",
 		"/root/", fname, memdump_type,  dhd->debug_dump_time_str);
 	/* Extra flags O_DIRECT and O_SYNC are required for Brix Android, as we are
@@ -16823,6 +16834,7 @@ write_dump_to_file(dhd_pub_t *dhd, uint8 *buf, int size, char *fname)
 			filp_close(fp, NULL);
 		}
 	}
+#endif /* CONFIG_DHD_PLAT_ROCKCHIP */
 #else
 	snprintf(memdump_path, sizeof(memdump_path), "%s%s_%s_" "%s",
 		DHD_COMMON_DUMP_PATH, fname, memdump_type,  dhd->debug_dump_time_str);
@@ -18052,6 +18064,8 @@ int dhd_set_ap_isolate(dhd_pub_t *dhdp, uint32 idx, int val)
 #define RNDINFO PLATFORM_PATH".rnd"
 #elif defined(CUSTOMER_HW2) || defined(BOARD_HIKEY)
 #define RNDINFO "/data/misc/wifi/.rnd"
+#elif defined(OEM_ANDROID) && defined(CONFIG_DHD_PLAT_ROCKCHIP)
+#define RNDINFO	"/data/misc/wifi/.rnd"
 #elif defined(OEM_ANDROID) && (defined(BOARD_PANDA) || defined(__ARM_ARCH_7A__))
 #define RNDINFO "/data/misc/wifi/.rnd"
 #elif defined(OEM_ANDROID)

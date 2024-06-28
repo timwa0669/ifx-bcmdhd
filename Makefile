@@ -597,8 +597,15 @@ ifeq ($(CONFIG_ARCH_MESON),y)
 DHDCFLAGS += -DBOARD_VIM3
 DHDOFILES += dhd_custom_vim3.o
 endif
+
 ifeq ($(CONFIG_ARCH_MSM),y)
 DHDOFILES += dhd_custom_msm.o
+endif
+
+ifeq ($(CONFIG_ARCH_ROCKCHIP),y)
+DHDCFLAGS += -DCONFIG_DHD_PLAT_ROCKCHIP
+DHDCFLAGS += -DWL_ENABLE_P2P_IF
+DHDOFILES += dhd_custom_rockchip.o
 endif
 endif
 
