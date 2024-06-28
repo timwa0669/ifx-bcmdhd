@@ -607,6 +607,10 @@ DHDCFLAGS += -DCONFIG_DHD_PLAT_ROCKCHIP
 DHDCFLAGS += -DWL_ENABLE_P2P_IF
 DHDOFILES += dhd_custom_rockchip.o
 endif
+
+ifeq ($(CONFIG_ARCH_LOMBO),y)
+DHDOFILES += dhd_custom_lombo.o
+endif
 endif
 
 ifeq ($(CONFIG_BCMDHD_SDMMC),y)
