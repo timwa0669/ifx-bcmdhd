@@ -1355,6 +1355,7 @@ sdioh_request_buffer(sdioh_info_t *sd, uint pio_dma, uint fix_inc, uint write, u
 {
 	SDIOH_API_RC status;
 	void *tmppkt;
+	int is_vmalloc = FALSE;
 
 	sd_trace(("%s: Enter\n", __FUNCTION__));
 	DHD_PM_RESUME_WAIT(sdioh_request_buffer_wait);
@@ -1376,10 +1377,18 @@ sdioh_request_buffer(sdioh_info_t *sd, uint pio_dma, uint fix_inc, uint write, u
 	}
 
 	ASSERT(buffer);
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 24)
+	is_vmalloc = is_vmalloc_addr(buffer);
+#endif /* LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 24) */
 
 	/* buffer and length are aligned, use it directly so we can avoid memory copy */
-	if (((ulong)buffer & (ARCH_DMA_MINALIGN - 1)) == 0 && (buf_len & DMA_ALIGN_MASK) == 0)
+	if ((((ulong)buffer & DMA_ALIGN_MASK) == 0) && ((buf_len & DMA_ALIGN_MASK) == 0) &&
+			(!is_vmalloc))
 		return sdioh_buffer_tofrom_bus(sd, fix_inc, write, func, addr, buffer, buf_len);
+
+	if (is_vmalloc)
+		sd_trace(("%s: Need to memory copy due to virtual memory address.\n",
+			__FUNCTION__));
 
 	sd_trace(("%s: [%d] doing memory copy buf=%p, len=%d\n",
 		__FUNCTION__, write, buffer, buf_len));
