@@ -21428,6 +21428,11 @@ wl_cfg80211_netdev_notifier_call(struct notifier_block * nb,
 		return NOTIFY_DONE;
 	}
 
+	if (unlikely(!wdev->wiphy)) {
+		WL_ERR(("%s: wiphy null\n", __FUNCTION__));
+		return NOTIFY_DONE;
+	}
+
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(wdev->wiphy);
 	if (!cfg || (cfg != wl_cfg80211_get_bcmcfg())) {
 		/* If cfg80211 priv is null or doesn't match return */
