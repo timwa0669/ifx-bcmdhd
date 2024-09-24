@@ -7131,6 +7131,7 @@ static void wl_cfgvendor_dbg_ring_send_evt(void *ctx,
 }
 #endif /* DEBUGABILITY */
 
+#ifdef DHD_DEBUG
 #ifdef DHD_LOG_DUMP
 static int wl_cfgvendor_nla_put_sssr_dump_data(struct sk_buff *skb,
 		struct net_device *ndev)
@@ -7475,6 +7476,7 @@ done:
 	}
 }
 #endif /* DHD_LOG_DUMP */
+#endif /* DHD_DEBUG */
 
 #ifndef WL_DHD_XR
 static
@@ -11079,9 +11081,11 @@ int wl_cfgvendor_attach(struct wiphy *wiphy, dhd_pub_t *dhd)
 	dhd_os_dbg_register_callback(FW_VERBOSE_RING_ID, wl_cfgvendor_dbg_ring_send_evt);
 	dhd_os_dbg_register_callback(DHD_EVENT_RING_ID, wl_cfgvendor_dbg_ring_send_evt);
 #endif /* DEBUGABILITY */
+#ifdef DHD_DEBUG
 #ifdef DHD_LOG_DUMP
 	dhd_os_dbg_register_urgent_notifier(dhd, wl_cfgvendor_dbg_send_file_dump_evt);
 #endif /* DHD_LOG_DUMP */
+#endif /* DHD_DEBUG */
 
 	BCM_REFERENCE(wl_cfgvendor_set_random_mac);
 

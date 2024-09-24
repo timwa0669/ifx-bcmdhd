@@ -77,6 +77,7 @@ int get_scheduler_policy(struct task_struct *p);
 #include <dhdioctl.h>
 #include <wlfc_proto.h>
 #include <hnd_armtrap.h>
+#include <hnd_pktq.h>
 #if defined(DUMP_IOCTL_IOV_LIST) || defined(DHD_DEBUG)
 #include <bcmutils.h>
 #endif /* DUMP_IOCTL_IOV_LIST || DHD_DEBUG */
@@ -1530,61 +1531,53 @@ typedef struct {
 } dhd_workitem_context_t;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(dhd_workitem_context_t, dhd_get_dhd_workitem_context)
-#endif /* (BCMWDF)  */
+#endif /* (BCMWDF) */
 
-	#if defined(CONFIG_PM_SLEEP)
-
-	#define DHD_PM_RESUME_WAIT_INIT(a) DECLARE_WAIT_QUEUE_HEAD(a);
-	#define _DHD_PM_RESUME_WAIT(a, b) do {\
-			int retry = 0; \
+#if defined(CONFIG_PM_SLEEP)
+#define DHD_PM_RESUME_WAIT_INIT(a) DECLARE_WAIT_QUEUE_HEAD(a);
+#define _DHD_PM_RESUME_WAIT(a, b) do { \
+		int retry = 0; \
+		SMP_RD_BARRIER_DEPENDS(); \
+		while (dhd_mmc_suspend && retry++ != b) { \
 			SMP_RD_BARRIER_DEPENDS(); \
-			while (dhd_mmc_suspend && retry++ != b) { \
-				SMP_RD_BARRIER_DEPENDS(); \
-				wait_event_interruptible_timeout(a, !dhd_mmc_suspend, 1); \
-			} \
-		} 	while (0)
-	#define DHD_PM_RESUME_WAIT(a) 		_DHD_PM_RESUME_WAIT(a, 200)
-	#define DHD_PM_RESUME_WAIT_FOREVER(a) 	_DHD_PM_RESUME_WAIT(a, ~0)
-	#define DHD_PM_RESUME_RETURN_ERROR(a)   do { \
-			if (dhd_mmc_suspend) { \
-				printf("%s[%d]: mmc is still in suspend state!!!\n", \
-					__FUNCTION__, __LINE__); \
-				return a; \
-			} \
-		} while (0)
-	#define DHD_PM_RESUME_RETURN		do { if (dhd_mmc_suspend) return; } while (0)
-
-	#define DHD_SPINWAIT_SLEEP_INIT(a) DECLARE_WAIT_QUEUE_HEAD(a);
-	#define SPINWAIT_SLEEP(a, exp, us) do { \
-		uint countdown = (us) + 9999; \
-		while ((exp) && (countdown >= 10000)) { \
-			wait_event_interruptible_timeout(a, FALSE, 1); \
-			countdown -= 10000; \
+			wait_event_interruptible_timeout(a, !dhd_mmc_suspend, 1); \
 		} \
 	} while (0)
-
-	#else
-
-	#define DHD_PM_RESUME_WAIT_INIT(a)
-	#define DHD_PM_RESUME_WAIT(a)
-	#define DHD_PM_RESUME_WAIT_FOREVER(a)
-	#define DHD_PM_RESUME_RETURN_ERROR(a)
-	#define DHD_PM_RESUME_RETURN
-
-	#define DHD_SPINWAIT_SLEEP_INIT(a)
-	#define SPINWAIT_SLEEP(a, exp, us)  do { \
-		uint countdown = (us) + 9; \
-		while ((exp) && (countdown >= 10)) { \
-			OSL_DELAY(10);  \
-			countdown -= 10;  \
+#define DHD_PM_RESUME_WAIT(a) 		_DHD_PM_RESUME_WAIT(a, 200)
+#define DHD_PM_RESUME_WAIT_FOREVER(a) 	_DHD_PM_RESUME_WAIT(a, ~0)
+#define DHD_PM_RESUME_RETURN_ERROR(a)   do { \
+		if (dhd_mmc_suspend) { \
+			printf("%s[%d]: mmc is still in suspend state!!!\n", \
+				__FUNCTION__, __LINE__); \
+			return a; \
 		} \
 	} while (0)
+#define DHD_PM_RESUME_RETURN		do { if (dhd_mmc_suspend) return; } while (0)
 
-	#endif /* CONFIG_PM_SLEEP */
+#define DHD_SPINWAIT_SLEEP_INIT(a) DECLARE_WAIT_QUEUE_HEAD(a);
+#define SPINWAIT_SLEEP(a, exp, us) do { \
+	uint countdown = (us) + 9999; \
+	while ((exp) && (countdown >= 10000)) { \
+		wait_event_interruptible_timeout(a, FALSE, 1); \
+		countdown -= 10000; \
+	} \
+} while (0)
+#else
+#define DHD_PM_RESUME_WAIT_INIT(a)
+#define DHD_PM_RESUME_WAIT(a)
+#define DHD_PM_RESUME_WAIT_FOREVER(a)
+#define DHD_PM_RESUME_RETURN_ERROR(a)
+#define DHD_PM_RESUME_RETURN
 
-#ifndef OSL_SLEEP
-#define OSL_SLEEP(ms)		OSL_DELAY(ms*1000)
-#endif /* OSL_SLEEP */
+#define DHD_SPINWAIT_SLEEP_INIT(a)
+#define SPINWAIT_SLEEP(a, exp, us) do { \
+	uint countdown = (us) + 9; \
+	while ((exp) && (countdown >= 10)) { \
+		OSL_DELAY(10); \
+		countdown -= 10; \
+	} \
+} while (0)
+#endif /* CONFIG_PM_SLEEP */
 
 #define DHD_IF_VIF	0x01	/* Virtual IF (Hidden from user) */
 

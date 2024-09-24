@@ -149,6 +149,8 @@ dhd_dbg_ring_proc_create(dhd_pub_t *dhdp)
 	}
 #endif /* DEBUGABILITY */
 
+#ifdef DHD_DEBUG
+#ifdef DHD_LOG_DUNP
 #ifdef EWP_ECNTRS_LOGGING
 	if (!proc_create_data(PROCFS_DIR_ENCOUNTERS, S_IRUSR, NULL, &dhd_ring_proc_fops,
 		dhdp->ecntr_dbg_ring)) {
@@ -166,6 +168,8 @@ dhd_dbg_ring_proc_create(dhd_pub_t *dhdp)
 		DHD_ERROR(("Created /proc/"PROCFS_DIR_RTT" procfs interface\n"));
 	}
 #endif /* EWP_RTT_LOGGING */
+#endif /* DHD_LOG_DUMP */
+#endif /* DHD_DEBUG */
 }
 
 void

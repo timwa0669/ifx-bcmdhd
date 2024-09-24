@@ -18350,8 +18350,8 @@ dhd_mem_dump(void *handle, void *event_info, u8 event)
 	 * The dumps will be pushed to HAL layer which will
 	 * write into files
 	 */
+#ifdef DHD_DEBUG
 #ifdef DHD_DUMP_FILE_WRITE_FROM_KERNEL
-
 	if (write_dump_to_file(&dhd->pub, dump->buf, dump->bufsize, "mem_dump")) {
 		DHD_ERROR(("%s: writing SoC_RAM dump to the file failed\n", __FUNCTION__));
 #ifdef DHD_DEBUG_UART
@@ -18417,6 +18417,7 @@ dhd_mem_dump(void *handle, void *event_info, u8 event)
 		}
 	}
 #endif /* DHD_DUMP_FILE_WRITE_FROM_KERNEL */
+#endif /* DHD_DEBUG */
 
 	DHD_ERROR(("%s: memdump type %u\n", __FUNCTION__, dhd->pub.memdump_type));
 	if (dhd->pub.memdump_enabled == DUMP_MEMFILE_BUGON &&
