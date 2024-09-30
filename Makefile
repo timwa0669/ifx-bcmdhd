@@ -551,6 +551,9 @@ DHDCFLAGS += -DBCMPCIE_OOB_HOST_WAKE
 else ifeq ($(CONFIG_BCMDHD_DPC_IN_ISR),y)
 DHDCFLAGS += -DPCIE_ISR_THREAD
 endif
+
+# Use a writeonly method to reset watchdog
+DHDCFLAGS += -DCC_WD_RST_WRITEONLY
 endif
 
 # Print 802.1X packets

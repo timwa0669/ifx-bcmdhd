@@ -66,6 +66,9 @@ void pcie_watchdog_reset(osl_t *osh, si_t *sih, uint32 wd_mask, uint32 wd_val)
 		PCIECFGREG_PML1_SUB_CTRL1, PCIECFGREG_REG_BAR2_CONFIG,
 		PCIECFGREG_REG_BAR3_CONFIG};
 	sbpcieregs_t *pcieregs = NULL;
+#ifdef CC_WD_RST_WRITEONLY
+	chipcregs_t *cc = NULL;
+#endif /* CC_WD_RST_WRITEONLY */
 	uint32 origidx = si_coreidx(sih);
 	int32 bcmerror = BCME_ERROR;
 
@@ -106,7 +109,18 @@ void pcie_watchdog_reset(osl_t *osh, si_t *sih, uint32 wd_mask, uint32 wd_val)
 		}
 	}
 
+#ifdef CC_WD_RST_WRITEONLY
+	/*
+	 * Use a writeonly method to reset watchdog. This can avoid imprecise
+	 * external abort on some FPGA platforms (Xilinx Zynq 7015).
+	 */
+	cc = (chipcregs_t *)si_setcore(sih, CC_CORE_ID, 0);
+	BCM_REFERENCE(cc);
+	ASSERT(cc != NULL);
+	W_REG(osh, &cc->watchdog, 4);
+#else /* CC_WD_RST_WRITEONLY */
 	si_corereg(sih, SI_CC_IDX, OFFSETOF(chipcregs_t, watchdog), ~0, 4);
+#endif /* CC_WD_RST_WRITEONLY */
 
 #ifdef BCMQT
 	OSL_DELAY(10000000);
@@ -128,6 +142,13 @@ void pcie_watchdog_reset(osl_t *osh, si_t *sih, uint32 wd_mask, uint32 wd_val)
 			return;
 		}
 	}
+
+#ifdef CC_WD_RST_WRITEONLY
+	/* Switch back to PCIE2 core */
+	pcieregs = (sbpcieregs_t *)si_setcore(sih, PCIE2_CORE_ID, 0);
+	BCM_REFERENCE(pcieregs);
+	ASSERT(pcieregs != NULL);
+#endif /* CC_WD_RST_WRITEONLY */
 
 	W_REG(osh, &pcieregs->configaddr, PCIECFGREG_LINK_STATUS_CTRL);
 	W_REG(osh, &pcieregs->configdata, lsc);
