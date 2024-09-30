@@ -57,6 +57,14 @@
 static struct proc_dir_entry *dhd_trace_proc_entry = NULL;
 #endif /* DEBUGABILITY */
 
+#ifdef EWP_ECNTRS_LOGGING
+static struct proc_dir_entry *dhd_encounters_proc_entry = NULL;
+#endif /* EWP_ECNTRS_LOGGING */
+
+#ifdef EWP_RTT_LOGGING
+static struct proc_dir_entry *dhd_rtt_proc_entry = NULL;
+#endif /* EWP_RTT_LOGGING */
+
 #ifdef SHOW_LOGTRACE
 extern dhd_pub_t* g_dhd_pub;
 static int dhd_ring_proc_open(struct inode *inode, struct file *file);
@@ -152,8 +160,9 @@ dhd_dbg_ring_proc_create(dhd_pub_t *dhdp)
 #ifdef DHD_DEBUG
 #ifdef DHD_LOG_DUNP
 #ifdef EWP_ECNTRS_LOGGING
-	if (!proc_create_data(PROCFS_DIR_ENCOUNTERS, S_IRUSR, NULL, &dhd_ring_proc_fops,
-		dhdp->ecntr_dbg_ring)) {
+	dhd_encounters_proc_entry = proc_create_data(PROCFS_DIR_ENCOUNTERS, S_IRUSR, NULL, &dhd_ring_proc_fops,
+			dhdp->ecntr_dbg_ring);
+	if (!dhd_encounters_proc_entry) {
 		DHD_ERROR(("Failed to create /proc/"PROCFS_DIR_ENCOUNTERS" procfs interface\n"));
 	} else {
 		DHD_ERROR(("Created /proc/"PROCFS_DIR_ENCOUNTERS" procfs interface\n"));
@@ -161,8 +170,9 @@ dhd_dbg_ring_proc_create(dhd_pub_t *dhdp)
 #endif /* EWP_ECNTRS_LOGGING */
 
 #ifdef EWP_RTT_LOGGING
-	if (!proc_create_data(PROCFS_DIR_RTT, S_IRUSR, NULL, &dhd_ring_proc_fops,
-		dhdp->rtt_dbg_ring)) {
+	dhd_rtt_proc_entry = proc_create_data(PROCFS_DIR_RTT, S_IRUSR, NULL, &dhd_ring_proc_fops,
+			dhdp->rtt_dbg_ring);
+	if (!dhd_rtt_proc_entry) {
 		DHD_ERROR(("Failed to create /proc/"PROCFS_DIR_RTT" procfs interface\n"));
 	} else {
 		DHD_ERROR(("Created /proc/"PROCFS_DIR_RTT" procfs interface\n"));
@@ -183,11 +193,17 @@ dhd_dbg_ring_proc_destroy(dhd_pub_t *dhdp)
 #endif /* DEBUGABILITY */
 
 #ifdef EWP_ECNTRS_LOGGING
-	remove_proc_entry(PROCFS_DIR_ENCOUNTERS, NULL);
+	if (dhd_encounters_proc_entry) {
+		remove_proc_entry(PROCFS_DIR_ENCOUNTERS, dhd_encounters_proc_entry);
+		dhd_encounters_proc_entry = NULL;
+	}
 #endif /* EWP_ECNTRS_LOGGING */
 
 #ifdef EWP_RTT_LOGGING
-	remove_proc_entry(PROCFS_DIR_RTT, NULL);
+	if (dhd_rtt_proc_entry) {
+		remove_proc_entry(PROCFS_DIR_RTT, dhd_rtt_proc_entry);
+		dhd_rtt_proc_entry = NULL;
+	}
 #endif /* EWP_RTT_LOGGING */
 
 }
