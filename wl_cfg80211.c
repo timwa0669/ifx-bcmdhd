@@ -11914,7 +11914,8 @@ wl_cfg80211_mgmt_tx(struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
 
 			memcpy(&mf_params->da.octet, &mgmt->da[0], ETH_ALEN);
 			memcpy(&mf_params->bssid.octet, &mgmt->bssid[0], ETH_ALEN);
-			*cookie = (u64)mf_params->data;
+			/* Strange code here ??? */
+			// *cookie = (u64)mf_params->data;
 			mf_params->packetId = cpu_to_le32(*cookie);
 
 			memcpy(mf_params->data, &buf[DOT11_MGMT_HDR_LEN],
