@@ -38,6 +38,9 @@
 
 #if defined(__ARM_ARCH_7A__) && !defined(DHD_USE_COHERENT_MEM_FOR_RING)
 #include <asm/cacheflush.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+#include <asm/memory.h>
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) */
 #endif /* __ARM_ARCH_7A__ && !DHD_USE_COHERENT_MEM_FOR_RING */
 
 #include <linux/random.h>
@@ -589,10 +592,12 @@ osl_cache_flush(void *va, uint size)
 	if (size > 0)
 #ifdef STB_SOC_WIFI
 		dma_sync_single_for_device(OSH_NULL, virt_to_phys(va), size, DMA_TX);
-#else /* STB_SOC_WIFI */
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+		dma_sync_single_for_device(OSH_NULL, virt_to_phys(va), size, DMA_TO_DEVICE);
+#else
 		dma_sync_single_for_device(OSH_NULL, virt_to_dma(OSH_NULL, va), size,
 			DMA_TO_DEVICE);
-#endif /* STB_SOC_WIFI */
+#endif
 }
 
 inline void BCMFASTPATH
@@ -601,9 +606,11 @@ osl_cache_inv(void *va, uint size)
 
 #ifdef STB_SOC_WIFI
 	dma_sync_single_for_cpu(OSH_NULL, virt_to_phys(va), size, DMA_RX);
-#else /* STB_SOC_WIFI */
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
+	dma_sync_single_for_cpu(OSH_NULL, virt_to_phys(va), size, DMA_FROM_DEVICE);
+#else
 	dma_sync_single_for_cpu(OSH_NULL, virt_to_dma(OSH_NULL, va), size, DMA_FROM_DEVICE);
-#endif /* STB_SOC_WIFI */
+#endif
 }
 
 inline void BCMFASTPATH

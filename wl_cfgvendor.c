@@ -9553,7 +9553,7 @@ static int wl_cfgvendor_wnm(struct wiphy *wiphy,
 					if (memcpy_s(&param[buf_len], sizeof(param) - buf_len, &period, sizeof(period)) == BCME_OK) {
 						buf_len += sizeof(period);
 					} else {
-						WL_ERR(("Failed to copy data. len: %ld\n", sizeof(period)));
+						WL_ERR(("Failed to copy data. len: %lu\n", (unsigned long)sizeof(period)));
 						return -ENOMEM;
 					}
 				}
@@ -9571,7 +9571,7 @@ static int wl_cfgvendor_wnm(struct wiphy *wiphy,
 					if (memcpy_s(&param[buf_len], sizeof(param) - buf_len, &option, sizeof(option)) == BCME_OK) {
 						buf_len += sizeof(option);
 					} else {
-						WL_ERR(("Failed to copy data. len: %ld\n", sizeof(option)));
+						WL_ERR(("Failed to copy data. len: %lu\n", (unsigned long)sizeof(option)));
 						return -ENOMEM;
 					}
 				}
