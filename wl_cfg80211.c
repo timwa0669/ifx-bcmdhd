@@ -14329,6 +14329,7 @@ wl_cfg80211_start_ap(
 	struct parsed_ies ies;
 	s32 bssidx = 0;
 	u32 dev_role = 0;
+	chanspec_bw_t chspec_bw = INVCHANSPEC;
 #ifdef WL11AX
 #if (defined(IFX_CFG80211_5_4_21) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0) && \
 	LINUX_VERSION_CODE <= KERNEL_VERSION(5, 18, 19)))
@@ -14430,6 +14431,30 @@ wl_cfg80211_start_ap(
 		err = -EINVAL;
 		goto fail;
 	}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
+	switch (info->chandef.width) {
+	case NL80211_CHAN_WIDTH_20:
+	case NL80211_CHAN_WIDTH_20_NOHT:
+		chspec_bw = WL_CHANSPEC_BW_20;
+		break;
+	case NL80211_CHAN_WIDTH_40:
+		chspec_bw = WL_CHANSPEC_BW_40;
+		break;
+	case NL80211_CHAN_WIDTH_80:
+		chspec_bw = WL_CHANSPEC_BW_80;
+		break;
+	case NL80211_CHAN_WIDTH_160:
+		chspec_bw = WL_CHANSPEC_BW_160;
+		break;
+	case NL80211_CHAN_WIDTH_80P80:
+	case NL80211_CHAN_WIDTH_5:
+	case NL80211_CHAN_WIDTH_10:
+	default:
+		WARN_ON_ONCE(1);
+	}
+	wl_set_chanwidth_by_netdev(cfg, dev, chspec_bw);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)) */
 
 #if ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0)) && !defined(WL_COMPAT_WIRELESS))
 	if ((err = wl_cfg80211_set_channel(wiphy, dev,
@@ -30012,6 +30037,7 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 	wl_chan_switch_t csa_arg;
 	struct cfg80211_chan_def *chandef = &params->chandef;
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
+	chanspec_bw_t chspec_bw = INVCHANSPEC;
 #ifdef WL_DHD_XR
 	dhd_pub_t *dhdxr = (dhd_pub_t *)dhd_get_pub(dev);
 	struct net_device *prim_ndev = dhd_linux_get_primary_netdev(dhdxr);
@@ -30089,6 +30115,28 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 			" so skip\n", CHSPEC_CHANNEL(chspec)));
 		return BCME_OK;
 	}
+
+	switch (params->chandef.width) {
+	case NL80211_CHAN_WIDTH_20:
+	case NL80211_CHAN_WIDTH_20_NOHT:
+		chspec_bw = WL_CHANSPEC_BW_20;
+		break;
+	case NL80211_CHAN_WIDTH_40:
+		chspec_bw = WL_CHANSPEC_BW_40;
+		break;
+	case NL80211_CHAN_WIDTH_80:
+		chspec_bw = WL_CHANSPEC_BW_80;
+		break;
+	case NL80211_CHAN_WIDTH_160:
+		chspec_bw = WL_CHANSPEC_BW_160;
+		break;
+	case NL80211_CHAN_WIDTH_80P80:
+	case NL80211_CHAN_WIDTH_5:
+	case NL80211_CHAN_WIDTH_10:
+	default:
+		WARN_ON_ONCE(1);
+	}
+	wl_set_chanwidth_by_netdev(cfg, dev, chspec_bw);
 
 	if (band == IEEE80211_BAND_5GHZ) {
 #ifdef APSTA_RESTRICTED_CHANNEL
