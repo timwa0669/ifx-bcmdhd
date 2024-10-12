@@ -2729,6 +2729,22 @@ wl_cfgp2p_del_p2p_disc_if(struct wireless_dev *wdev, struct bcm_cfg80211 *cfg)
 
 	WL_INFORM(("Enter\n"));
 
+	if (!cfg->p2p_wdev) {
+		WL_ERR(("Already deleted p2p_wdev\n"));
+		return -EINVAL;
+	}
+
+	if (cfg->p2p != NULL) {
+		/* Ensure discovery i/f is deinitialized */
+		if (wl_cfgp2p_disable_discovery(cfg) != BCME_OK) {
+			/* discard error in the deinit part. Fw state
+			 * recovery would happen from wl down/reset
+			 * context.
+			 */
+			CFGP2P_ERR(("p2p disable disc failed\n"));
+		}
+	}
+
 	if (!rtnl_is_locked()) {
 		rtnl_lock();
 		rollback_lock = true;
