@@ -372,9 +372,6 @@ endif
 ifneq ($(CONFIG_BCMDHDX),)
 DRIVER_TYPE ?= $(CONFIG_BCMDHDX)
 DHDCFLAGS += -DBCMDHDX -DWL_DHD_XR_CLIENT
-
-# AP mode for primary interface of slave
-#DHDCFLAGS += -DWL_DHD_XR_CLIENT_APONLY
 endif
 # Bandsteer support
 DHDCFLAGS += -DDHD_BANDSTEER

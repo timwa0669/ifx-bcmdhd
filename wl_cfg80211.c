@@ -23683,13 +23683,17 @@ static s32 __wl_cfg80211_up_xr(struct bcm_cfg80211 *cfg, struct net_device *ndev
 		WL_ERR(("there is no netinfo\n"));
 		return -ENODEV;
 	}
-#ifdef WL_DHD_XR_CLIENT_APONLY
-	ndev->ieee80211_ptr->iftype = NL80211_IFTYPE_AP;
-	netinfo->iftype = WL_IF_TYPE_AP;
-#else
-	ndev->ieee80211_ptr->iftype = NL80211_IFTYPE_STATION;
-	netinfo->iftype = WL_IF_TYPE_STA;
-#endif /* WL_DHD_XR_CLIENT_APONLY */
+
+	if (ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_AP) {
+		/* AP on primary interface case: Supplicant will
+		 * set mode first and then do dev_open. so in this
+		 * case, the type will already be set.
+		 */
+		netinfo->iftype = WL_IF_TYPE_AP;
+	} else {
+		ndev->ieee80211_ptr->iftype = NL80211_IFTYPE_STATION;
+		netinfo->iftype = WL_IF_TYPE_STA;
+	}
 
 	if (cfg80211_to_wl_iftype(wdev->iftype, &wl_iftype, &wl_mode) < 0) {
 		return -EINVAL;
@@ -23790,8 +23794,17 @@ static s32 __wl_cfg80211_up(struct bcm_cfg80211 *cfg)
 		WL_ERR(("there is no netinfo\n"));
 		return -ENODEV;
 	}
-	ndev->ieee80211_ptr->iftype = NL80211_IFTYPE_STATION;
-	netinfo->iftype = WL_IF_TYPE_STA;
+
+	if (ndev->ieee80211_ptr->iftype == NL80211_IFTYPE_AP) {
+		/* AP on primary interface case: Supplicant will
+		 * set mode first and then do dev_open. so in this
+		 * case, the type will already be set.
+		 */
+		netinfo->iftype = WL_IF_TYPE_AP;
+	} else {
+		ndev->ieee80211_ptr->iftype = NL80211_IFTYPE_STATION;
+		netinfo->iftype = WL_IF_TYPE_STA;
+	}
 
 	if (cfg80211_to_wl_iftype(wdev->iftype, &wl_iftype, &wl_mode) < 0) {
 		return -EINVAL;
@@ -24038,8 +24051,6 @@ static s32 __wl_cfg80211_down_xr(struct bcm_cfg80211 *cfg, struct net_device *nd
 		wl_clr_drv_status(cfg, NESTED_CONNECT, iter->ndev);
 		wl_clr_drv_status(cfg, CFG80211_CONNECT, iter->ndev);
 	}
-	primary_ndev->ieee80211_ptr->iftype =
-		NL80211_IFTYPE_STATION;
 	/* Avoid deadlock from wl_cfg80211_down */
 	if (!dhd_download_fw_on_driverload) {
 		mutex_unlock(&cfg->usr_sync);
@@ -24198,8 +24209,6 @@ static s32 __wl_cfg80211_down(struct bcm_cfg80211 *cfg)
 		wl_clr_drv_status(cfg, NESTED_CONNECT, iter->ndev);
 		wl_clr_drv_status(cfg, CFG80211_CONNECT, iter->ndev);
 	}
-	bcmcfg_to_prmry_ndev(cfg)->ieee80211_ptr->iftype =
-		NL80211_IFTYPE_STATION;
 #if defined(WL_CFG80211) && (defined(WL_ENABLE_P2P_IF) || \
 	defined(WL_NEWCFG_PRIVCMD_SUPPORT)) && !defined(PLATFORM_SLP)
 #ifdef SUPPORT_DEEP_SLEEP
