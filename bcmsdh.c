@@ -857,3 +857,11 @@ bcmsdh_gpioout(void *sdh, uint32 gpio, bool enab)
 
 	return sdioh_gpioout(sd, gpio, enab);
 }
+
+uint
+bcmsdh_set_mode(void *sdh, uint mode)
+{
+	bcmsdh_info_t *p = (bcmsdh_info_t *)sdh;
+	sdioh_info_t *sd = (sdioh_info_t *)(p->sdioh);
+	return (sdioh_set_mode(sd, mode));
+}

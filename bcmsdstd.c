@@ -101,6 +101,9 @@ uint sd_delay_value = 500000;
 #ifdef BCMSDIOH_TXGLOM
 uint sd_txglom;
 module_param(sd_txglom, uint, 0);
+
+uint sd_txglom_mode;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
+module_param(sd_txglom_mode, uint, 0);
 #endif /* BCMSDIOH_TXGLOM */
 
 char dhd_sdiod_uhsi_ds_override[2] = {' '};

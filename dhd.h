@@ -569,6 +569,10 @@ enum dhd_rsdb_scan_features {
 #endif /* BCMSPI */
 #endif /* !DHD_SDALIGN */
 
+#ifndef ALIGNMENT
+#define ALIGNMENT 4
+#endif /* !ALIGNMENT */
+
 #define DHD_TX_CONTEXT_MASK 0xff
 #define DHD_TX_START_XMIT   0x01
 #define DHD_TX_SEND_PKT     0x02

@@ -61,7 +61,7 @@
 #define SDPCM_MAXGLOM_SIZE	40
 #endif /* CUSTOM_MAX_TXGLOM_SIZE */
 
-#define SDPCM_TXGLOM_CPY 0			/* SDIO 2.0 should use copy mode */
+#define SDPCM_TXGLOM_CPY	0		/* SDIO 2.0 should use copy mode */
 #define SDPCM_TXGLOM_MDESC	1		/* SDIO 3.0 should use multi-desc mode */
 
 #ifdef CUSTOM_DEF_TXGLOM_SIZE
@@ -158,5 +158,6 @@ extern SDIOH_API_RC sdioh_gpio_init(sdioh_info_t *sd);
 extern bool sdioh_gpioin(sdioh_info_t *sd, uint32 gpio);
 extern SDIOH_API_RC sdioh_gpioouten(sdioh_info_t *sd, uint32 gpio);
 extern SDIOH_API_RC sdioh_gpioout(sdioh_info_t *sd, uint32 gpio, bool enab);
+extern uint sdioh_set_mode(sdioh_info_t *sd, uint mode);
 
 #endif /* _sdio_api_h_ */

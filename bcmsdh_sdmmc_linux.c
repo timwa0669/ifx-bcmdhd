@@ -74,6 +74,9 @@ static int clockoverride = 0;
 module_param(clockoverride, int, 0644);
 MODULE_PARM_DESC(clockoverride, "SDIO card clock override");
 
+extern uint sd_txglom_mode;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
+module_param(sd_txglom_mode, uint, 0);
+
 /* Maximum number of bcmsdh_sdmmc devices supported by driver */
 #define BCMSDH_SDMMC_MAX_DEVICES 1
 

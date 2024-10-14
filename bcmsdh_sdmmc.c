@@ -133,6 +133,10 @@ uint sd_use_dma = TRUE;
 #define CUSTOM_RXCHAIN 0
 #endif // endif
 
+#define COPY_BUF_SIZE	(SDPCM_MAXGLOM_SIZE * 1600)
+
+uint sd_txglom_mode;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
+
 DHD_PM_RESUME_WAIT_INIT(sdioh_request_byte_wait);
 DHD_PM_RESUME_WAIT_INIT(sdioh_request_word_wait);
 DHD_PM_RESUME_WAIT_INIT(sdioh_request_packet_wait);
@@ -223,6 +227,14 @@ sdioh_attach(osl_t *osh, struct sdio_func *func)
 		return NULL;
 	}
 	bzero((char *)sd, sizeof(sdioh_info_t));
+#if defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF)
+	sd->copy_buf = MALLOC(osh, COPY_BUF_SIZE);
+	if (sd->copy_buf == NULL) {
+		sd_err(("%s: MALLOC of %d-byte copy_buf failed\n",
+			__FUNCTION__, COPY_BUF_SIZE));
+		goto fail;
+	}
+#endif
 	sd->osh = osh;
 	sd->fake_func0.num = 0;
 	sd->fake_func0.card = func->card;
@@ -238,7 +250,7 @@ sdioh_attach(osl_t *osh, struct sdio_func *func)
 	sd->sd_blockmode = TRUE;
 	sd->use_client_ints = TRUE;
 	sd->client_block_size[0] = 64;
-	sd->use_rxchain = CUSTOM_RXCHAIN;
+	sd->use_rxchain = sd_txglom_mode;
 	if (sd->func[1] == NULL || sd->func[2] == NULL) {
 		sd_err(("%s: func 1 or 2 is null \n", __FUNCTION__));
 		goto fail;
@@ -277,6 +289,9 @@ sdioh_attach(osl_t *osh, struct sdio_func *func)
 	return sd;
 
 fail:
+#if defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF)
+	MFREE(sd->osh, sd->copy_buf, COPY_BUF_SIZE);
+#endif
 	MFREE(sd->osh, sd, sizeof(sdioh_info_t));
 	return NULL;
 }
@@ -305,6 +320,9 @@ sdioh_detach(osl_t *osh, sdioh_info_t *sd)
 		sd->func[1] = NULL;
 		sd->func[2] = NULL;
 
+#if defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF)
+		MFREE(sd->osh, sd->copy_buf, COPY_BUF_SIZE);
+#endif
 		MFREE(sd->osh, sd, sizeof(sdioh_info_t));
 	}
 	return SDIOH_API_RC_SUCCESS;
@@ -980,6 +998,17 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 	return ((err_ret == 0) ? SDIOH_API_RC_SUCCESS : SDIOH_API_RC_FAIL);
 }
 
+uint
+sdioh_set_mode(sdioh_info_t *sd, uint mode)
+{
+	if (mode == SDPCM_TXGLOM_CPY)
+		sd->txglom_mode = mode;
+	else if (mode == SDPCM_TXGLOM_MDESC)
+		sd->txglom_mode = mode;
+
+	return (sd->txglom_mode);
+}
+
 extern SDIOH_API_RC
 sdioh_request_word(sdioh_info_t *sd, uint cmd_type, uint rw, uint func, uint addr,
                                    uint32 *word, uint nbytes)
@@ -1071,6 +1100,9 @@ sdioh_request_packet_chain(sdioh_info_t *sd, uint fix_inc, uint write, uint func
 	uint32 sg_count;
 	struct sdio_func *sdio_func = sd->func[func];
 	struct mmc_host *host = sdio_func->card->host;
+	uint8 *localbuf = NULL;
+	uint local_plen = 0;
+	uint pkt_len = 0;
 
 	sd_trace(("%s: Enter\n", __FUNCTION__));
 	ASSERT(pkt);
@@ -1084,6 +1116,16 @@ sdioh_request_packet_chain(sdioh_info_t *sd, uint fix_inc, uint write, uint func
 	pkt_offset = 0;
 	pnext = pkt;
 
+	if (sd->txglom_mode == SDPCM_TXGLOM_MDESC) {
+		goto txglom_mdesc;
+	} else if (sd->txglom_mode == SDPCM_TXGLOM_CPY) {
+		goto txglom_cpy;
+	} else {
+		sd_err(("%s: set to wrong glom mode %d\n", __FUNCTION__, sd->txglom_mode));
+		return SDIOH_API_RC_FAIL;
+	}
+
+txglom_mdesc:
 	while (pnext != NULL) {
 		ttl_len = 0;
 		sg_count = 0;
@@ -1175,6 +1217,79 @@ sdioh_request_packet_chain(sdioh_info_t *sd, uint fix_inc, uint write, uint func
 		}
 	}
 
+	sd_trace(("%s: Exit\n", __FUNCTION__));
+	return SDIOH_API_RC_SUCCESS;
+
+txglom_cpy:
+	ttl_len = 0;
+	sg_count = 0;
+	for (pnext = pkt; pnext; pnext = PKTNEXT(sd->osh, pnext)) {
+		ttl_len += PKTLEN(sd->osh, pnext);
+	}
+
+	/* Claim host controller */
+	sdio_claim_host(sd->func[func]);
+	for (pnext = pkt; pnext; pnext = PKTNEXT(sd->osh, pnext)) {
+		uint8 *buf = (uint8*)PKTDATA(sd->osh, pnext);
+		pkt_len = PKTLEN(sd->osh, pnext);
+		if (!localbuf) {
+#ifdef BCMSDIOH_STATIC_COPY_BUF
+			if (ttl_len <= COPY_BUF_SIZE)
+				localbuf = sd->copy_buf;
+#else /* BCMSDIOH_STATIC_COPY_BUF */
+			localbuf = (uint8 *)MALLOC(sd->osh, ttl_len);
+#endif /* BCMSDIOH_STATIC_COPY_BUF */
+			if (localbuf == NULL) {
+				sd_err(("%s: %s localbuf malloc FAILED ttl_len=%d\n",
+					__FUNCTION__, (write) ? "TX" : "RX", ttl_len));
+				ttl_len -= pkt_len;
+				goto txglomfail;
+			}
+		}
+		bcopy(buf, (localbuf + local_plen), pkt_len);
+		local_plen += pkt_len;
+		if (PKTNEXT(sd->osh, pnext))
+			continue;
+
+		buf = localbuf;
+		pkt_len = local_plen;
+txglomfail:
+		/* Align Patch */
+		if (!write || pkt_len < DHD_SDALIGN)
+			pkt_len = ALIGN_SIZE(pkt_len, DMA_ALIGN_MASK + 1);
+		else if (pkt_len % blk_size)
+			pkt_len = ROUNDUP(pkt_len, blk_size);
+
+		if ((write) && (!fifo))
+			err_ret = sdio_memcpy_toio(sd->func[func], addr, buf, pkt_len);
+		else if (write)
+			err_ret = sdio_memcpy_toio(sd->func[func], addr, buf, pkt_len);
+		else if (fifo)
+			err_ret = sdio_readsb(sd->func[func], buf, addr, pkt_len);
+		else
+			err_ret = sdio_memcpy_fromio(sd->func[func], buf, addr, pkt_len);
+
+		if (err_ret)
+			sd_err(("%s: %s FAILED %p[%d], addr=0x%05x, pkt_len=%d, ERR=%d\n",
+			       __FUNCTION__,
+			       (write) ? "TX" : "RX",
+			       pnext, sg_count, addr, pkt_len, err_ret));
+		else
+			sd_trace(("%s: %s xfr'd %p[%d], addr=0x%05x, len=%d\n",
+				__FUNCTION__,
+				(write) ? "TX" : "RX",
+				pnext, sg_count, addr, pkt_len));
+
+		if (!fifo)
+			addr += pkt_len;
+		sg_count++;
+	}
+	sdio_release_host(sd->func[func]);
+
+#ifndef BCMSDIOH_STATIC_COPY_BUF
+	if (localbuf)
+		MFREE(sd->osh, localbuf, ttl_len);
+#endif
 	sd_trace(("%s: Exit\n", __FUNCTION__));
 	return SDIOH_API_RC_SUCCESS;
 }

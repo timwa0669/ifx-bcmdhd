@@ -589,8 +589,6 @@ static struct dhd_dbg_bus_ops_s  bus_ops = {
 };
 #endif /* DEBUGGER */
 
-#define ALIGNMENT  4
-
 #if defined(OOB_INTR_ONLY) && defined(HW_OOB)
 extern void bcmsdh_enable_hw_oob_intr(void *sdh, bool enable);
 #endif // endif
@@ -5894,7 +5892,14 @@ dhd_bus_stop(struct dhd_bus *bus, bool enforce_mutex)
 
 #if defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STD)
 extern uint sd_txglom;
-#endif // endif
+#endif /* defined(BCMSDIOH_STD) || defined(BCMLXSDMMC) */
+
+#if defined(BCMSDIOH_TXGLOM)
+#if defined(BCMSDIOH_STD) || defined(BCMLXSDMMC)
+extern uint sd_txglom_mode;
+#endif /* defined(BCMSDIOH_STD) || defined(BCMLXSDMMC) */
+#endif /* defined(BCMSDIOH_TXGLOM) */
+
 void
 dhd_txglom_enable(dhd_pub_t *dhdp, bool enable)
 {
@@ -5929,6 +5934,15 @@ dhd_txglom_enable(dhd_pub_t *dhdp, bool enable)
 	} else
 #endif /* BCMSDIOH_TXGLOM */
 		bus->txglom_enable = FALSE;
+
+	if (bus->txglom_enable)
+#if defined(BCMSDIOH_STD) || defined(BCMLXSDMMC)
+		bcmsdh_set_mode(bus->sdh, sd_txglom_mode);
+#else /* defined(BCMSDIOH_STD) || defined(BCMLXSDMMC) */
+		bcmsdh_set_mode(bus->sdh, SDPCM_TXGLOM_CPY);
+#endif /* defined(BCMSDIOH_STD) || defined(BCMLXSDMMC) */
+	else
+		bcmsdh_set_mode(bus->sdh, SDPCM_TXGLOM_CPY);
 }
 
 int
