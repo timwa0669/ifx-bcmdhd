@@ -10929,7 +10929,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 			memcpy(dhd->mac.octet, iovbuf, ETHER_ADDR_LEN);
 #endif /* SET_RANDOM_MAC_SOFTAP */
 #ifdef USE_DYNAMIC_F2_BLKSIZE
-		dhdsdio_func_blocksize(dhd, 2, sd_f2_blocksize);
+		dhdsdio_func_blocksize(dhd, 2, DYNAMIC_F2_BLKSIZE_FOR_NONLEGACY);
 #endif /* USE_DYNAMIC_F2_BLKSIZE */
 #ifdef SOFTAP_UAPSD_OFF
 		ret = dhd_iovar(dhd, 0, "wme_apsd", (char *)&wme_apsd, sizeof(wme_apsd), NULL, 0,
@@ -17763,7 +17763,7 @@ int dhd_deepsleep(struct net_device *dev, int flag)
 void dhd_wlfc_plat_init(void *dhd)
 {
 #ifdef USE_DYNAMIC_F2_BLKSIZE
-	dhdsdio_func_blocksize((dhd_pub_t *)dhd, 2, sd_f2_blocksize);
+	dhdsdio_func_blocksize((dhd_pub_t *)dhd, 2, DYNAMIC_F2_BLKSIZE_FOR_NONLEGACY);
 #endif /* USE_DYNAMIC_F2_BLKSIZE */
 	return;
 }

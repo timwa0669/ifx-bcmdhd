@@ -9271,19 +9271,6 @@ dhdsdio_probe_attach(struct dhd_bus *bus, osl_t *osh, void *sdh, void *regsva,
 				break;
 			case BCM4373_CHIP_ID:
 				bus->dongle_ram_base = CR4_4373_RAM_BASE;
-				/* Updating F2 Block size to 256 for 4373 to fix TX Transmit
-				 * Underflow issue during Bi-Directional Traffic
-				 */
-				{
-					uint fn = 2;
-					fn = fn << SDIO_FUNC_BLOCK_SIZE_SHIFT | F2_BLOCK_SIZE_256;
-					if (bcmsdh_iovar_op(sdh, "sd_blocksize",
-						NULL, 0, &fn, sizeof(fn), TRUE) != BCME_OK) {
-						DHD_ERROR(("%s: Set F2 Block size error\n",
-						__FUNCTION__));
-						goto fail;
-					}
-				}
 				break;
 			case BCM4364_CHIP_ID:
 				bus->dongle_ram_base = CR4_4364_RAM_BASE;
