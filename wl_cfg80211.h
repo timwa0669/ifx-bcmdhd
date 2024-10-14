@@ -1680,7 +1680,7 @@ struct bcm_cfg80211 {
 	u32 assoc_reject_status;
 	u32 roam_count;
 #endif /* DHD_ENABLE_BIGDATA_LOGGING */
-	u16 ap_oper_channel;
+	chanspec_t ap_oper_chspec;
 #if defined(SUPPORT_RANDOM_MAC_SCAN)
 	bool random_mac_enabled;
 #endif /* SUPPORT_RANDOM_MAC_SCAN */

@@ -12197,9 +12197,9 @@ wl_cfg80211_set_channel(struct wiphy *wiphy, struct net_device *dev,
 	struct ieee80211_channel *chan,
 	enum nl80211_channel_type channel_type)
 {
-	s32 _chan;
-	chanspec_t chspec = 0;
-	chanspec_t fw_chspec = 0;
+	u32 _chan;
+	chanspec_t chspec = INVCHANSPEC;
+	chanspec_t fw_chspec = INVCHANSPEC;
 	u32 bw = WL_CHANSPEC_BW_20;
 	s32 err = BCME_OK;
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
@@ -12270,7 +12270,7 @@ set_channel:
 		if (fw_chspec != INVCHANSPEC) {
 			if ((err = wldev_iovar_setint(dev, "chanspec",
 				fw_chspec)) == BCME_BADCHAN) {
-				if (bw == WL_CHANSPEC_BW_80)
+				if ((bw == WL_CHANSPEC_BW_80) || (bw == WL_CHANSPEC_BW_40))
 					goto change_bw;
 				err = wldev_ioctl_set(dev, WLC_SET_CHANNEL,
 					&_chan, sizeof(_chan));
@@ -12331,8 +12331,10 @@ change_bw:
 #endif /* CUSTOM_SET_CPUCORE */
 	if (!err && (wl_get_mode_by_netdev(cfg, dev) == WL_MODE_AP)) {
 		/* Update AP/GO operating channel */
-		cfg->ap_oper_channel = ieee80211_frequency_to_channel(chan->center_freq);
+		WL_INFORM_MEM(("Setting chanspec %x for GO/AP\n", chspec));
+		cfg->ap_oper_chspec = chspec;
 	}
+
 	if (err) {
 		wl_flush_fw_log_buffer(primary_ndev,
 			FW_LOGSET_MASK_ALL);
@@ -14812,7 +14814,7 @@ wl_cfg80211_stop_ap(
 
 	wl_clr_drv_status(cfg, AP_CREATING, dev);
 	wl_clr_drv_status(cfg, AP_CREATED, dev);
-	cfg->ap_oper_channel = 0;
+	cfg->ap_oper_chspec = INVCHANSPEC;
 
 	if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_AP) {
 		dev_role = NL80211_IFTYPE_AP;
@@ -15344,7 +15346,7 @@ wl_cfg80211_del_beacon(struct wiphy *wiphy, struct net_device *dev)
 	/* Clear AP/GO connected status */
 	wl_clr_drv_status(cfg, CONNECTED, dev);
 
-	cfg->ap_oper_channel = 0;
+	cfg->ap_oper_chspec = INVCHANSPEC;
 
 	if ((bssidx = wl_get_bssidx_by_wdev(cfg, dev->ieee80211_ptr)) < 0) {
 		WL_ERR(("find p2p index from wdev(%p) failed\n", dev->ieee80211_ptr));
@@ -21749,7 +21751,7 @@ s32 wl_notifier_change_state_xr(struct bcm_cfg80211 *cfg, struct net_info *_net_
 #endif /* DISABLE_FRAMEBURST_VSDB */
 #ifdef DISABLE_WL_FRAMEBURST_SOFTAP
 		if (DHD_OPMODE_STA_SOFTAP_CONCURR(dhd) &&
-			(cfg->ap_oper_channel <= CH_MAX_2G_CHANNEL)) {
+			(CHSPEC_CHANNEL(cfg->ap_oper_chspec) <= CH_MAX_2G_CHANNEL)) {
 			/* Disable frameburst for stand-alone 2GHz SoftAP */
 			wl_cfg80211_set_frameburst(cfg, FALSE);
 		}
@@ -21873,7 +21875,7 @@ static s32 wl_notifier_change_state(struct bcm_cfg80211 *cfg, struct net_info *_
 #endif /* DISABLE_FRAMEBURST_VSDB */
 #ifdef DISABLE_WL_FRAMEBURST_SOFTAP
 		if (DHD_OPMODE_STA_SOFTAP_CONCURR(dhd) &&
-			(cfg->ap_oper_channel <= CH_MAX_2G_CHANNEL)) {
+			(CHSPEC_CHANNEL(cfg->ap_oper_chspec) <= CH_MAX_2G_CHANNEL)) {
 			/* Disable frameburst for stand-alone 2GHz SoftAP */
 			wl_cfg80211_set_frameburst(cfg, FALSE);
 		}
@@ -27117,11 +27119,16 @@ wl_ap_channel_ind(struct bcm_cfg80211 *cfg,
 	struct net_device *ndev,
 	chanspec_t chanspec)
 {
-	u32 channel = LCHSPEC_CHANNEL(chanspec);
+	u32 channel = INVCHANNEL;
+	if (wl_cfg80211_get_ioctl_version() == 1) {
+		channel = LCHSPEC_CHANNEL(chanspec);
+	} else {
+		channel = CHSPEC_CHANNEL(chanspec);
+	}
 
 	WL_INFORM_MEM(("(%s) AP channel:%d chspec:0x%x \n",
 		ndev->name, channel, chanspec));
-	if (cfg->ap_oper_channel != channel) {
+	if (cfg->ap_oper_chspec != chanspec) {
 		/*
 		 * If cached channel is different from the channel indicated
 		 * by the event, notify user space about the channel switch.
@@ -27129,7 +27136,7 @@ wl_ap_channel_ind(struct bcm_cfg80211 *cfg,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0))
 		wl_cfg80211_ch_switch_notify(ndev, chanspec, bcmcfg_to_wiphy(cfg));
 #endif /* LINUX_VERSION_CODE >= (3, 5, 0) */
-		cfg->ap_oper_channel = channel;
+		cfg->ap_oper_chspec = chanspec;
 	}
 }
 
@@ -30032,9 +30039,54 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 		return -EINVAL;
 	}
 
-	if (chan == cfg->ap_oper_channel) {
-		WL_ERR(("Channel %d is same as current operating channel,"
-			" so skip\n", chan));
+	switch (chandef->width) {
+	case NL80211_CHAN_WIDTH_20:
+	case NL80211_CHAN_WIDTH_20_NOHT:
+		bw = WL_CHANSPEC_BW_20;
+		break;
+	case NL80211_CHAN_WIDTH_40:
+		bw = WL_CHANSPEC_BW_40;
+		break;
+	case NL80211_CHAN_WIDTH_80:
+		bw = WL_CHANSPEC_BW_80;
+		break;
+	case NL80211_CHAN_WIDTH_160:
+		bw = WL_CHANSPEC_BW_160;
+		break;
+	case NL80211_CHAN_WIDTH_80P80:
+	case NL80211_CHAN_WIDTH_5:
+	case NL80211_CHAN_WIDTH_10:
+	default:
+		WARN_ON_ONCE(1);
+	}
+	wl_set_chanwidth_by_netdev(cfg, dev, bw);
+
+	err = wl_get_bandwidth_cap(prim_ndev,
+		band, &bw);
+	if (err < 0) {
+		WL_ERR(("Failed to get bandwidth information,"
+			" err=%d\n", err));
+		return err;
+	}
+
+#ifdef WL_6E
+	if (band == IEEE80211_BAND_6GHZ)
+	{
+		chspec = wf_channel2chspec6E(chan, bw);
+	}
+	else
+#endif /* WL_6E */
+	{
+		chspec = wf_channel2chspec(chan, bw);
+	}
+	if (!wf_chspec_valid(chspec)) {
+		WL_ERR(("Invalid chanspec 0x%x\n", chspec));
+		return -EINVAL;
+	}
+
+	if (chspec == cfg->ap_oper_chspec) {
+		WL_ERR(("Chanspec %d is same as current operating chanspec,"
+			" so skip\n", CHSPEC_CHANNEL(chspec)));
 		return BCME_OK;
 	}
 
@@ -30045,13 +30097,6 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 			return -EINVAL;
 		}
 #endif /* APSTA_RESTRICTED_CHANNEL */
-		err = wl_get_bandwidth_cap(prim_ndev,
-			band, &bw);
-		if (err < 0) {
-			WL_ERR(("Failed to get bandwidth information,"
-				" err=%d\n", err));
-			return err;
-		}
 	} else if (band == IEEE80211_BAND_2GHZ) {
 #ifdef APSTA_RESTRICTED_CHANNEL
 #ifndef WL_DHD_XR
@@ -30061,7 +30106,7 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 			prim_ndev, WL_PROF_CHAN);
 
 		/* In 2GHz STA/SoftAP concurrent mode, the operating channel
-		 * of STA and SoftAP should be confgiured to the same 2GHz
+		 * of STA and SoftAP should be configured to the same 2GHz
 		 * channel. Otherwise, it is an invalid configuration.
 		 */
 #ifndef WL_DHD_XR
@@ -30078,16 +30123,6 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 			return -EINVAL;
 		}
 #endif /* APSTA_RESTRICTED_CHANNEL */
-		bw = WL_CHANSPEC_BW_20;
-	} else {
-		WL_ERR(("invalid band (%d)\n", band));
-		return -EINVAL;
-	}
-
-	chspec = wf_channel2chspec(chan, bw);
-	if (!wf_chspec_valid(chspec)) {
-		WL_ERR(("Invalid chanspec 0x%x\n", chspec));
-		return -EINVAL;
 	}
 
 	/* Send CSA to associated STAs */
