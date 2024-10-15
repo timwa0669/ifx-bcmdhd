@@ -535,8 +535,10 @@ DHDCFLAGS += -DHCHK_COMMON_SW_EVENT
 
 # Enable Load Balancing support by default.
 # DHD_LB_RXP - Perform RX Packet processing in parallel
+# DHD_LB_TXP - Perform TX Packet processing in parallel
 # DHD_LB_STATS - To display the Load Blancing statistics
 DHDCFLAGS += -DDHD_LB -DDHD_LB_RXP -DDHD_LB_STATS
+DHDCFLAGS += -DDHD_LB_TXP -DDHD_LB_TXP_DEFAULT_ENAB
 DHDCFLAGS += -DDHD_LB_PRIMARY_CPUS=0xF0 -DDHD_LB_SECONDARY_CPUS=0x0E
 
 # Runtime PM feature
