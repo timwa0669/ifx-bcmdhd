@@ -1845,11 +1845,6 @@ static const u32 __wl_cipher_suites[] = {
 };
 
 #ifdef WL_SUPPORT_ACS
-/*
- * The firmware code required for this feature to work is currently under
- * BCMINTERNAL flag. In future if this is to enabled we need to bring the
- * required firmware code out of the BCMINTERNAL flag.
- */
 struct wl_dump_survey {
 	u32 obss;
 	u32 ibss;
@@ -1857,6 +1852,29 @@ struct wl_dump_survey {
 	u32 no_pckt;
 	u32 tx;
 	u32 idle;
+};
+
+enum cca_survey_config {
+	CCA_SURVEY_READ_CLEAR = 1,      /* previous data only */
+	CCA_SURVEY_READ = 2,            /* sum for each of data */
+	CCA_SURVEY_RESET = 3,           /* Set for each of data */
+};
+
+struct cca_survey {
+	u32 usecs;   /**< millisecs spent sampling this channel */
+	u32 ibss;    /**< millisecs spent ibss */
+	u32 obss;    /**< millisecs spent obss */
+	u32 txdur;   /**< millisecs spent txdur */
+	u32 noctg;   /**< millisecs spent 802.11 of unknown type */
+	u32 nopkt;   /**< millisecs spent non 802.11 */
+	u32 PM;      /**< usecs MAC spent in doze mode for PM */
+};
+
+struct cca_survey_req {
+	u16 chanspec;                    /* Which channel? */
+	u16 num_secs;                    /* How many secs worth of data */
+	struct cca_survey secs[1];       /* Data */
+	enum cca_survey_config config;   /* enum */
 };
 #endif /* WL_SUPPORT_ACS */
 
@@ -15478,39 +15496,34 @@ static int wl_parse_dump_obss(char *buf, struct wl_dump_survey *survey)
 	return 0;
 }
 
-static int wl_dump_obss(struct net_device *ndev, cca_msrmnt_query req,
+#ifndef WL_DHD_XR
+static
+#endif /* WL_DHD_XR */
+int wl_dump_obss(struct net_device *ndev, cca_msrmnt_query req,
 	struct wl_dump_survey *survey)
 {
 	cca_stats_n_flags *results;
 	char *buf;
-	int retry, err;
+	int err;
 	struct bcm_cfg80211 *cfg = wl_get_cfg(ndev);
 #ifdef WL_DHD_XR
 	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(ndev);
 #endif /*WL_DHD_XR*/
 
 #ifdef WL_DHD_XR
-	buf = (char *)MALLOCZ(dhd->osh, sizeof(char) * WLC_IOCTL_MAXLEN);
+	buf = (char *)MALLOCZ(dhd->osh, sizeof(char) * WLC_IOCTL_MEDLEN);
 #else
-	buf = (char *)MALLOCZ(cfg->osh, sizeof(char) * WLC_IOCTL_MAXLEN);
+	buf = (char *)MALLOCZ(cfg->osh, sizeof(char) * WLC_IOCTL_MEDLEN);
 #endif /* WL_DHD_XR */
 	if (unlikely(!buf)) {
-		WL_ERR(("%s: buf alloc failed\n", __func__));
+		WL_ERR(("buf alloc failed\n"));
 		return -ENOMEM;
 	}
 
-	retry = IOCTL_RETRY_COUNT;
-	while (retry--) {
-		err = wldev_iovar_getbuf(ndev, "dump_obss", &req, sizeof(req),
-			buf, WLC_IOCTL_MAXLEN, NULL);
-		if (err >=  0) {
-			break;
-		}
-		WL_DBG(("attempt = %d, err = %d, \n",
-			(IOCTL_RETRY_COUNT - retry), err));
-	}
+	err = wldev_iovar_getbuf(ndev, "dump_obss", &req, sizeof(req),
+		buf, WLC_IOCTL_MEDLEN, NULL);
 
-	if (retry <= 0)	{
+	if (err < 0) {
 		WL_ERR(("failure, dump_obss IOVAR failed\n"));
 		err = -EINVAL;
 		goto exit;
@@ -15518,18 +15531,13 @@ static int wl_dump_obss(struct net_device *ndev, cca_msrmnt_query req,
 
 	results = (cca_stats_n_flags *)(buf);
 	wl_parse_dump_obss(results->buf, survey);
-#ifdef WL_DHD_XR
-	MFREE(dhd->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
-#else
-	MFREE(cfg->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
-#endif /* WL_DHD_XR */
 
-	return 0;
+	err = 0;
 exit:
 #ifdef WL_DHD_XR
-	MFREE(dhd->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
+	MFREE(dhd->osh, buf, sizeof(char) * WLC_IOCTL_MEDLEN);
 #else
-	MFREE(cfg->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
+	MFREE(cfg->osh, buf, sizeof(char) * WLC_IOCTL_MEDLEN);
 #endif /* WL_DHD_XR */
 	return err;
 }
@@ -15537,33 +15545,29 @@ exit:
 #ifndef WL_DHD_XR
 static
 #endif /* WL_DHD_XR */
-int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
+int wl_cfg80211_dump_obss(struct wiphy *wiphy, struct net_device *ndev,
 	int idx, struct survey_info *info)
 {
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
 	struct wl_dump_survey *survey;
 	struct ieee80211_supported_band *band;
-	struct ieee80211_channel*chan;
+	struct ieee80211_channel *chan;
 	cca_msrmnt_query req;
-	int val, err, noise, retry;
+	int val, err, noise;
 #ifdef WL_DHD_XR
-	dhd_pub_t *dhdxr = (dhd_pub_t *)dhd_get_pub(ndev);
-#endif /*WL_DHD_XR*/
-
-#ifdef WL_DHD_XR_MASTER
-	if (dhdxr && DHD_GET_XR_ROLE(dhdxr) == XR_SLAVE) {
-		return wl_cfg80211_dump_survey_xr(cfg->pub, dhdxr, wiphy, ndev, idx, info);
-	}
-#endif/* WL_DHD_XR_MASTER */
-
-#ifdef WL_DHD_XR
-	dhd_pub_t *dhd = (dhd_pub_t *) dhd_get_pub(ndev);
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(ndev);
 #else
 	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
 #endif /* WL_DHD_XR */
+
 	if (!(dhd->op_mode & DHD_FLAG_HOSTAP_MODE)) {
 		return -ENOENT;
 	}
+
+	if (wl_get_drv_status_all(cfg, CONNECTED) ||
+		wl_get_drv_status_all(cfg, CONNECTING))
+		return -EBUSY;
+
 	band = wiphy->bands[IEEE80211_BAND_2GHZ];
 	if (band && idx >= band->n_channels) {
 		idx -= band->n_channels;
@@ -15573,7 +15577,8 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 	if (!band || idx >= band->n_channels) {
 		/* Move to 5G band */
 		band = wiphy->bands[IEEE80211_BAND_5GHZ];
-		if (idx >= band->n_channels) {
+		if (!band || idx >= band->n_channels) {
+			WL_DBG(("not support channel ifx=%d\n", idx));
 			return -ENOENT;
 		}
 	}
@@ -15583,6 +15588,12 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 	if ((err = wl_cfg80211_set_channel(wiphy, ndev, chan,
 		NL80211_CHAN_HT20) < 0)) {
 		WL_ERR(("Set channel failed \n"));
+	}
+
+	err = wldev_iovar_setint(ndev, "mpc", 0);
+	if (err < 0) {
+		WL_ERR(("Set mpc 0 failed, error = %d\n", err));
+		return -EINVAL;
 	}
 
 	if (!idx) {
@@ -15595,19 +15606,10 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 	}
 
 	/* Get noise value */
-	retry = IOCTL_RETRY_COUNT;
-	while (retry--) {
-		noise = 0;
-		err = wldev_ioctl_get(ndev, WLC_GET_PHY_NOISE, &noise,
-			sizeof(noise));
-		if (err >=  0) {
-			break;
-		}
-		WL_DBG(("attempt = %d, err = %d, \n",
-			(IOCTL_RETRY_COUNT - retry), err));
-	}
-
-	if (retry <= 0)	{
+	noise = 0;
+	err = wldev_ioctl_get(ndev, WLC_GET_PHY_NOISE, &noise,
+		sizeof(noise));
+	if (err < 0) {
 		WL_ERR(("Get Phy Noise failed, error = %d\n", err));
 		noise = CHAN_NOISE_DUMMY;
 	}
@@ -15620,7 +15622,7 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 		sizeof(struct wl_dump_survey));
 #endif /* WL_DHD_XR */
 	if (unlikely(!survey)) {
-		WL_ERR(("%s: alloc failed\n", __func__));
+		WL_ERR(("alloc failed\n"));
 		return -ENOMEM;
 	}
 
@@ -15635,7 +15637,7 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 	 * Wait for the meaurement to complete, adding a buffer value of 10 to take
 	 * into consideration any delay in IOVAR completion
 	 */
-	msleep(ACS_MSRMNT_DELAY + 10);
+	OSL_SLEEP(ACS_MSRMNT_DELAY + 10);
 
 	/* Issue IOVAR to collect measurement results */
 	req.msrmnt_query = 1;
@@ -15645,27 +15647,344 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 
 	info->channel = chan;
 	info->noise = noise;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
+	info->time = ACS_MSRMNT_DELAY;
+	info->time_busy = ACS_MSRMNT_DELAY - survey->idle;
+	info->time_rx = survey->obss + survey->ibss + survey->no_ctg +
+		survey->no_pckt;
+	info->time_tx = survey->tx;
+	info->filled = SURVEY_INFO_NOISE_DBM |SURVEY_INFO_TIME |
+		SURVEY_INFO_TIME_BUSY | SURVEY_INFO_TIME_RX |
+		SURVEY_INFO_TIME_TX;
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
 	info->channel_time = ACS_MSRMNT_DELAY;
 	info->channel_time_busy = ACS_MSRMNT_DELAY - survey->idle;
 	info->channel_time_rx = survey->obss + survey->ibss + survey->no_ctg +
 		survey->no_pckt;
 	info->channel_time_tx = survey->tx;
 	info->filled = SURVEY_INFO_NOISE_DBM |SURVEY_INFO_CHANNEL_TIME |
-		SURVEY_INFO_CHANNEL_TIME_BUSY |	SURVEY_INFO_CHANNEL_TIME_RX |
+		SURVEY_INFO_CHANNEL_TIME_BUSY | SURVEY_INFO_CHANNEL_TIME_RX |
 		SURVEY_INFO_CHANNEL_TIME_TX;
-#ifdef WL_DHD_XR
-	MFREE(dhd->osh, survey, sizeof(struct wl_dump_survey));
-#else
-	MFREE(cfg->osh, survey, sizeof(struct wl_dump_survey));
-#endif /* WL_DHD_XR */
-	return 0;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
+
+	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
+		ieee80211_frequency_to_channel(chan->center_freq),
+		info->time));
+	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
+		info->noise, info->time_busy, info->time_rx, info->time_tx));
+
+	err = 0;
 exit:
+	err = wldev_iovar_setint(ndev, "mpc", 1);
+	if (err < 0) {
+		WL_ERR(("Set mpc 1 failed, error = %d\n", err));
+	}
+
+	if (survey)
 #ifdef WL_DHD_XR
-	MFREE(dhd->osh, survey, sizeof(struct wl_dump_survey));
+		MFREE(dhd->osh, survey, sizeof(struct wl_dump_survey));
 #else
-	MFREE(cfg->osh, survey, sizeof(struct wl_dump_survey));
+		MFREE(cfg->osh, survey, sizeof(struct wl_dump_survey));
 #endif /* WL_DHD_XR */
 	return err;
+}
+
+#ifndef WL_DHD_XR
+static
+#endif /* WL_DHD_XR */
+int wl_dump_cca_survey(struct net_device *ndev, struct cca_survey_req *survey,
+	struct survey_info *info)
+{
+	char *buf;
+	int err;
+	struct bcm_cfg80211 *cfg = wl_get_cfg(ndev);
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(ndev);
+#endif /*WL_DHD_XR*/
+
+#ifdef WL_DHD_XR
+	buf = (char *)MALLOCZ(dhd->osh, sizeof(char) * WLC_IOCTL_MAXLEN);
+#else
+	buf = (char *)MALLOCZ(cfg->osh, sizeof(char) * WLC_IOCTL_MAXLEN);
+#endif /* WL_DHD_XR */
+	if (unlikely(!buf)) {
+		WL_ERR(("buf alloc failed\n"));
+		return -ENOMEM;
+	}
+
+	err = wldev_iovar_getbuf(ndev, "cca_survey_dump", (char *)survey, sizeof(struct cca_survey_req),
+		buf, WLC_IOCTL_MAXLEN, NULL);
+
+	if (err < 0) {
+		WL_ERR(("failure, cca_survey_dump IOVAR failed with %d\n", err));
+		err = -EINVAL;
+		goto exit;
+	}
+	memcpy(survey, buf, sizeof(struct cca_survey_req));
+
+	err = 0;
+exit:
+#ifdef WL_DHD_XR
+	MFREE(dhd->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
+#else
+	MFREE(cfg->osh, buf, sizeof(char) * WLC_IOCTL_MAXLEN);
+#endif /* WL_DHD_XR */
+	return err;
+}
+
+#ifndef WL_DHD_XR
+static
+#endif /* WL_DHD_XR */
+int wl_cfg80211_dump_cca_survey(struct wiphy *wiphy, struct net_device *ndev,
+	int idx, struct survey_info *info)
+{
+	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
+	struct cca_survey_req *survey;
+	struct cca_survey *secs;
+	struct ieee80211_supported_band *band;
+	struct ieee80211_channel *chan;
+	struct cfg80211_chan_def chandef;
+	int val, err, noise;
+	u8 _chan = INVCHANNEL;
+	chanspec_t chspec = INVCHANSPEC;
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(ndev);
+#else
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
+
+	if (!(dhd->op_mode & DHD_FLAG_HOSTAP_MODE)) {
+		return -ENOENT;
+	}
+
+	if (wl_get_drv_status_all(cfg, CONNECTED) ||
+		wl_get_drv_status_all(cfg, CONNECTING))
+		return -EBUSY;
+
+	band = wiphy->bands[IEEE80211_BAND_2GHZ];
+	if (band && idx >= band->n_channels) {
+		idx -= band->n_channels;
+		band = NULL;
+	}
+
+	if (!band || idx >= band->n_channels) {
+		/* Move to 5G band */
+		band = wiphy->bands[IEEE80211_BAND_5GHZ];
+		if (!band || idx >= band->n_channels) {
+			WL_DBG(("not support channel ifx=%d\n", idx));
+			return -ENOENT;
+		}
+	}
+
+	chan = &band->channels[idx];
+	/* Set interface up, explicitly. */
+	val = 1;
+	err = wldev_ioctl_set(ndev, WLC_UP, (void *)&val, sizeof(val));
+	if (err < 0) {
+		WL_ERR(("set interface up failed, error = %d\n", err));
+	}
+
+	/* Get noise value */
+	noise = 0;
+	err = wldev_ioctl_get(ndev, WLC_GET_PHY_NOISE, &noise,
+		sizeof(noise));
+	if (err < 0) {
+		WL_ERR(("Get Phy Noise failed, error = %d\n", err));
+		noise = CHAN_NOISE_DUMMY;
+	}
+
+#ifdef WL_DHD_XR
+	survey = (struct cca_survey_req *)MALLOCZ(dhd->osh,
+		sizeof(struct cca_survey_req));
+#else
+	survey = (struct cca_survey_req *)MALLOCZ(cfg->osh,
+		sizeof(struct cca_survey_req));
+#endif /* WL_DHD_XR */
+	if (unlikely(!survey)) {
+		WL_ERR(("alloc failed\n"));
+		return -ENOMEM;
+	}
+
+	_chan = ieee80211_frequency_to_channel(chan->center_freq);
+	/* 6GHz ACS is not supported yet */
+#if 0
+#ifdef WL_6E
+	if (chan->band == IEEE80211_BAND_6GHZ)
+		chspec = wf_channel2chspec6E(_chan, WL_CHANSPEC_BW_20);
+	else
+#endif /* WL_6E */
+#endif
+		chspec = wf_channel2chspec(_chan, WL_CHANSPEC_BW_20);
+	if (!wf_chspec_valid(chspec)) {
+		WL_ERR(("invalid chanspec 0x%x\n", chspec));
+		err = -ENOENT;
+		goto exit;
+	}
+	survey->chanspec = chspec;
+
+	if ((err = wl_dump_cca_survey(ndev, survey, info)) < 0) {
+		WL_ERR(("cca survey dump failed (%d)\n", err));
+		goto exit;
+	}
+
+	secs = &survey->secs[0];
+
+	info->channel = chan;
+	info->noise = noise;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
+	info->time = secs->usecs;
+	info->time_busy = secs->ibss + secs->txdur + secs->obss
+		+ secs->noctg + secs->nopkt;
+	info->time_rx = secs->obss + secs->ibss + secs->noctg
+		+ secs->nopkt;
+	info->time_tx = secs->txdur;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
+	info->time_bss_rx = secs->ibss;
+	info->filled = SURVEY_INFO_NOISE_DBM | SURVEY_INFO_TIME |
+		SURVEY_INFO_TIME_BUSY | SURVEY_INFO_TIME_RX |
+		SURVEY_INFO_TIME_TX | SURVEY_INFO_TIME_BSS_RX;
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) */
+	info->filled = SURVEY_INFO_NOISE_DBM | SURVEY_INFO_TIME |
+		SURVEY_INFO_TIME_BUSY | SURVEY_INFO_TIME_RX |
+		SURVEY_INFO_TIME_TX;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) */
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
+	info->channel_time = secs->usecs;
+	info->channel_time_busy = secs->ibss + secs->txdur + secs->obss
+		+ secs->noctg + secs->nopkt;
+	info->channel_time_rx = secs->obss + secs->ibss + secs->noctg
+		+ secs->nopkt;
+	info->channel_time_tx = secs->txdur;
+	info->filled = SURVEY_INFO_NOISE_DBM |SURVEY_INFO_CHANNEL_TIME |
+		SURVEY_INFO_CHANNEL_TIME_BUSY | SURVEY_INFO_CHANNEL_TIME_RX |
+		SURVEY_INFO_CHANNEL_TIME_TX;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
+
+	memset(&chandef, 0, sizeof(chandef));
+	err = wl_cfg80211_get_channel(wiphy, ndev_to_wdev(ndev),
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || \
+		defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
+		0,
+#endif // endif
+		&chandef);
+	if (err < 0) {
+		WL_ERR(("get channel failed (%d)\n", err));
+		goto exit;
+	}
+
+	if (chandef.chan->center_freq == chan->center_freq) {
+		info->filled = info->filled | SURVEY_INFO_IN_USE;
+	}
+
+	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
+		ieee80211_frequency_to_channel(chan->center_freq),
+		info->time));
+	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
+		info->noise, info->time_busy, info->time_rx, info->time_tx));
+
+	err = 0;
+exit:
+	if (survey)
+#ifdef WL_DHD_XR
+		MFREE(dhd->osh, survey, sizeof(struct cca_survey_req));
+#else
+		MFREE(cfg->osh, survey, sizeof(struct cca_survey_req));
+#endif /* WL_DHD_XR */
+	return err;
+}
+
+#ifndef WL_DHD_XR
+static
+#endif /* WL_DHD_XR */
+int wl_cfg80211_dump_phy_noise(struct wiphy *wiphy, struct net_device *ndev,
+	int idx, struct survey_info *info)
+{
+	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
+	struct cfg80211_chan_def chandef;
+	int err, noise;
+	u16 wl_iftype = 0;
+	u16 wl_mode = 0;
+
+	if (cfg80211_to_wl_iftype(ndev->ieee80211_ptr->iftype, &wl_iftype, &wl_mode) < 0) {
+		return -ENOENT;
+	}
+
+	if (wl_iftype != WL_IF_TYPE_STA ||
+		!wl_get_drv_status(cfg, CONNECTED, ndev) ||
+		idx != 0) {
+		return -ENOENT;
+	}
+
+	/* Get noise value */
+	noise = 0;
+	err = wldev_ioctl_get(ndev, WLC_GET_PHY_NOISE, &noise,
+		sizeof(noise));
+	if (err < 0) {
+		WL_ERR(("Get Phy Noise failed, error = %d\n", err));
+		noise = CHAN_NOISE_DUMMY;
+	}
+
+	memset(&chandef, 0, sizeof(chandef));
+	err = wl_cfg80211_get_channel(wiphy, ndev_to_wdev(ndev),
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || \
+		defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
+		0,
+#endif // endif
+		&chandef);
+	if (err < 0) {
+		WL_ERR(("get channel failed (%d)\n", err));
+		goto exit;
+	}
+
+	info->channel = ieee80211_get_channel(wiphy, chandef.chan->center_freq);
+	info->noise = noise;
+	info->filled = SURVEY_INFO_NOISE_DBM;
+
+	WL_DBG(("survey dump: channel %d: survey noise %d\n",
+		ieee80211_frequency_to_channel(info->channel->center_freq),
+		info->noise));
+
+	err = 0;
+exit:
+	return err;
+}
+
+#ifndef WL_DHD_XR
+static
+#endif /* WL_DHD_XR */
+int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
+	int idx, struct survey_info *info)
+{
+	int err;
+	u32 val;
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(ndev);
+#else /* WL_DHD_XR */
+	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
+
+#ifdef WL_DHD_XR_MASTER
+	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
+	if (dhdxr && DHD_GET_XR_ROLE(dhd) == XR_SLAVE) {
+		return wl_cfg80211_dump_survey_xr(cfg->pub, dhdxr, wiphy, ndev, idx, info);
+	}
+#endif/* WL_DHD_XR_MASTER */
+
+	if ((dhd->op_mode & DHD_FLAG_HOSTAP_MODE)) {
+		err = wldev_iovar_getint(ndev, "cca_survey_dump", &val);
+		if (err != BCME_UNSUPPORTED)
+			return wl_cfg80211_dump_cca_survey(wiphy, ndev, idx, info);
+
+		err = wldev_iovar_getint(ndev, "dump_obss", &val);
+		if (err != BCME_UNSUPPORTED)
+			return wl_cfg80211_dump_obss(wiphy, ndev, idx, info);
+
+		WL_ERR(("All survey methods failed!\n"));
+		return -EINVAL;
+	} else {
+		return wl_cfg80211_dump_phy_noise(wiphy, ndev, idx, info);
+	}
 }
 #endif /* WL_SUPPORT_ACS */
 

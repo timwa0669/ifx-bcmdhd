@@ -2971,9 +2971,8 @@ struct net_device *wl_cfg80211_get_remain_on_channel_ndev(struct bcm_cfg80211 *c
 #endif /* WL_CFG80211_VSDB_PRIORITIZE_SCAN_REQUEST */
 
 #ifdef WL_SUPPORT_ACS
-#define ACS_MSRMNT_DELAY 1000 /* dump_obss delay in ms */
-#define IOCTL_RETRY_COUNT 5
-#define CHAN_NOISE_DUMMY -80
+#define ACS_MSRMNT_DELAY 80 /* dump_obss delay in ms */
+#define CHAN_NOISE_DUMMY (-80)
 #define OBSS_TOKEN_IDX 15
 #define IBSS_TOKEN_IDX 15
 #define TX_TOKEN_IDX 14
