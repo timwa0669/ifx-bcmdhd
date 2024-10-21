@@ -420,6 +420,7 @@ bool dhd_is_static_ndev(dhd_pub_t *dhdp, struct net_device *ndev);
 static int _dhd_remove_if(dhd_pub_t *dhdpub, int ifidx, bool need_rtnl_lock, bool remove_static_if);
 
 atomic_t exit_in_progress = ATOMIC_INIT(0);
+atomic_t reboot_in_progress = ATOMIC_INIT(-1);
 
 static void dhd_process_daemon_msg(struct sk_buff *skb);
 static void dhd_destroy_to_notifier_skt(void);
@@ -13504,16 +13505,25 @@ dhd_module_init(void)
 static int
 dhd_reboot_callback(struct notifier_block *this, unsigned long code, void *unused)
 {
+	dhd_pub_t *dhdp = g_dhd_pub;
+
+	BCM_REFERENCE(dhdp);
 	DHD_TRACE(("%s: code = %ld\n", __FUNCTION__, code));
-	if (code == SYS_RESTART) {
+
 #ifdef OEM_ANDROID
-#ifdef BCMPCIE
-		is_reboot = code;
-#endif /* BCMPCIE */
-#else
-		dhd_module_cleanup();
-#endif /* OEM_ANDROID */
+	if (!OSL_ATOMIC_INC_AND_TEST(dhdp->osh, &reboot_in_progress)) {
+		DHD_ERROR(("%s: Skip duplicated reboot callback!\n", __FUNCTION__));
+		return NOTIFY_DONE;
 	}
+
+	dhd_module_cleanup();
+#endif /* OEM_ANDROID */
+
+#ifndef OEM_ANDROID
+	if (code == SYS_RESTART) {
+		dhd_module_cleanup();
+	}
+#endif /* OEM_ANDROID */
 	return NOTIFY_DONE;
 }
 
