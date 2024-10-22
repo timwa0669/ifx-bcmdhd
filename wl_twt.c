@@ -59,7 +59,7 @@ static DEFINE_SPINLOCK(twt_session_list_lock);
 /*
  * Nominal Minimum Wake Duration derivation from Wake Duration
  */
-inline void
+void
 wl_twt_wake_dur_to_min_twt(uint32 wake_dur, uint8 *min_twt, uint8 *min_twt_unit)
 {
 	if(*min_twt_unit == 1) {
@@ -111,7 +111,7 @@ wl_twt_min_twt_to_wake_dur(uint8 min_twt, uint8 min_twt_unit)
 /*
  * Wake Interval Mantissa & Exponent derivation from Wake Interval
  */
-inline void
+void
 wl_twt_uint32_to_float(uint32 val, uint8 *exp, uint16 *mant)
 {
 	uint8 lzs = (uint8)__builtin_clz(val); /* leading 0's */

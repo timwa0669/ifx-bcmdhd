@@ -106,11 +106,9 @@ typedef struct wl_twt_ctx {
 } wl_twt_ctx_t;
 
 /* Nominal Minimum Wake Duration derivation from Wake Duration */
-inline void
-wl_twt_wake_dur_to_min_twt(uint32 wake_dur, uint8 *min_twt, uint8 *min_twt_unit);
+void wl_twt_wake_dur_to_min_twt(uint32 wake_dur, uint8 *min_twt, uint8 *min_twt_unit);
 /* Wake Interval Mantissa & Exponent derivation from Wake Interval */
-inline void
-wl_twt_uint32_to_float(uint32 val, uint8 *exp, uint16 *mant);
+void wl_twt_uint32_to_float(uint32 val, uint8 *exp, uint16 *mant);
 int wl_twt_cleanup_session_records(dhd_pub_t *dhd, u8 ifidx);
 int wl_twt_oper(struct net_device *pri_ndev,
 		struct wireless_dev *wdev, wl_twt_param_t twt_param);
