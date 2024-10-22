@@ -10624,8 +10624,7 @@ wl_cfg80211_unregister_static_if(struct bcm_cfg80211 *cfg)
 		/* wdev free will happen from notifier context */
 		/* free_netdev(cfg->static_ndev);
 		*/
-		if (cfg->static_ndev[i]->reg_state == NETREG_REGISTERED)
-			unregister_netdev(cfg->static_ndev[i]);
+		dhd_unregister_net(ifp->net, true);
 	}
 }
 

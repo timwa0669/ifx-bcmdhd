@@ -3442,6 +3442,8 @@ int dhd_print_fw_ver_from_file(dhd_pub_t *dhdp, char *fwpath);
 void dhd_h2d_log_time_sync_deferred_wq_schedule(dhd_pub_t *dhdp);
 void dhd_h2d_log_time_sync(dhd_pub_t *dhdp);
 #endif /* DHD_H2D_LOG_TIME_SYNC */
+extern void dhd_unregister_net(struct net_device *net, bool need_rtnl_lock);
+extern int dhd_register_net(struct net_device *net, bool need_rtnl_lock);
 extern void dhd_cleanup_if(struct net_device *net);
 
 #ifdef DNGL_AXI_ERROR_LOGGING

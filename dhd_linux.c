@@ -6169,7 +6169,7 @@ dhd_add_monitor_if(dhd_info_t *dhd)
 
 	dev->netdev_ops = &netdev_monitor_ops;
 
-	if (register_netdevice(dev)) {
+	if (dhd_register_net(dev, true)) {
 		DHD_ERROR(("%s, register_netdev failed for %s\n",
 			__FUNCTION__, dev->name));
 		free_netdev(dev);
@@ -6229,7 +6229,7 @@ dhd_del_monitor_if(dhd_info_t *dhd)
 		if (dhd->monitor_dev->reg_state == NETREG_UNINITIALIZED) {
 			free_netdev(dhd->monitor_dev);
 		} else {
-			unregister_netdevice(dhd->monitor_dev);
+			dhd_unregister_net(dhd->monitor_dev, true);
 		}
 		dhd->monitor_dev = NULL;
 	}
@@ -8068,10 +8068,7 @@ dhd_allocate_if(dhd_pub_t *dhdpub, int ifidx, const char *name,
 				free_netdev(ifp->net);
 			} else {
 				netif_stop_queue(ifp->net);
-				if (need_rtnl_lock)
-					unregister_netdev(ifp->net);
-				else
-					unregister_netdevice(ifp->net);
+				dhd_unregister_net(ifp->net, need_rtnl_lock);
 			}
 			ifp->net = NULL;
 		}
@@ -8185,6 +8182,47 @@ fail:
 
 	dhdinfo->iflist[ifidx] = NULL;
 	return NULL;
+}
+
+void dhd_unregister_net(struct net_device *net, bool need_rtnl_lock)
+{
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
+	if (need_rtnl_lock) {
+		rtnl_lock();
+		cfg80211_unregister_netdevice(net);
+		rtnl_unlock();
+	} else {
+		cfg80211_unregister_netdevice(net);
+	}
+#else
+	if (need_rtnl_lock) {
+		unregister_netdev(net);
+	} else {
+		unregister_netdevice(net);
+	}
+#endif /* KERNEL_VER >= KERNEL_VERSION(5, 15, 0) */
+	return;
+}
+
+int dhd_register_net(struct net_device *net, bool need_rtnl_lock)
+{
+	int err = 0;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
+	if (need_rtnl_lock) {
+		rtnl_lock();
+		err = cfg80211_register_netdevice(net);
+		rtnl_unlock();
+	} else {
+		err = cfg80211_register_netdevice(net);
+	}
+#else
+	if (need_rtnl_lock) {
+		err = register_netdev(net);
+	} else {
+		err = register_netdevice(net);
+	}
+#endif /* KERNEL_VER >= KERNEL_VERSION(5, 15, 0) */
+	return err;
 }
 
 static void
@@ -8340,10 +8378,7 @@ _dhd_remove_if(dhd_pub_t *dhdpub, int ifidx, bool need_rtnl_lock, bool remove_st
 				dhd_tcpack_suppress_set(dhdpub, TCPACK_SUP_OFF);
 #endif /* DHDTCPACK_SUPPRESS && BCMPCIE */
 #endif // endif
-				if (need_rtnl_lock)
-					unregister_netdev(ifp->net);
-				else
-					unregister_netdevice(ifp->net);
+				dhd_unregister_net(ifp->net, need_rtnl_lock);
 			}
 			ifp->net = NULL;
 			DHD_GENERAL_LOCK(dhdpub, flags);
@@ -12738,11 +12773,7 @@ dhd_register_if(dhd_pub_t *dhdp, int ifidx, bool need_rtnl_lock)
 	if (ifidx == 0)
 		printf("%s\n", dhd_version);
 
-	if (need_rtnl_lock)
-		err = register_netdev(net);
-	else
-		err = register_netdevice(net);
-
+	err = dhd_register_net(net, need_rtnl_lock);
 	if (err != 0) {
 		DHD_ERROR(("couldn't register the net device [%s], err %d\n", net->name, err));
 		goto fail;
@@ -12884,6 +12915,7 @@ void dhd_detach(dhd_pub_t *dhdp)
 	unsigned long flags;
 	int timer_valid = FALSE;
 	struct net_device *dev = NULL;
+	dhd_if_t *ifp;
 #ifdef WL_CFG80211
 	struct bcm_cfg80211 *cfg = NULL;
 #endif // endif
@@ -12894,8 +12926,11 @@ void dhd_detach(dhd_pub_t *dhdp)
 	if (!dhd)
 		return;
 
-	if (dhd->iflist[0])
-		dev = dhd->iflist[0]->net;
+	/* primary interface 0 */
+	ifp = dhd->iflist[0];
+	if (ifp && ifp->net) {
+		dev = ifp->net;
+	}
 
 	if (dev) {
 		rtnl_lock();
@@ -12996,7 +13031,6 @@ void dhd_detach(dhd_pub_t *dhdp)
 	/* delete all interfaces, start with virtual  */
 	if (dhd->dhd_state & DHD_ATTACH_STATE_ADD_IF) {
 		int i = 1;
-		dhd_if_t *ifp;
 
 		/* Cleanup virtual interfaces */
 		dhd_net_if_lock_local(dhd);
@@ -13015,8 +13049,7 @@ void dhd_detach(dhd_pub_t *dhdp)
 #endif /* WL_STATIC_IF */
 		dhd_net_if_unlock_local(dhd);
 
-		/*  delete primary interface 0 */
-		ifp = dhd->iflist[0];
+		/* 'ifp' indicates primary interface 0, clean it up. */
 		if (ifp && ifp->net) {
 
 #ifdef WL_CFG80211
@@ -13035,7 +13068,7 @@ void dhd_detach(dhd_pub_t *dhdp)
 				custom_rps_map_clear(ifp->net->_rx);
 #endif /* SET_RPS_CPUS */
 				netif_tx_disable(ifp->net);
-				unregister_netdev(ifp->net);
+				dhd_unregister_net(ifp->net, TRUE);
 			}
 #ifdef PCIE_FULL_DONGLE
 			ifp->net = DHD_NET_DEV_NULL;
@@ -13059,7 +13092,12 @@ void dhd_detach(dhd_pub_t *dhdp)
 			dhd_if_del_sta_list(ifp);
 
 			MFREE(dhd->pub.osh, ifp, sizeof(*ifp));
-			dhd->iflist[0] = NULL;
+			ifp = NULL;
+#ifdef WL_CFG80211
+			if (cfg && cfg->wdev) {
+				cfg->wdev->netdev = NULL;
+			}
+#endif
 		}
 	}
 

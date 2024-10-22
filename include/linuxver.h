@@ -993,10 +993,4 @@ int kernel_read_compat(struct file *file, loff_t offset, char *addr, unsigned lo
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define rtc_time_to_tm(time, tm) rtc_time64_to_tm(time, tm)
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(5, 6, 0) */
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
-#define register_netdevice(dev) cfg80211_register_netdevice(dev)
-#define unregister_netdevice(dev) cfg80211_unregister_netdevice(dev)
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)) */
-
 #endif /* _linuxver_h_ */
