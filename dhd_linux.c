@@ -12937,11 +12937,6 @@ void dhd_detach(dhd_pub_t *dhdp)
 #endif /* DHD_WLFC_THREAD */
 #endif /* PROP_TXSTATUS */
 
-#ifdef WL_CFG80211
-	if (dev)
-		wl_cfg80211_down(dev);
-#endif /* WL_CFG80211 */
-
 	if (dhd->dhd_state & DHD_ATTACH_STATE_PROT_ATTACH) {
 
 #if defined(OEM_ANDROID) || !defined(BCMSDIO)
