@@ -84,11 +84,6 @@ struct bcm_cfg80211;
 struct wl_security;
 struct wl_ibss;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0) && !defined(WL_SAE) && \
-	!defined(BCMSUP_4WAY_HANDSHAKE_SAE))
-#define WL_SAE
-#endif // endif
-
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0) && !defined(WL_FILS_ROAM_OFFLD))
 #define WL_FILS_ROAM_OFFLD
 #endif // endif
