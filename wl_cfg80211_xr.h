@@ -70,62 +70,62 @@ enum xr_cmds {
 	 /* Async */
 	XR_CMD_SCAN,
 	/* sync */
-        XR_CMD_GET_TX_POWER,
-        XR_CMD_REPLY_GET_TX_POWER,
+	XR_CMD_GET_TX_POWER,
+	XR_CMD_REPLY_GET_TX_POWER,
 	/* sync */
-        XR_CMD_SET_POWER_MGMT,
-        XR_CMD_REPLY_SET_POWER_MGMT,
+	XR_CMD_SET_POWER_MGMT,
+	XR_CMD_REPLY_SET_POWER_MGMT,
 	 /* sync */
-        XR_CMD_FLUSH_PMKSA,
-        XR_CMD_REPLY_FLUSH_PMKSA,
+	XR_CMD_FLUSH_PMKSA,
+	XR_CMD_REPLY_FLUSH_PMKSA,
 	 /* sync */
-        XR_CMD_CHANGE_VIRUTAL_IFACE,
-        XR_CMD_REPLY_CHANGE_VIRUTAL_IFACE,
+	XR_CMD_CHANGE_VIRUTAL_IFACE,
+	XR_CMD_REPLY_CHANGE_VIRUTAL_IFACE,
 	 /* sync */
-        XR_CMD_START_AP,
-        XR_CMD_REPLY_START_AP,
+	XR_CMD_START_AP,
+	XR_CMD_REPLY_START_AP,
 	 /* sync */
-        XR_CMD_SET_MAC_ACL,
-        XR_CMD_REPLY_SET_MAC_ACL,
+	XR_CMD_SET_MAC_ACL,
+	XR_CMD_REPLY_SET_MAC_ACL,
 	 /* sync */
-        XR_CMD_CHANGE_BSS,
-        XR_CMD_REPLY_CHANGE_BSS,
+	XR_CMD_CHANGE_BSS,
+	XR_CMD_REPLY_CHANGE_BSS,
 	 /* sync */
-        XR_CMD_ADD_KEY,
-        XR_CMD_REPLY_ADD_KEY,
+	XR_CMD_ADD_KEY,
+	XR_CMD_REPLY_ADD_KEY,
 	 /* sync */
-        XR_CMD_SET_CHANNEL,
-        XR_CMD_REPLY_SET_CHANNEL,
+	XR_CMD_SET_CHANNEL,
+	XR_CMD_REPLY_SET_CHANNEL,
 	 /* sync */
-        XR_CMD_CONFIG_DEFAULT_KEY,
-        XR_CMD_REPLY_CONFIG_DEFAULT_KEY,
+	XR_CMD_CONFIG_DEFAULT_KEY,
+	XR_CMD_REPLY_CONFIG_DEFAULT_KEY,
 	 /* sync */
-        XR_CMD_STOP_AP,
-        XR_CMD_REPLY_STOP_AP,
+	XR_CMD_STOP_AP,
+	XR_CMD_REPLY_STOP_AP,
 	/* sync */
-        XR_CMD_DEL_STATION,
-        XR_CMD_REPLY_DEL_STATION,
+	XR_CMD_DEL_STATION,
+	XR_CMD_REPLY_DEL_STATION,
 	 /* sync */
-        XR_CMD_CHANGE_STATION,
-        XR_CMD_REPLY_CHANGE_STATION,
+	XR_CMD_CHANGE_STATION,
+	XR_CMD_REPLY_CHANGE_STATION,
 	 /* sync */
-        XR_CMD_MGMT_TX,
-        XR_CMD_REPLY_MGMT_TX,
+	XR_CMD_MGMT_TX,
+	XR_CMD_REPLY_MGMT_TX,
 	 /* sync */
-        XR_CMD_EXTERNAL_AUTH,
-        XR_CMD_REPLY_EXTERNAL_AUTH,
+	XR_CMD_EXTERNAL_AUTH,
+	XR_CMD_REPLY_EXTERNAL_AUTH,
 	 /* sync */
-        XR_CMD_DEL_KEY,
-        XR_CMD_REPLY_DEL_KEY,
+	XR_CMD_DEL_KEY,
+	XR_CMD_REPLY_DEL_KEY,
 	 /* sync */
-        XR_CMD_GET_KEY,
-        XR_CMD_REPLY_GET_KEY,
+	XR_CMD_GET_KEY,
+	XR_CMD_REPLY_GET_KEY,
 	 /* sync */
-        XR_CMD_DEL_VIRTUAL_IFACE,
-        XR_CMD_REPLY_DEL_VIRTUAL_IFACE,
+	XR_CMD_DEL_VIRTUAL_IFACE,
+	XR_CMD_REPLY_DEL_VIRTUAL_IFACE,
 	/* sync */
-        XR_CMD_GET_STATION,
-        XR_CMD_REPLY_GET_STATION,
+	XR_CMD_GET_STATION,
+	XR_CMD_REPLY_GET_STATION,
 	/* sync */
 	XR_CMD_BSTR_UPDATE_IFACES,
 	XR_CMD_REPLY_BSTR_UPDATE_IFACES,
@@ -154,36 +154,36 @@ enum xr_cmds {
 	XR_CMD_DUMP_SURVEY,
 	XR_CMD_REPLY_DUMP_SURVEY,
 #endif /* WL_SUPPORT_ACS */
-	 /* sync */
-        XR_CMD_CFGVENDOR_CMD,
-        XR_CMD_REPLY_CFGVENDOR_CMD,
-	 /* sync */
-        XR_CMD_CONNECT,
-        XR_CMD_REPLY_CONNECT,
-	 /* sync */
-        XR_CMD_DISCONNECT,
-        XR_CMD_REPLY_DISCONNECT,
-	 /* sync */
-        XR_CMD_REKEY_DATA,
-        XR_CMD_REPLY_REKEY_DATA,
-	 /* sync */
-        XR_CMD_SET_PMK,
-        XR_CMD_REPLY_SET_PMK,
-	 /* sync */
-        XR_CMD_DEL_PMK,
-        XR_CMD_REPLY_DEL_PMK,
-	 /* sync */
-        XR_CMD_SET_PMKSA,
-        XR_CMD_REPLY_SET_PMKSA,
-	 /* sync */
-        XR_CMD_DEL_PMKSA,
-        XR_CMD_REPLY_DEL_PMKSA,
-	 /* sync */
-        XR_CMD_UPDATE_CONNECT_PARAMS,
-        XR_CMD_REPLY_UPDATE_CONNECT_PARAMS,
-	 /* sync */
-        XR_CMD_UPDATE_OWE_INFO,
-        XR_CMD_REPLY_UPDATE_OWE_INFO,
+	/* sync */
+	XR_CMD_CFGVENDOR_CMD,
+	XR_CMD_REPLY_CFGVENDOR_CMD,
+	/* sync */
+	XR_CMD_CONNECT,
+	XR_CMD_REPLY_CONNECT,
+	/* sync */
+	XR_CMD_DISCONNECT,
+	XR_CMD_REPLY_DISCONNECT,
+	/* sync */
+	XR_CMD_REKEY_DATA,
+	XR_CMD_REPLY_REKEY_DATA,
+	/* sync */
+	XR_CMD_SET_PMK,
+	XR_CMD_REPLY_SET_PMK,
+	/* sync */
+	XR_CMD_DEL_PMK,
+	XR_CMD_REPLY_DEL_PMK,
+	/* sync */
+	XR_CMD_SET_PMKSA,
+	XR_CMD_REPLY_SET_PMKSA,
+	/* sync */
+	XR_CMD_DEL_PMKSA,
+	XR_CMD_REPLY_DEL_PMKSA,
+	/* sync */
+	XR_CMD_UPDATE_CONNECT_PARAMS,
+	XR_CMD_REPLY_UPDATE_CONNECT_PARAMS,
+	/* sync */
+	XR_CMD_UPDATE_OWE_INFO,
+	XR_CMD_REPLY_UPDATE_OWE_INFO,
 };
 
 typedef struct _xr_cmd {
@@ -224,11 +224,11 @@ typedef struct _xr_cmd_get_tx_power {
 	struct wireless_dev *wdev;
 #endif // endif
 	s32 *dbm;
-}xr_cmd_get_tx_power_t;
+} xr_cmd_get_tx_power_t;
 
 typedef struct _xr_cmd_reply_get_tx_power {
 	s32 status;
-}xr_cmd_reply_get_tx_power_t;
+} xr_cmd_reply_get_tx_power_t;
 
 /*set_power_mgmt*/
 typedef struct _xr_cmd_set_power_mgmt {
@@ -236,21 +236,21 @@ typedef struct _xr_cmd_set_power_mgmt {
 	struct net_device *dev;
 	bool enabled;
 	s32 timeout;
-}xr_cmd_set_power_mgmt_t;
+} xr_cmd_set_power_mgmt_t;
 
 typedef struct _xr_cmd_reply_set_power_mgmt {
 	s32 status;
-}xr_cmd_reply_set_power_mgmt_t;
+} xr_cmd_reply_set_power_mgmt_t;
 
 /* flush pmksa */
 typedef struct _xr_cmd_flush_pmksa {
 	struct wiphy *wiphy;
 	struct net_device *dev;
-}xr_cmd_flush_pmksa_t;
+} xr_cmd_flush_pmksa_t;
 
 typedef struct _xr_cmd_reply_flush_pmksa {
 	s32 status;
-}xr_cmd_reply_flush_pmksa_t;
+} xr_cmd_reply_flush_pmksa_t;
 
 typedef struct _xr_cmd_change_virtual_iface {
 	struct wiphy *wiphy;
@@ -260,11 +260,11 @@ typedef struct _xr_cmd_change_virtual_iface {
 	u32 *flags;
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(4, 12, 0) */
 	struct vif_params *params;
-}xr_cmd_change_virtual_iface_t;
+} xr_cmd_change_virtual_iface_t;
 
 typedef struct _xr_cmd_reply_change_virtual_iface {
 	s32 status;
-}xr_cmd_reply_change_virtual_iface_t;
+} xr_cmd_reply_change_virtual_iface_t;
 
 /* start_ap */
 typedef struct _xr_cmd_start_ap {
@@ -275,29 +275,29 @@ typedef struct _xr_cmd_start_ap {
 
 typedef struct _xr_cmd_reply_start_ap {
 	s32 status;
-}xr_cmd_reply_start_ap_t;
+} xr_cmd_reply_start_ap_t;
 #ifdef WL_CFG80211_ACL
 /* set_mac_acl */
 typedef struct _xr_cmd_set_mac_acl {
 	struct wiphy *wiphy;
 	struct net_device *cfgdev;
 	const struct cfg80211_acl_data *acl;
-}xr_cmd_set_mac_acl_t;
+} xr_cmd_set_mac_acl_t;
 
 typedef struct _xr_cmd_reply_set_mac_acl {
 	s32 status;
-}xr_cmd_reply_set_mac_acl_t;
+} xr_cmd_reply_set_mac_acl_t;
 #endif /* WL_CFG80211_ACL */
 /* change_bss */
 typedef struct _xr_cmd_change_bss {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct bss_parameters *params;
-}xr_cmd_change_bss_t;
+} xr_cmd_change_bss_t;
 
 typedef struct _xr_cmd_reply_change_bss {
 	s32 status;
-}xr_cmd_reply_change_bss_t;
+} xr_cmd_reply_change_bss_t;
 
 /* add_key */
 typedef struct _xr_cmd_add_key {
@@ -308,11 +308,11 @@ typedef struct _xr_cmd_add_key {
 	bool pairwise;
 	const u8 *mac_addr;
 	struct key_params *params;
-}xr_cmd_add_key_t;
+} xr_cmd_add_key_t;
 
 typedef struct _xr_cmd_reply_add_key {
 	s32 status;
-}xr_cmd_reply_add_key_t;
+} xr_cmd_reply_add_key_t;
 
 /* set_channel */
 typedef struct _xr_cmd_set_channel {
@@ -320,11 +320,11 @@ typedef struct _xr_cmd_set_channel {
 	struct net_device *dev;
 	struct ieee80211_channel *chan;
 	int channel_type;
-}xr_cmd_set_channel_t;
+} xr_cmd_set_channel_t;
 
 typedef struct _xr_cmd_reply_set_channel {
 	s32 status;
-}xr_cmd_reply_set_channel_t;
+} xr_cmd_reply_set_channel_t;
 
 /* config_default_key */
 typedef struct _xr_cmd_config_default_key {
@@ -334,21 +334,21 @@ typedef struct _xr_cmd_config_default_key {
 	u8 key_idx;
 	bool unicast;
 	bool multicast;
-}xr_cmd_config_default_key_t;
+} xr_cmd_config_default_key_t;
 
 typedef struct _xr_cmd_reply_config_default_key {
 	s32 status;
-}xr_cmd_reply_config_default_key_t;
+} xr_cmd_reply_config_default_key_t;
 
 /* stop_ap */
 typedef struct _xr_cmd_stop_ap {
 	struct wiphy *wiphy;
 	struct net_device *dev;
-}xr_cmd_stop_ap_t;
+} xr_cmd_stop_ap_t;
 
 typedef struct _xr_cmd_reply_stop_ap {
 	s32 status;
-}xr_cmd_reply_stop_ap_t;
+} xr_cmd_reply_stop_ap_t;
 
 /* del_station */
 typedef struct _xr_cmd_del_station {
@@ -357,13 +357,13 @@ typedef struct _xr_cmd_del_station {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0))
 	struct station_del_parameters *params;
 #else
-	u8* mac_addr;
+	u8 *mac_addr;
 #endif // endif
-}xr_cmd_del_station_t;
+} xr_cmd_del_station_t;
 
 typedef struct _xr_cmd_reply_del_station {
-        s32 status;
-}xr_cmd_reply_del_station_t;
+	s32 status;
+} xr_cmd_reply_del_station_t;
 
 /* change_station */
 typedef struct _xr_cmd_change_station {
@@ -374,7 +374,7 @@ typedef struct _xr_cmd_change_station {
 } xr_cmd_change_station_t;
 
 typedef struct _xr_cmd_reply_change_station {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_change_station_t;
 
 /* mgmt_tx */
@@ -391,27 +391,27 @@ struct net_device *cfgdev;
 	u64 *cookie;
 #else
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0))
-        enum nl80211_channel_type channel_type;
-        bool channel_type_valid;
+	enum nl80211_channel_type channel_type;
+	bool channel_type_valid;
 #endif /* (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0)) */
-        unsigned int wait;
+	unsigned int wait;
 	const u8* buf;
 	size_t len;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool no_cck;
+	bool no_cck;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 2, 0)) || \
-        defined(WL_COMPAT_WIRELESS) */
+	defined(WL_COMPAT_WIRELESS) */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool dont_wait_for_ack;
+	bool dont_wait_for_ack;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || \
-        defined(WL_COMPAT_WIRELESS) */
+	defined(WL_COMPAT_WIRELESS) */
 	u64 *cookie;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)) */
 
 } xr_cmd_mgmt_tx_t;
 
 typedef struct _xr_cmd_reply_mgmt_tx {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_mgmt_tx_t;
 
 #ifdef WL_SAE
@@ -419,11 +419,11 @@ typedef struct _xr_cmd_reply_mgmt_tx {
 typedef struct _xr_cmd_external_auth {
 	struct wiphy *wiphy;
 	struct net_device *dev;
-        struct cfg80211_external_auth_params *params;
+	struct cfg80211_external_auth_params *params;
 } xr_cmd_external_auth_t;
 
 typedef struct _xr_cmd_reply_external_auth {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_external_auth_t;
 #endif /* WL_SAE */
 
@@ -435,11 +435,11 @@ typedef struct _xr_cmd_del_key {
 	u8 key_idx;
 	bool pairwise;
 	const u8 *mac_addr;
-}xr_cmd_del_key_t;
+} xr_cmd_del_key_t;
 
 typedef struct _xr_cmd_reply_del_key {
 	s32 status;
-}xr_cmd_reply_del_key_t;
+} xr_cmd_reply_del_key_t;
 
 /* get_key */
 typedef struct _xr_cmd_get_key {
@@ -450,22 +450,22 @@ typedef struct _xr_cmd_get_key {
 	bool pairwise;
 	const u8 *mac_addr;
 	void *cookie;
-        void (*callback) (void *cookie, struct key_params * params);
-}xr_cmd_get_key_t;
+	void (*callback)(void *cookie, struct key_params *params);
+} xr_cmd_get_key_t;
 
 typedef struct _xr_cmd_reply_get_key {
 	s32 status;
-}xr_cmd_reply_get_key_t;
+} xr_cmd_reply_get_key_t;
 
 /* del_virtual_iface */
 typedef struct _xr_cmd_del_virtual_iface {
 	struct wiphy *wiphy;
 	bcm_struct_cfgdev *cfgdev;
-}xr_cmd_del_virtual_iface_t;
+} xr_cmd_del_virtual_iface_t;
 
 typedef struct _xr_cmd_reply_del_virtual_iface {
 	s32 status;
-}xr_cmd_reply_del_virtual_iface_t;
+} xr_cmd_reply_del_virtual_iface_t;
 
 /* get_station */
 typedef struct _xr_cmd_get_station {
@@ -476,7 +476,7 @@ typedef struct _xr_cmd_get_station {
 } xr_cmd_get_station_t;
 
 typedef struct _xr_cmd_reply_get_station {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_get_station_t;
 
 #ifdef DHD_BANDSTEER
@@ -499,7 +499,7 @@ typedef struct _xr_cmd_stop_fils_6g {
 } xr_cmd_stop_fils_6g_t;
 
 typedef struct _xr_cmd_reply_stop_fils_6g {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_stop_fils_6g_t;
 #endif /* WL_6E */
 
@@ -577,7 +577,7 @@ typedef struct _xr_cmd_reply_dump_survey {
 
 /* cfgvendor command */
 typedef struct _xr_cmd_cfgvendor_cmd {
-        struct wiphy *wiphy;
+	struct wiphy *wiphy;
 	struct wireless_dev *wdev;
 	const void *cfgvendor_cmd_value;
 	int len;
@@ -585,29 +585,29 @@ typedef struct _xr_cmd_cfgvendor_cmd {
 } xr_cmd_cfgvendor_cmd_t;
 
 typedef struct _xr_cmd_reply_cfgvendor_cmd {
-        s32 status;
+	s32 status;
 } xr_cmd_reply_cfgvendor_cmd_t;
 /* connect */
 typedef struct _xr_cmd_connect {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct cfg80211_connect_params *sme;
-}xr_cmd_connect_t;
+} xr_cmd_connect_t;
 
 typedef struct _xr_cmd_reply_connect {
 	s32 status;
-}xr_cmd_reply_connect_t;
+} xr_cmd_reply_connect_t;
 
 /* disconnect */
 typedef struct _xr_cmd_disconnect {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	u16 reason_code;
-}xr_cmd_disconnect_t;
+} xr_cmd_disconnect_t;
 
 typedef struct _xr_cmd_reply_disconnect {
 	s32 status;
-}xr_cmd_reply_disconnect_t;
+} xr_cmd_reply_disconnect_t;
 
 #ifdef GTK_OFFLOAD_SUPPORT
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 1, 0))
@@ -616,11 +616,11 @@ typedef struct _xr_cmd_rekey_data {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct cfg80211_gtk_rekey_data *data;
-}xr_cmd_rekey_data_t;
+} xr_cmd_rekey_data_t;
 
 typedef struct _xr_cmd_reply_rekey_data {
 	s32 status;
-}xr_cmd_reply_rekey_data_t;
+} xr_cmd_reply_rekey_data_t;
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 1, 0) */
 #endif /* GTK_OFFLOAD_SUPPORT */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
@@ -629,45 +629,45 @@ typedef struct _xr_cmd_set_pmk {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	const struct cfg80211_pmk_conf *conf;
-}xr_cmd_set_pmk_t;
+} xr_cmd_set_pmk_t;
 
 typedef struct _xr_cmd_reply_set_pmk {
 	s32 status;
-}xr_cmd_reply_set_pmk_t;
+} xr_cmd_reply_set_pmk_t;
 
 /* del_pmk */
 typedef struct _xr_cmd_del_pmk {
 	struct wiphy *wiphy;
 	struct net_device *dev;
-	 const u8 *aa;
-}xr_cmd_del_pmk_t;
+	const u8 *aa;
+} xr_cmd_del_pmk_t;
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) */
 
 typedef struct _xr_cmd_reply_del_pmk {
 	s32 status;
-}xr_cmd_reply_del_pmk_t;
+} xr_cmd_reply_del_pmk_t;
 
 /* set_pmksa */
 typedef struct _xr_cmd_set_pmksa {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct cfg80211_pmksa *pmksa;
-}xr_cmd_set_pmksa_t;
+} xr_cmd_set_pmksa_t;
 
 typedef struct _xr_cmd_reply_set_pmksa {
 	s32 status;
-}xr_cmd_reply_set_pmksa_t;
+} xr_cmd_reply_set_pmksa_t;
 
 /* del_pmksa */
 typedef struct _xr_cmd_del_pmksa {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct cfg80211_pmksa *pmksa;
-}xr_cmd_del_pmksa_t;
+} xr_cmd_del_pmksa_t;
 
 typedef struct _xr_cmd_reply_del_pmksa {
 	s32 status;
-}xr_cmd_reply_del_pmksa_t;
+} xr_cmd_reply_del_pmksa_t;
 
 /* update_connect_params */
 #if defined(WL_FILS) || defined(WL_OWE)
@@ -677,11 +677,11 @@ typedef struct _xr_cmd_update_connect_params {
 	struct net_device *dev;
 	struct cfg80211_connect_params *sme;
 	u32 changed;
-}xr_cmd_update_connect_params_t;
+} xr_cmd_update_connect_params_t;
 
 typedef struct _xr_cmd_reply_update_connect_params {
 	s32 status;
-}xr_cmd_reply_update_connect_params_t;
+} xr_cmd_reply_update_connect_params_t;
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0) */
 #endif /* defined(WL_FILS) || defined(WL_OWE) */
 
@@ -691,11 +691,11 @@ typedef struct _xr_cmd_update_owe_info {
 	struct wiphy *wiphy;
 	struct net_device *dev;
 	struct cfg80211_update_owe_info *owe_info;
-}xr_cmd_update_owe_info_t;
+} xr_cmd_update_owe_info_t;
 
 typedef struct _xr_cmd_reply_update_owe_info {
 	s32 status;
-}xr_cmd_reply_update_owe_info_t;
+} xr_cmd_reply_update_owe_info_t;
 #endif /* WL_OWE && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0) */
 
 typedef struct _xr_cmd_reply_status {
@@ -862,7 +862,7 @@ enum xr_sta_evt {
 
 enum xr_sta_mode {
 	/* XR uses single sta network interface for
-	*  for both chips*/
+	 * for both chips */
 	XR_STA_MODE_SINGLE = 1
 };
 #define XR_STA_GET_STATE(cfg) (cfg->xr_sta_state)
@@ -916,19 +916,19 @@ wl_cfg80211_scan_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy
 #endif /* WL_CFG80211_P2P_DEV_IF */
 #if defined(WL_CFG80211_P2P_DEV_IF)
 extern s32 wl_cfg80211_get_tx_power_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy,
-        struct wireless_dev *wdev, s32 *dbm);
+	struct wireless_dev *wdev, s32 *dbm);
 #else
 extern s32 wl_cfg80211_get_tx_power_xr(dhd_pub_t *src_pub,dhd_pub_t *dest_pub, struct wiphy *wiphy, s32 *dbm);
 #endif /* WL_CFG80211_P2P_DEV_IF */
 extern s32 wl_cfg80211_set_power_mgmt_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
-        bool enabled, s32 timeout);
+	bool enabled, s32 timeout);
 extern s32 wl_cfg80211_flush_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev);
 extern s32 wl_cfg80211_change_virtual_iface_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *ndev,
-        enum nl80211_iftype type,
+	enum nl80211_iftype type,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 12, 0))
-        u32 *flags,
+	u32 *flags,
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(4, 12, 0) */
-        struct vif_params *params);
+	struct vif_params *params);
 extern s32 wl_cfg80211_start_ap_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy 	*wiphy, struct net_device *dev, struct cfg80211_ap_settings *info);
 
 extern int wl_cfg80211_set_mac_acl_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *cfgdev, const struct cfg80211_acl_data *acl);
@@ -942,7 +942,7 @@ extern s32 wl_cfg80211_del_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struc
 	int link_id, u8 key_idx, bool pairwise, const u8 *mac_addr);
 extern s32 wl_cfg80211_get_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
 	int link_id, u8 key_idx, bool pairwise, const u8 *mac_addr, void *cookie,
-        void (*callback) (void *cookie, struct key_params * params));
+	void (*callback)(void *cookie, struct key_params * params));
 
 extern s32
 wl_cfg80211_set_channel_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev, struct ieee80211_channel *chan, enum nl80211_channel_type channel_type);
@@ -951,65 +951,65 @@ extern s32
 wl_cfg80211_stop_ap_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev);
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0))
 extern s32 wl_cfg80211_del_station_xr(
-                dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-                struct wiphy *wiphy, struct net_device *ndev,
-                struct station_del_parameters *params);
+	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy, struct net_device *ndev,
+	struct station_del_parameters *params);
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0))
 extern s32 wl_cfg80211_del_station_xr(
-        dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *ndev,
-        const u8* mac_addr);
+	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct net_device *ndev,
+	const u8 *mac_addr);
 #else
 extern s32 wl_cfg80211_del_station_xr(
-        dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *ndev,
-        u8* mac_addr);
+	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct net_device *ndev,
+	u8 *mac_addr);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0))
 extern s32
 wl_cfg80211_change_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        const u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	const u8 *mac,
 	struct station_parameters *params);
 #else
 extern s32
 wl_cfg80211_change_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	u8 *mac,
 	struct station_parameters *params);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
 s32
 wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
-        struct cfg80211_mgmt_tx_params *params, u64 *cookie);
+	struct cfg80211_mgmt_tx_params *params, u64 *cookie);
 #else
 s32
 wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
-        struct ieee80211_channel *channel, bool offchan,
+	struct ieee80211_channel *channel, bool offchan,
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0))
-        enum nl80211_channel_type channel_type,
-        bool channel_type_valid,
+	enum nl80211_channel_type channel_type,
+	bool channel_type_valid,
 #endif /* LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0) */
-        unsigned int wait, const u8* buf, size_t len,
+	unsigned int wait, const u8* buf, size_t len,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool no_cck,
+	bool no_cck,
 #endif // endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool dont_wait_for_ack,
+	bool dont_wait_for_ack,
 #endif // endif
-        u64 *cookie);
+	u64 *cookie);
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) */
 
 #ifdef WL_SAE
 extern int
 wl_cfg80211_external_auth_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
-        struct cfg80211_external_auth_params *params);
+	struct cfg80211_external_auth_params *params);
 #endif /* WL_SAE */
 extern s32
 wl_cfg80211_del_virtual_iface_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev);
@@ -1017,24 +1017,24 @@ wl_cfg80211_del_virtual_iface_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct
 s32
 wl_cfg80211_get_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        const u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	const u8 *mac,
 	struct station_info *sinfo);
 #else
 s32
 wl_cfg80211_get_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	u8 *mac,
 	struct station_info *sinfo);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 extern int xr_cmd_deferred_handler(dhd_pub_t *pub, xr_buf_t *xr_buf);
 #ifdef DHD_BANDSTEER
 /* dhd_bandsteer_update_slave_ifaces */
 s32 dhd_bandsteer_update_ifaces_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-                struct net_device *ndev);
+		struct net_device *ndev);
 #endif /* DHD_BANDSTEER */
 #ifdef WL_6E
 s32
@@ -1097,18 +1097,18 @@ wl_cfg80211_dump_survey_xr(
 	struct survey_info *info);
 #endif /* WL_SUPPORT_ACS */
 int wl_cfgvendor_cmd_xr(
-        dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct wireless_dev *wdev,
-        const void *cfgvendor_cmd_value,
-        int len,
-        int cfgvendor_id);
+	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct wireless_dev *wdev,
+	const void *cfgvendor_cmd_value,
+	int len,
+	int cfgvendor_id);
 int wl_cfg80211_connect_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	struct wiphy *wiphy, struct net_device *dev,
-		struct cfg80211_connect_params *sme);
+	struct cfg80211_connect_params *sme);
 s32 wl_cfg80211_disconnect_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	struct wiphy *wiphy, struct net_device *dev,
-		u16 reason_code);
+	u16 reason_code);
 #ifdef GTK_OFFLOAD_SUPPORT
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 1, 0))
 s32 wl_cfg80211_set_rekey_data_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy,
@@ -1119,36 +1119,36 @@ s32 wl_cfg80211_set_rekey_data_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struc
 /* set_pmk */
 s32
 wl_cfg80211_set_pmk_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev,
-        const struct cfg80211_pmk_conf *conf);
+	struct wiphy *wiphy, struct net_device *dev,
+	const struct cfg80211_pmk_conf *conf);
 s32
 wl_cfg80211_del_pmk_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev, const u8 *aa);
+	struct wiphy *wiphy, struct net_device *dev, const u8 *aa);
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) */
 s32
 wl_cfg80211_set_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev, struct cfg80211_pmksa *pmksa);
+	struct wiphy *wiphy, struct net_device *dev, struct cfg80211_pmksa *pmksa);
 s32
 wl_cfg80211_del_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev, struct cfg80211_pmksa *pmksa);
+	struct wiphy *wiphy, struct net_device *dev, struct cfg80211_pmksa *pmksa);
 #if defined(WL_FILS) || defined(WL_OWE)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0))
 /* update_connect_params */
 s32
 wl_cfg80211_update_connect_params_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev, struct cfg80211_connect_params *sme, u32 changed);
+	struct wiphy *wiphy, struct net_device *dev, struct cfg80211_connect_params *sme, u32 changed);
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0) */
 #endif /* defined(WL_FILS) || defined(WL_OWE) */
 #if defined(WL_OWE) && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
 /* update_owe_info */
 s32
 wl_cfg80211_update_owe_info_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy, struct net_device *dev, struct cfg80211_update_owe_info *owe_info);
+	struct wiphy *wiphy, struct net_device *dev, struct cfg80211_update_owe_info *owe_info);
 #endif /* WL_OWE && LINUX_VERSION_CODE > KERNEL_VERSION(5, 2, 0) */
 void xr_sta_sm_disconnect_hdlr(struct bcm_cfg80211 *cfg);
 void xr_sta_sm_connect_hdlr(struct bcm_cfg80211 *cfg);
 void xr_sta_sm_evt_handler(struct bcm_cfg80211 *cfg, int event);
-struct net_device * xr_sta_get_ndev_for_cfg_event(struct bcm_cfg80211 *cfg,
+struct net_device *xr_sta_get_ndev_for_cfg_event(struct bcm_cfg80211 *cfg,
 	struct net_device *dev);
 void xr_sta_init(struct bcm_cfg80211 *cfg, struct net_device *ndev, int mode);
 void xr_sta_deinit(struct bcm_cfg80211 *cfg);

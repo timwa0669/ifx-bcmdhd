@@ -119,7 +119,7 @@ int dhd_xr_init(dhd_pub_t *dhdp)
 		return BCME_ERROR;
 	}
 
-	dhdp->xr_ctx = (void *) kzalloc(sizeof(xr_ctx_t), flags);
+	dhdp->xr_ctx = (void *)kzalloc(sizeof(xr_ctx_t), flags);
 	if (!dhdp->xr_ctx) {
 		DHD_ERROR(("XR ctx allocation failed\n"));
 		return BCME_ERROR;
@@ -156,17 +156,17 @@ struct wireless_dev *wl_cfg80211_add_if_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_p
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_add_if_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_add_if_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return NULL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_ADD_IF;
 	cmd->len = sizeof(xr_cmd_add_if_t);
 	data = (xr_cmd_add_if_t *)&cmd->data[0];
@@ -197,12 +197,12 @@ int wl_cfg80211_add_if_xr_reply(dhd_pub_t *dest_pub, struct wireless_dev *wdev)
 	xr_cmd_reply_add_if_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_ADD_IF;
 	cmd->len = sizeof(xr_cmd_reply_add_if_t);
 	data = (xr_cmd_reply_add_if_t *)&cmd->data[0];
@@ -255,14 +255,14 @@ int xr_cmd_reply_add_if_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_add_if_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_add_if_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_add_if_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.add_if_wdev = reply->wdev;
 	complete(&xr_ctx->xr_cmd_wait.add_if_wait);
 	return ret;
@@ -276,17 +276,17 @@ s32 wl_cfg80211_del_if_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_if_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_if_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_IF;
 	cmd->len = sizeof(xr_cmd_del_if_t);
 	data = (xr_cmd_del_if_t *)&cmd->data[0];
@@ -315,12 +315,12 @@ int wl_cfg80211_del_if_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_reply_del_if_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_IF;
 	cmd->len = sizeof(xr_cmd_reply_del_if_t);
 	data = (xr_cmd_reply_del_if_t *)&cmd->data[0];
@@ -375,14 +375,14 @@ int xr_cmd_reply_del_if_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_if_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_if_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_if_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_if_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_if_wait);
 	return ret;
@@ -403,11 +403,11 @@ wl_cfg80211_scan_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_scan_t *data = NULL;
 	int ret = BCME_OK;
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SCAN;
 	cmd->len = sizeof(xr_cmd_scan_t);
 	data = (xr_cmd_scan_t *)&cmd->data[0];
@@ -468,7 +468,7 @@ int xr_cmd_scan_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 
 #if defined(WL_CFG80211_P2P_DEV_IF)
 s32 wl_cfg80211_get_tx_power_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy,
-        struct wireless_dev *wdev, s32 *dbm)
+	struct wireless_dev *wdev, s32 *dbm)
 #else
 s32 wl_cfg80211_get_tx_power_xr(dhd_pub_t *src_pub,dhd_pub_t *dest_pub, struct wiphy *wiphy, s32 *dbm)
 #endif /* WL_CFG80211_P2P_DEV_IF */
@@ -477,15 +477,15 @@ s32 wl_cfg80211_get_tx_power_xr(dhd_pub_t *src_pub,dhd_pub_t *dest_pub, struct w
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_get_tx_power_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_get_tx_power_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = 0;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_GET_TX_POWER;
 	cmd->len = sizeof(xr_cmd_get_tx_power_t);
 	data = (xr_cmd_get_tx_power_t *)&cmd->data[0];
@@ -515,18 +515,18 @@ int wl_cfg80211_get_tx_power_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_get_tx_power_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_get_tx_power_t * data = NULL;
+	xr_cmd_reply_get_tx_power_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_GET_TX_POWER;
 	cmd->len = sizeof(xr_cmd_reply_get_tx_power_t);
-	data = (xr_cmd_reply_get_tx_power_t *) &cmd->data[0];
+	data = (xr_cmd_reply_get_tx_power_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -559,7 +559,7 @@ int xr_cmd_get_tx_power_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_get_tx_power_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_get_tx_power_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("XR_CMD_GET_TX_POWER cfg is NULL\n"));
@@ -584,14 +584,14 @@ int xr_cmd_reply_get_tx_power_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_get_tx_power_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_get_tx_power_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_get_tx_power_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.get_tx_power_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.get_tx_power_wait);
 
@@ -600,24 +600,24 @@ int xr_cmd_reply_get_tx_power_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 /* set_power_mgmt */
 s32
 wl_cfg80211_set_power_mgmt_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
-        bool enabled, s32 timeout)
+	bool enabled, s32 timeout)
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_power_mgmt_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_power_mgmt_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = 0;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_POWER_MGMT;
 	cmd->len = sizeof(xr_cmd_set_power_mgmt_t);
-	data = (xr_cmd_set_power_mgmt_t *) &cmd->data[0];
+	data = (xr_cmd_set_power_mgmt_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -643,18 +643,18 @@ int wl_cfg80211_set_power_mgmt_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_power_mgmt_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_power_mgmt_t * data = NULL;
+	xr_cmd_reply_set_power_mgmt_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_POWER_MGMT;
 	cmd->len = sizeof(xr_cmd_reply_set_power_mgmt_t);
-	data = (xr_cmd_reply_set_power_mgmt_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_power_mgmt_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -688,7 +688,7 @@ int xr_cmd_set_power_mgmt_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_set_power_mgmt_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_set_power_mgmt_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -709,14 +709,14 @@ int xr_cmd_reply_set_power_mgmt_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_power_mgmt_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_power_mgmt_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_power_mgmt_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_power_mgmt_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_power_mgmt_wait);
 
@@ -730,18 +730,18 @@ s32 wl_cfg80211_flush_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct w
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_flush_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_flush_pmksa_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_FLUSH_PMKSA;
 	cmd->len = sizeof(xr_cmd_flush_pmksa_t);
-	data = (xr_cmd_flush_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_flush_pmksa_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -764,18 +764,18 @@ int wl_cfg80211_flush_pmksa_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_flush_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_flush_pmksa_t * data = NULL;
+	xr_cmd_reply_flush_pmksa_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_FLUSH_PMKSA;
 	cmd->len = sizeof(xr_cmd_reply_flush_pmksa_t);
-	data = (xr_cmd_reply_flush_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_reply_flush_pmksa_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -811,7 +811,7 @@ int xr_cmd_flush_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_flush_pmksa_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_flush_pmksa_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -832,14 +832,14 @@ int xr_cmd_reply_flush_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_flush_pmksa_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_flush_pmksa_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_flush_pmksa_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.flush_pmksa_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.flush_pmksa_wait);
 
@@ -847,28 +847,28 @@ int xr_cmd_reply_flush_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 }
 /* change_virtual_iface */
 s32 wl_cfg80211_change_virtual_iface_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *ndev,
-        enum nl80211_iftype type,
+	enum nl80211_iftype type,
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 12, 0))
-        u32 *flags,
+	u32 *flags,
 #endif /* (LINUX_VERSION_CODE < KERNEL_VERSION(4, 12, 0) */
-        struct vif_params *params)
+	struct vif_params *params)
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_change_virtual_iface_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_change_virtual_iface_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CHANGE_VIRUTAL_IFACE;
 	cmd->len = sizeof(xr_cmd_change_virtual_iface_t);
-	data = (xr_cmd_change_virtual_iface_t *) &cmd->data[0];
+	data = (xr_cmd_change_virtual_iface_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->ndev = ndev;
@@ -897,18 +897,18 @@ int wl_cfg80211_change_virtual_iface_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_change_virtual_iface_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_change_virtual_iface_t * data = NULL;
+	xr_cmd_reply_change_virtual_iface_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CHANGE_VIRUTAL_IFACE;
 	cmd->len = sizeof(xr_cmd_reply_change_virtual_iface_t);
-	data = (xr_cmd_reply_change_virtual_iface_t *) &cmd->data[0];
+	data = (xr_cmd_reply_change_virtual_iface_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -943,7 +943,7 @@ int xr_cmd_change_virtual_iface_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_change_virtual_iface_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_change_virtual_iface_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -967,14 +967,14 @@ int xr_cmd_reply_change_virtual_iface_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_change_virtual_iface_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_change_virtual_iface_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_change_virtual_iface_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.change_virtual_iface_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.change_virtual_iface_wait);
 
@@ -989,20 +989,20 @@ wl_stop_fils_6g_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_stop_fils_6g_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_stop_fils_6g_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_STOP_FILS_6G;
 	cmd->len = sizeof(xr_cmd_stop_fils_6g_t);
-	data = (xr_cmd_stop_fils_6g_t *) &cmd->data[0];
+	data = (xr_cmd_stop_fils_6g_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1030,20 +1030,20 @@ wl_cfg80211_start_ap_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *w
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_start_ap_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_start_ap_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_START_AP;
 	cmd->len = sizeof(xr_cmd_start_ap_t);
-	data = (xr_cmd_start_ap_t *) &cmd->data[0];
+	data = (xr_cmd_start_ap_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1068,18 +1068,18 @@ int wl_cfg80211_start_ap_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_start_ap_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_start_ap_t * data = NULL;
+	xr_cmd_reply_start_ap_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_START_AP;
 	cmd->len = sizeof(xr_cmd_reply_start_ap_t);
-	data = (xr_cmd_reply_start_ap_t *) &cmd->data[0];
+	data = (xr_cmd_reply_start_ap_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1114,7 +1114,7 @@ int xr_cmd_start_ap_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_start_ap_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_start_ap_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -1136,14 +1136,14 @@ int xr_cmd_reply_start_ap_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_start_ap_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_start_ap_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_start_ap_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.start_ap_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.start_ap_wait);
 
@@ -1158,20 +1158,20 @@ int wl_cfg80211_set_mac_acl_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct w
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_mac_acl_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_mac_acl_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_MAC_ACL;
 	cmd->len = sizeof(xr_cmd_set_mac_acl_t);
-	data = (xr_cmd_set_mac_acl_t *) &cmd->data[0];
+	data = (xr_cmd_set_mac_acl_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->cfgdev = cfgdev;
@@ -1196,18 +1196,18 @@ int wl_cfg80211_set_mac_acl_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_mac_acl_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_mac_acl_t * data = NULL;
+	xr_cmd_reply_set_mac_acl_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_MAC_ACL;
 	cmd->len = sizeof(xr_cmd_reply_set_mac_acl_t);
-	data = (xr_cmd_reply_set_mac_acl_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_mac_acl_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1242,7 +1242,7 @@ int xr_cmd_set_mac_acl_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_set_mac_acl_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_set_mac_acl_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 
@@ -1265,14 +1265,14 @@ int xr_cmd_reply_set_mac_acl_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_mac_acl_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_mac_acl_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_mac_acl_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_mac_acl_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_mac_acl_wait);
 
@@ -1287,20 +1287,20 @@ wl_cfg80211_change_bss_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy 
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_change_bss_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_change_bss_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CHANGE_BSS;
 	cmd->len = sizeof(xr_cmd_change_bss_t);
-	data = (xr_cmd_change_bss_t *) &cmd->data[0];
+	data = (xr_cmd_change_bss_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1325,18 +1325,18 @@ int wl_cfg80211_change_bss_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_change_bss_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_change_bss_t * data = NULL;
+	xr_cmd_reply_change_bss_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CHANGE_BSS;
 	cmd->len = sizeof(xr_cmd_reply_change_bss_t);
-	data = (xr_cmd_reply_change_bss_t *) &cmd->data[0];
+	data = (xr_cmd_reply_change_bss_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1371,7 +1371,7 @@ int xr_cmd_change_bss_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_change_bss_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_change_bss_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -1393,14 +1393,14 @@ int xr_cmd_reply_change_bss_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_change_bss_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_change_bss_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_change_bss_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.change_bss_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.change_bss_wait);
 
@@ -1416,20 +1416,20 @@ wl_cfg80211_add_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wi
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_add_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_add_key_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_ADD_KEY;
 	cmd->len = sizeof(xr_cmd_add_key_t);
-	data = (xr_cmd_add_key_t *) &cmd->data[0];
+	data = (xr_cmd_add_key_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1458,18 +1458,18 @@ int wl_cfg80211_add_key_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_add_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_add_key_t * data = NULL;
+	xr_cmd_reply_add_key_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_ADD_KEY;
 	cmd->len = sizeof(xr_cmd_reply_add_key_t);
-	data = (xr_cmd_reply_add_key_t *) &cmd->data[0];
+	data = (xr_cmd_reply_add_key_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1505,7 +1505,7 @@ int xr_cmd_add_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_add_key_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_add_key_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -1529,14 +1529,14 @@ int xr_cmd_reply_add_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_add_key_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_add_key_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_add_key_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.add_key_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.add_key_wait);
 
@@ -1551,20 +1551,20 @@ wl_cfg80211_set_channel_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_channel_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_channel_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_CHANNEL;
 	cmd->len = sizeof(xr_cmd_set_channel_t);
-	data = (xr_cmd_set_channel_t *) &cmd->data[0];
+	data = (xr_cmd_set_channel_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1590,18 +1590,18 @@ int wl_cfg80211_set_channel_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_channel_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_channel_t * data = NULL;
+	xr_cmd_reply_set_channel_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_CHANNEL;
 	cmd->len = sizeof(xr_cmd_reply_set_channel_t);
-	data = (xr_cmd_reply_set_channel_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_channel_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1636,7 +1636,7 @@ int xr_cmd_set_channel_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_set_channel_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_set_channel_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -1659,14 +1659,14 @@ int xr_cmd_reply_set_channel_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_channel_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_channel_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_channel_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_channel_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_channel_wait);
 
@@ -1682,20 +1682,20 @@ wl_cfg80211_config_default_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struc
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_config_default_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_config_default_key_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CONFIG_DEFAULT_KEY;
 	cmd->len = sizeof(xr_cmd_config_default_key_t);
-	data = (xr_cmd_config_default_key_t *) &cmd->data[0];
+	data = (xr_cmd_config_default_key_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1723,18 +1723,18 @@ int wl_cfg80211_config_default_key_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_config_default_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_config_default_key_t * data = NULL;
+	xr_cmd_reply_config_default_key_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CONFIG_DEFAULT_KEY;
 	cmd->len = sizeof(xr_cmd_reply_config_default_key_t);
-	data = (xr_cmd_reply_config_default_key_t *) &cmd->data[0];
+	data = (xr_cmd_reply_config_default_key_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1769,7 +1769,7 @@ int xr_cmd_config_default_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_config_default_key_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_config_default_key_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -1792,14 +1792,14 @@ int xr_cmd_reply_config_default_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_config_default_key_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_config_default_key_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_config_default_key_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.config_default_key_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.config_default_key_wait);
 
@@ -1814,20 +1814,20 @@ wl_cfg80211_stop_ap_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wi
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_stop_ap_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_stop_ap_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_STOP_AP;
 	cmd->len = sizeof(xr_cmd_stop_ap_t);
-	data = (xr_cmd_stop_ap_t *) &cmd->data[0];
+	data = (xr_cmd_stop_ap_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -1851,18 +1851,18 @@ int wl_cfg80211_stop_ap_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_stop_ap_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_stop_ap_t * data = NULL;
+	xr_cmd_reply_stop_ap_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_STOP_AP;
 	cmd->len = sizeof(xr_cmd_reply_stop_ap_t);
-	data = (xr_cmd_reply_stop_ap_t *) &cmd->data[0];
+	data = (xr_cmd_reply_stop_ap_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -1897,7 +1897,7 @@ int xr_cmd_stop_ap_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_stop_ap_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_stop_ap_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -1922,14 +1922,14 @@ int xr_cmd_reply_stop_ap_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_stop_ap_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_stop_ap_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_stop_ap_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.stop_ap_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.stop_ap_wait);
 
@@ -1940,22 +1940,22 @@ int xr_cmd_reply_stop_ap_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 s32
 wl_cfg80211_del_station_xr(
 		dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-                struct wiphy *wiphy, struct net_device *ndev,
-                struct station_del_parameters *params)
+		struct wiphy *wiphy, struct net_device *ndev,
+		struct station_del_parameters *params)
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0))
 s32
 wl_cfg80211_del_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *ndev,
-        const u8* mac_addr)
+	struct wiphy *wiphy,
+	struct net_device *ndev,
+	const u8* mac_addr)
 #else
 s32
 wl_cfg80211_del_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *ndev,
-        u8* mac_addr)
+	struct wiphy *wiphy,
+	struct net_device *ndev,
+	u8* mac_addr)
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 {
 
@@ -1963,18 +1963,18 @@ wl_cfg80211_del_station_xr(
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_station_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_STATION;
 	cmd->len = sizeof(xr_cmd_del_station_t);
-	data = (xr_cmd_del_station_t *) &cmd->data[0];
+	data = (xr_cmd_del_station_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->ndev = ndev;
@@ -2003,18 +2003,18 @@ int wl_cfg80211_del_station_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_del_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_del_station_t * data = NULL;
+	xr_cmd_reply_del_station_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_STATION;
 	cmd->len = sizeof(xr_cmd_reply_del_station_t);
-	data = (xr_cmd_reply_del_station_t *) &cmd->data[0];
+	data = (xr_cmd_reply_del_station_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -2049,7 +2049,7 @@ int xr_cmd_del_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_del_station_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_del_station_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("XR_CMD_DEL_STATION cfg is NULL\n"));
@@ -2074,14 +2074,14 @@ int xr_cmd_reply_del_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_station_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_station_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_station_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_station_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_station_wait);
 
@@ -2093,17 +2093,17 @@ int xr_cmd_reply_del_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 s32
 wl_cfg80211_change_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        const u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	const u8* mac,
 	struct station_parameters *params)
 #else
 s32
 wl_cfg80211_change_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	u8* mac,
 	struct station_parameters *params)
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 {
@@ -2112,18 +2112,18 @@ wl_cfg80211_change_station_xr(
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_change_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_change_station_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CHANGE_STATION;
 	cmd->len = sizeof(xr_cmd_change_station_t);
-	data = (xr_cmd_change_station_t *) &cmd->data[0];
+	data = (xr_cmd_change_station_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -2149,18 +2149,18 @@ int wl_cfg80211_change_station_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_change_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_change_station_t * data = NULL;
+	xr_cmd_reply_change_station_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CHANGE_STATION;
 	cmd->len = sizeof(xr_cmd_reply_change_station_t);
-	data = (xr_cmd_reply_change_station_t *) &cmd->data[0];
+	data = (xr_cmd_reply_change_station_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -2195,7 +2195,7 @@ int xr_cmd_change_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_change_station_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_change_station_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("XR_CMD_DEL_STATION cfg is NULL\n"));
@@ -2217,14 +2217,14 @@ int xr_cmd_reply_change_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_change_station_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_change_station_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_change_station_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.change_station_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.change_station_wait);
 
@@ -2234,43 +2234,43 @@ int xr_cmd_reply_change_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
 s32
 wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
-        struct cfg80211_mgmt_tx_params *params, u64 *cookie)
+	struct cfg80211_mgmt_tx_params *params, u64 *cookie)
 #else
 s32
 wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
-        struct ieee80211_channel *channel, bool offchan,
+	struct ieee80211_channel *channel, bool offchan,
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0))
-        enum nl80211_channel_type channel_type,
-        bool channel_type_valid,
+	enum nl80211_channel_type channel_type,
+	bool channel_type_valid,
 #endif /* LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0) */
-        unsigned int wait, const u8* buf, size_t len,
+	unsigned int wait, const u8* buf, size_t len,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool no_cck,
+	bool no_cck,
 #endif // endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || defined(WL_COMPAT_WIRELESS)
-        bool dont_wait_for_ack,
+	bool dont_wait_for_ack,
 #endif // endif
-        u64 *cookie)
+	u64 *cookie)
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0) */
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_mgmt_tx_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_mgmt_tx_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_MGMT_TX;
 	cmd->len = sizeof(xr_cmd_mgmt_tx_t);
-	data = (xr_cmd_mgmt_tx_t *) &cmd->data[0];
+	data = (xr_cmd_mgmt_tx_t *)&cmd->data[0];
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
 	data->wiphy = wiphy;
 	data->cfgdev = cfgdev;
@@ -2279,7 +2279,7 @@ wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wi
 #else
 	data->wiphy = wiphy;
 	data->cfgdev = cfgdev;
-        data->channel = channel;
+	data->channel = channel;
 	data->offchan = offchan;
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 7, 0))
 	data->channel_type = channel_type;
@@ -2289,12 +2289,12 @@ wl_cfg80211_mgmt_tx_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wi
 	data->buf = buf;
 	data->len = len;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
-        data->no_cck = no_cck;
+	data->no_cck = no_cck;
 #endif // endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || defined(WL_COMPAT_WIRELESS)
 	data->dont_wait_for_ack = dont_wait_for_ack;
 #endif // endif
-        data->cookie = cookie;
+	data->cookie = cookie;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)) */
 
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, &cmd_wait->mgmt_tx_wait, TRUE);
@@ -2316,18 +2316,18 @@ int wl_cfg80211_mgmt_tx_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_mgmt_tx_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_mgmt_tx_t * data = NULL;
+	xr_cmd_reply_mgmt_tx_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_MGMT_TX;
 	cmd->len = sizeof(xr_cmd_reply_mgmt_tx_t);
-	data = (xr_cmd_reply_mgmt_tx_t *) &cmd->data[0];
+	data = (xr_cmd_reply_mgmt_tx_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -2361,7 +2361,7 @@ int xr_cmd_mgmt_tx_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_mgmt_tx_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_mgmt_tx_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -2396,14 +2396,14 @@ int xr_cmd_reply_mgmt_tx_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_mgmt_tx_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_mgmt_tx_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_mgmt_tx_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.mgmt_tx_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.mgmt_tx_wait);
 
@@ -2413,24 +2413,24 @@ int xr_cmd_reply_mgmt_tx_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 #ifdef WL_SAE
 int
 wl_cfg80211_external_auth_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
-        struct cfg80211_external_auth_params *params)
+	struct cfg80211_external_auth_params *params)
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_external_auth_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_external_auth_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_EXTERNAL_AUTH;
 	cmd->len = sizeof(xr_cmd_external_auth_t);
-	data = (xr_cmd_external_auth_t *) &cmd->data[0];
+	data = (xr_cmd_external_auth_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -2454,18 +2454,18 @@ int wl_cfg80211_external_auth_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_external_auth_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_external_auth_t * data = NULL;
+	xr_cmd_reply_external_auth_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_EXTERNAL_AUTH;
 	cmd->len = sizeof(xr_cmd_reply_external_auth_t);
-	data = (xr_cmd_reply_external_auth_t *) &cmd->data[0];
+	data = (xr_cmd_reply_external_auth_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -2500,7 +2500,7 @@ int xr_cmd_external_auth_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_external_auth_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_external_auth_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -2522,14 +2522,14 @@ int xr_cmd_reply_external_auth_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_external_auth_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_external_auth_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_external_auth_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.external_auth_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.external_auth_wait);
 
@@ -2546,20 +2546,20 @@ s32 wl_cfg80211_del_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_key_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_KEY;
 	cmd->len = sizeof(xr_cmd_del_key_t);
-	data = (xr_cmd_del_key_t *) &cmd->data[0];
+	data = (xr_cmd_del_key_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -2587,18 +2587,18 @@ int wl_cfg80211_del_key_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_del_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_del_key_t * data = NULL;
+	xr_cmd_reply_del_key_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_KEY;
 	cmd->len = sizeof(xr_cmd_reply_del_key_t);
-	data = (xr_cmd_reply_del_key_t *) &cmd->data[0];
+	data = (xr_cmd_reply_del_key_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -2633,7 +2633,7 @@ int xr_cmd_del_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_del_key_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_del_key_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -2656,14 +2656,14 @@ int xr_cmd_reply_del_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_key_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_key_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_key_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_key_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_key_wait);
 
@@ -2672,26 +2672,26 @@ int xr_cmd_reply_del_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 /* get_key */
 s32 wl_cfg80211_get_key_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev,
 	int link_id, u8 key_idx, bool pairwise, const u8 *mac_addr, void *cookie,
-        void (*callback) (void *cookie, struct key_params * params))
+	void (*callback)(void *cookie, struct key_params *params))
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_get_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_get_key_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_GET_KEY;
 	cmd->len = sizeof(xr_cmd_get_key_t);
-	data = (xr_cmd_get_key_t *) &cmd->data[0];
+	data = (xr_cmd_get_key_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -2721,18 +2721,18 @@ int wl_cfg80211_get_key_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_get_key_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_get_key_t * data = NULL;
+	xr_cmd_reply_get_key_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_GET_KEY;
 	cmd->len = sizeof(xr_cmd_reply_get_key_t);
-	data = (xr_cmd_reply_get_key_t *) &cmd->data[0];
+	data = (xr_cmd_reply_get_key_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -2767,7 +2767,7 @@ int xr_cmd_get_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_get_key_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_get_key_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -2790,14 +2790,14 @@ int xr_cmd_reply_get_key_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_get_key_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_get_key_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_get_key_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.get_key_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.get_key_wait);
 
@@ -2811,20 +2811,20 @@ wl_cfg80211_del_virtual_iface_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_virtual_iface_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_virtual_iface_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_VIRTUAL_IFACE;
 	cmd->len = sizeof(xr_cmd_del_virtual_iface_t);
-	data = (xr_cmd_del_virtual_iface_t *) &cmd->data[0];
+	data = (xr_cmd_del_virtual_iface_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->cfgdev = cfgdev;
@@ -2848,18 +2848,18 @@ int wl_cfg80211_del_virtual_iface_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_del_virtual_iface_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_del_virtual_iface_t * data = NULL;
+	xr_cmd_reply_del_virtual_iface_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_VIRTUAL_IFACE;
 	cmd->len = sizeof(xr_cmd_reply_del_virtual_iface_t);
-	data = (xr_cmd_reply_del_virtual_iface_t *) &cmd->data[0];
+	data = (xr_cmd_reply_del_virtual_iface_t *)&cmd->data[0];
 
 	data->status = status;
 	dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -2893,7 +2893,7 @@ int xr_cmd_del_virtual_iface_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_del_virtual_iface_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_del_virtual_iface_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -2915,14 +2915,14 @@ int xr_cmd_reply_del_virtual_iface_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_virtual_iface_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_virtual_iface_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_virtual_iface_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_virtual_iface_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_virtual_iface_wait);
 
@@ -2934,17 +2934,17 @@ int xr_cmd_reply_del_virtual_iface_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 s32
 wl_cfg80211_get_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        const u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	const u8* mac,
 	struct station_info *sinfo)
 #else
 s32
 wl_cfg80211_get_station_xr(
 	dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
-        struct net_device *dev,
-        u8* mac,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	u8* mac,
 	struct station_info *sinfo)
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) */
 {
@@ -2953,18 +2953,18 @@ wl_cfg80211_get_station_xr(
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_get_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_get_station_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL){
 		return -EINVAL;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_GET_STATION;
 	cmd->len = sizeof(xr_cmd_get_station_t);
-	data = (xr_cmd_get_station_t *) &cmd->data[0];
+	data = (xr_cmd_get_station_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -2990,18 +2990,18 @@ int wl_cfg80211_get_station_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_get_station_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_get_station_t * data = NULL;
+	xr_cmd_reply_get_station_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_GET_STATION;
 	cmd->len = sizeof(xr_cmd_reply_get_station_t);
-	data = (xr_cmd_reply_get_station_t *) &cmd->data[0];
+	data = (xr_cmd_reply_get_station_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3036,7 +3036,7 @@ int xr_cmd_get_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_get_station_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_get_station_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("XR_CMD_GET_STATION cfg is NULL\n"));
@@ -3058,14 +3058,14 @@ int xr_cmd_reply_get_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_get_station_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_get_station_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_get_station_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.get_station_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.get_station_wait);
 
@@ -3074,8 +3074,8 @@ int xr_cmd_reply_get_station_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 
 #ifdef WL_6E
 s32 wl_xr_stop_fils_6g(struct wiphy *wiphy,
-        struct net_device *dev,
-        u8 stop_fils)
+	struct net_device *dev,
+	u8 stop_fils)
 {
 	s32 err = BCME_OK;
 	s32 bssidx = 0;
@@ -3083,14 +3083,14 @@ s32 wl_xr_stop_fils_6g(struct wiphy *wiphy,
 	u8 stop_fils_6g = 0;
 
 	if ((bssidx = wl_get_bssidx_by_wdev(cfg, dev->ieee80211_ptr)) < 0) {
-                WL_ERR(("Find p2p index from wdev(%p) failed\n", dev->ieee80211_ptr));
-                return BCME_ERROR;
-        }
+		WL_ERR(("Find p2p index from wdev(%p) failed\n", dev->ieee80211_ptr));
+		return BCME_ERROR;
+	}
 
 	stop_fils_6g = stop_fils;
 	/* send IOVAR to firmware */
 	err = wldev_iovar_setbuf_bsscfg(dev, "stop_fils_6g", &stop_fils_6g, sizeof(u8),
-                        cfg->ioctl_buf, WLC_IOCTL_MAXLEN, bssidx, &cfg->ioctl_buf_sync);
+			cfg->ioctl_buf, WLC_IOCTL_MAXLEN, bssidx, &cfg->ioctl_buf_sync);
 
 	return err;
 }
@@ -3100,18 +3100,18 @@ int wl_xr_stop_fils_6g_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_stop_fils_6g_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_stop_fils_6g_t * data = NULL;
+	xr_cmd_reply_stop_fils_6g_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_STOP_FILS_6G;
 	cmd->len = sizeof(xr_cmd_reply_stop_fils_6g_t);
-	data = (xr_cmd_reply_stop_fils_6g_t *) &cmd->data[0];
+	data = (xr_cmd_reply_stop_fils_6g_t *)&cmd->data[0];
 
 	data->status = status;
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
@@ -3146,7 +3146,7 @@ int xr_cmd_stop_fils_6g_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_stop_fils_6g_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_stop_fils_6g_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -3167,14 +3167,14 @@ int xr_cmd_reply_stop_fils_6g_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_stop_fils_6g_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_stop_fils_6g_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_stop_fils_6g_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.stop_fils_6g_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.stop_fils_6g_wait);
 
@@ -3190,20 +3190,20 @@ wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wip
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_change_beacon_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_change_beacon_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CHANGE_BEACON;
 	cmd->len = sizeof(xr_cmd_change_beacon_t);
-	data = (xr_cmd_change_beacon_t *) &cmd->data[0];
+	data = (xr_cmd_change_beacon_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -3227,19 +3227,19 @@ int wl_cfg80211_change_beacon_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_change_beacon_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_change_beacon_t * data = NULL;
+	xr_cmd_reply_change_beacon_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CHANGE_BEACON;
 	cmd->len = sizeof(xr_cmd_reply_change_beacon_t);
-	data = (xr_cmd_reply_change_beacon_t *) &cmd->data[0];
+	data = (xr_cmd_reply_change_beacon_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3275,7 +3275,7 @@ int xr_cmd_change_beacon_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_change_beacon_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_change_beacon_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -3296,14 +3296,14 @@ int xr_cmd_reply_change_beacon_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_change_beacon_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_change_beacon_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_change_beacon_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.change_beacon_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.change_beacon_wait);
 
@@ -3318,20 +3318,20 @@ wl_cfg80211_channel_switch_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wi
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_channel_switch_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_channel_switch_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CHANNEL_SWITCH;
 	cmd->len = sizeof(xr_cmd_channel_switch_t);
-	data = (xr_cmd_channel_switch_t *) &cmd->data[0];
+	data = (xr_cmd_channel_switch_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -3355,10 +3355,10 @@ int wl_cfg80211_channel_switch_xr_reply(dhd_pub_t *dest_pub, int status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_channel_switch_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_channel_switch_t * data = NULL;
+	xr_cmd_reply_channel_switch_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
@@ -3367,7 +3367,7 @@ int wl_cfg80211_channel_switch_xr_reply(dhd_pub_t *dest_pub, int status)
 	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CHANNEL_SWITCH;
 	cmd->len = sizeof(xr_cmd_reply_channel_switch_t);
-	data = (xr_cmd_reply_channel_switch_t *) &cmd->data[0];
+	data = (xr_cmd_reply_channel_switch_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3403,7 +3403,7 @@ int xr_cmd_channel_switch_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_channel_switch_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_channel_switch_t *)&xr_cmd->data[0];
 
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
@@ -3426,14 +3426,14 @@ int xr_cmd_reply_channel_switch_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_channel_switch_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_channel_switch_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_channel_switch_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.channel_switch_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.channel_switch_wait);
 
@@ -3453,20 +3453,20 @@ wl_cfg80211_set_tx_power_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiph
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_tx_power_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_tx_power_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_TX_POWER;
 	cmd->len = sizeof(xr_cmd_set_tx_power_t);
-	data = (xr_cmd_set_tx_power_t *) &cmd->data[0];
+	data = (xr_cmd_set_tx_power_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->type = type;
@@ -3495,19 +3495,19 @@ int wl_cfg80211_set_tx_power_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_tx_power_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_tx_power_t * data = NULL;
+	xr_cmd_reply_set_tx_power_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_TX_POWER;
 	cmd->len = sizeof(xr_cmd_reply_set_tx_power_t);
-	data = (xr_cmd_reply_set_tx_power_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_tx_power_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3542,7 +3542,7 @@ int xr_cmd_set_tx_power_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_set_tx_power_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_set_tx_power_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("%s cfg is NULL\n", __func__));
@@ -3568,14 +3568,14 @@ int xr_cmd_reply_set_tx_power_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_tx_power_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_tx_power_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_tx_power_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_tx_power_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_tx_power_wait);
 
@@ -3590,20 +3590,20 @@ wl_cfg80211_set_wiphy_params_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct 
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_wiphy_params_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_wiphy_params_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_WIPHY_PARAMS;
 	cmd->len = sizeof(xr_cmd_set_wiphy_params_t);
-	data = (xr_cmd_set_wiphy_params_t *) &cmd->data[0];
+	data = (xr_cmd_set_wiphy_params_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->changed = changed;
@@ -3626,19 +3626,19 @@ int wl_cfg80211_set_wiphy_params_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_wiphy_params_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_wiphy_params_t * data = NULL;
+	xr_cmd_reply_set_wiphy_params_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_WIPHY_PARAMS;
 	cmd->len = sizeof(xr_cmd_reply_set_wiphy_params_t);
-	data = (xr_cmd_reply_set_wiphy_params_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_wiphy_params_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3673,7 +3673,7 @@ int xr_cmd_set_wiphy_params_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_set_wiphy_params_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_set_wiphy_params_t *)&xr_cmd->data[0];
 
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
@@ -3696,14 +3696,14 @@ int xr_cmd_reply_set_wiphy_params_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_wiphy_params_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_wiphy_params_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_wiphy_params_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_wiphy_params_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_wiphy_params_wait);
 
@@ -3718,20 +3718,20 @@ wl_cfg80211_set_cqm_rssi_config_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, stru
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_cqm_rssi_config_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_cqm_rssi_config_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_CQM_RSSI_CONFIG;
 	cmd->len = sizeof(xr_cmd_set_cqm_rssi_config_t);
-	data = (xr_cmd_set_cqm_rssi_config_t *) &cmd->data[0];
+	data = (xr_cmd_set_cqm_rssi_config_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -3756,19 +3756,19 @@ int wl_cfg80211_set_cqm_rssi_config_xr_reply(dhd_pub_t *dest_pub, int status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_cqm_rssi_config_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_cqm_rssi_config_t * data = NULL;
+	xr_cmd_reply_set_cqm_rssi_config_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_CQM_RSSI_CONFIG;
 	cmd->len = sizeof(xr_cmd_reply_set_cqm_rssi_config_t);
-	data = (xr_cmd_reply_set_cqm_rssi_config_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_cqm_rssi_config_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3803,7 +3803,7 @@ int xr_cmd_set_cqm_rssi_config_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_set_cqm_rssi_config_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_set_cqm_rssi_config_t *)&xr_cmd->data[0];
 
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
@@ -3826,14 +3826,14 @@ int xr_cmd_reply_set_cqm_rssi_config_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_cqm_rssi_config_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_cqm_rssi_config_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_cqm_rssi_config_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_cqm_rssi_config_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_cqm_rssi_config_wait);
 
@@ -3849,20 +3849,20 @@ wl_cfg80211_dump_survey_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_dump_survey_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_dump_survey_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DUMP_SURVEY;
 	cmd->len = sizeof(xr_cmd_dump_survey_t);
-	data = (xr_cmd_dump_survey_t *) &cmd->data[0];
+	data = (xr_cmd_dump_survey_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -3887,19 +3887,19 @@ int wl_cfg80211_dump_survey_xr_reply(dhd_pub_t *dest_pub, int status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_dump_survey_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_dump_survey_t * data = NULL;
+	xr_cmd_reply_dump_survey_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DUMP_SURVEY;
 	cmd->len = sizeof(xr_cmd_reply_dump_survey_t);
-	data = (xr_cmd_reply_dump_survey_t *) &cmd->data[0];
+	data = (xr_cmd_reply_dump_survey_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -3934,7 +3934,7 @@ int xr_cmd_dump_survey_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd = (xr_cmd_dump_survey_t *) &xr_cmd->data[0];
+	cmd = (xr_cmd_dump_survey_t *)&xr_cmd->data[0];
 
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
@@ -3957,14 +3957,14 @@ int xr_cmd_reply_dump_survey_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_dump_survey_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_dump_survey_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_dump_survey_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.dump_survey_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.dump_survey_wait);
 
@@ -3981,17 +3981,17 @@ s32 dhd_bandsteer_update_ifaces_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_bstr_update_ifaces_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_bstr_update_ifaces_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_BSTR_UPDATE_IFACES;
 	cmd->len = sizeof(xr_cmd_bstr_update_ifaces_t);
 	data = (xr_cmd_bstr_update_ifaces_t *)&cmd->data[0];
@@ -4019,12 +4019,12 @@ int dhd_bstr_update_ifaces_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_reply_bstr_update_ifaces_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_BSTR_UPDATE_IFACES;
 	cmd->len = sizeof(xr_cmd_reply_bstr_update_ifaces_t);
 	data = (xr_cmd_reply_bstr_update_ifaces_t *)&cmd->data[0];
@@ -4079,14 +4079,14 @@ int xr_cmd_reply_bstr_update_ifaces_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_bstr_update_ifaces_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_bstr_update_ifaces_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_bstr_update_ifaces_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.bstr_update_ifaces_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.bstr_update_ifaces_wait);
 	return ret;
@@ -4094,78 +4094,78 @@ int xr_cmd_reply_bstr_update_ifaces_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 #endif /* DHD_BANDSTEER */
 
 int wl_cfgvendor_cmd_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
-        struct wiphy *wiphy,
+	struct wiphy *wiphy,
 	struct wireless_dev *wdev,
 	const void *cfgvendor_cmd_value,
 	int len,
 	int cfgvendor_id)
 {
 
-        xr_cmd_t *cmd = NULL;
-        int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_cfgvendor_cmd_t);
-        gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-        xr_cmd_cfgvendor_cmd_t *data = NULL;
-        xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
-        xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
-        int ret = BCME_OK;
-        cmd = (xr_cmd_t *) kzalloc(size, flags);
-        if (cmd == NULL){
-                return -EINVAL;
-        }
-        /*Create cmd*/
-        cmd->cmd_id = XR_CMD_CFGVENDOR_CMD;
-        cmd->len = sizeof(xr_cmd_cfgvendor_cmd_t);
-        data = (xr_cmd_cfgvendor_cmd_t *) &cmd->data[0];
+	xr_cmd_t *cmd = NULL;
+	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_cfgvendor_cmd_t);
+	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
+	xr_cmd_cfgvendor_cmd_t *data = NULL;
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
+	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
+	int ret = BCME_OK;
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
+	if (cmd == NULL){
+		return -EINVAL;
+	}
+	/* Create cmd */
+	cmd->cmd_id = XR_CMD_CFGVENDOR_CMD;
+	cmd->len = sizeof(xr_cmd_cfgvendor_cmd_t);
+	data = (xr_cmd_cfgvendor_cmd_t *)&cmd->data[0];
 
-        data->wiphy = wiphy;
-        data->wdev = wdev;
-        data->cfgvendor_cmd_value = cfgvendor_cmd_value;
-        data->len = len;
+	data->wiphy = wiphy;
+	data->wdev = wdev;
+	data->cfgvendor_cmd_value = cfgvendor_cmd_value;
+	data->len = len;
 	data->cfgvendor_id = cfgvendor_id;
 
-        ret = dhd_send_xr_cmd(dest_pub, cmd, size, &cmd_wait->cfgvendor_cmd_wait, TRUE);
+	ret = dhd_send_xr_cmd(dest_pub, cmd, size, &cmd_wait->cfgvendor_cmd_wait, TRUE);
 
-        if (ret != BCME_OK) {
-                DHD_ERROR(("%s: dhd_send_xr_cmd fail\n", __func__));
-                return -EINVAL;
-        }
+	if (ret != BCME_OK) {
+		DHD_ERROR(("%s: dhd_send_xr_cmd fail\n", __func__));
+		return -EINVAL;
+	}
 
-        if (cmd)
-                kfree(cmd);
+	if (cmd)
+		kfree(cmd);
 
-        return xr_ctx->xr_cmd_reply_status.cfgvendor_cmd_status;
+	return xr_ctx->xr_cmd_reply_status.cfgvendor_cmd_status;
 
 }
 
 int wl_cfgvendor_cmd_xr_reply(dhd_pub_t *dest_pub, s32 status)
 {
-        xr_cmd_t *cmd = NULL;
-        int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_cfgvendor_cmd_t);
-        gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-        xr_cmd_reply_cfgvendor_cmd_t * data = NULL;
-        int ret = BCME_OK;
-        cmd = (xr_cmd_t *) kzalloc(size, flags);
-        if (cmd == NULL) {
-                DHD_ERROR(("cmd is NULL\n"));
-                return BCME_ERROR;
-        }
-        /*Create cmd*/
-        cmd->cmd_id = XR_CMD_REPLY_CFGVENDOR_CMD;
-        cmd->len = sizeof(xr_cmd_reply_cfgvendor_cmd_t);
-        data = (xr_cmd_reply_cfgvendor_cmd_t *) &cmd->data[0];
+	xr_cmd_t *cmd = NULL;
+	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_cfgvendor_cmd_t);
+	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
+	xr_cmd_reply_cfgvendor_cmd_t *data = NULL;
+	int ret = BCME_OK;
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
+	if (cmd == NULL) {
+		DHD_ERROR(("cmd is NULL\n"));
+		return BCME_ERROR;
+	}
+	/* Create cmd */
+	cmd->cmd_id = XR_CMD_REPLY_CFGVENDOR_CMD;
+	cmd->len = sizeof(xr_cmd_reply_cfgvendor_cmd_t);
+	data = (xr_cmd_reply_cfgvendor_cmd_t *)&cmd->data[0];
 
-        data->status = status;
+	data->status = status;
 
-        ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
+	ret = dhd_send_xr_cmd(dest_pub, cmd, size, NULL, FALSE);
 
-        if (ret != BCME_OK) {
-                DHD_ERROR(("%s: dhd_send_xr_cmd fail\n", __func__));
-                return ret;
-        }
+	if (ret != BCME_OK) {
+		DHD_ERROR(("%s: dhd_send_xr_cmd fail\n", __func__));
+		return ret;
+	}
 
-        if (cmd)
-                kfree(cmd);
-        return ret;
+	if (cmd)
+		kfree(cmd);
+	return ret;
 }
 
 int cfgvendor_cmd_hndlr(struct wiphy *wiphy,
@@ -4271,8 +4271,8 @@ int cfgvendor_cmd_hndlr(struct wiphy *wiphy,
 			}
 		case ANDR_WIFI_SET_COUNTRY:
 			{
-                                ret = wl_cfgvendor_set_country(wiphy, wdev, data, len);
-                                break;
+			ret = wl_cfgvendor_set_country(wiphy, wdev, data, len);
+			break;
 			}
 		default:
 			DHD_ERROR(("%s:vendor id (%d) is not found\n", __func__, vendor_id));
@@ -4299,7 +4299,7 @@ int xr_cmd_cfgvendor_cmd_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_cfgvendor_cmd_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_cfgvendor_cmd_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 	if (!cfg) {
 		DHD_ERROR(("XR_CMD_CFGVENDOR_CMD cfg is NULL\n"));
@@ -4321,13 +4321,13 @@ int xr_cmd_reply_cfgvendor_cmd_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_cfgvendor_cmd_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_cfgvendor_cmd_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_cfgvendor_cmd_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.cfgvendor_cmd_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.cfgvendor_cmd_wait);
 
@@ -4342,20 +4342,20 @@ int wl_cfg80211_connect_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_connect_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_connect_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_CONNECT;
 	cmd->len = sizeof(xr_cmd_connect_t);
-	data = (xr_cmd_connect_t *) &cmd->data[0];
+	data = (xr_cmd_connect_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -4380,18 +4380,18 @@ int wl_cfg80211_connect_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_connect_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_connect_t * data = NULL;
+	xr_cmd_reply_connect_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_CONNECT;
 	cmd->len = sizeof(xr_cmd_reply_connect_t);
-	data = (xr_cmd_reply_connect_t *) &cmd->data[0];
+	data = (xr_cmd_reply_connect_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -4427,7 +4427,7 @@ int xr_cmd_connect_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_connect_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_connect_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -4451,14 +4451,14 @@ int xr_cmd_reply_connect_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_connect_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_connect_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_connect_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.connect_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.connect_wait);
 
@@ -4474,20 +4474,20 @@ wl_cfg80211_disconnect_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy 
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_disconnect_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_disconnect_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DISCONNECT;
 	cmd->len = sizeof(xr_cmd_disconnect_t);
-	data = (xr_cmd_disconnect_t *) &cmd->data[0];
+	data = (xr_cmd_disconnect_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -4512,18 +4512,18 @@ int wl_cfg80211_disconnect_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_disconnect_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_disconnect_t * data = NULL;
+	xr_cmd_reply_disconnect_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DISCONNECT;
 	cmd->len = sizeof(xr_cmd_reply_disconnect_t);
-	data = (xr_cmd_reply_disconnect_t *) &cmd->data[0];
+	data = (xr_cmd_reply_disconnect_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -4559,7 +4559,7 @@ int xr_cmd_disconnect_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_disconnect_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_disconnect_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -4582,14 +4582,14 @@ int xr_cmd_reply_disconnect_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_disconnect_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_disconnect_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_disconnect_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.disconnect_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.disconnect_wait);
 
@@ -4607,20 +4607,20 @@ wl_cfg80211_set_rekey_data_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wi
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_rekey_data_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_rekey_data_t *xr_data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REKEY_DATA;
 	cmd->len = sizeof(xr_cmd_rekey_data_t);
-	xr_data = (xr_cmd_rekey_data_t *) &cmd->data[0];
+	xr_data = (xr_cmd_rekey_data_t *)&cmd->data[0];
 
 	xr_data->wiphy = wiphy;
 	xr_data->dev = dev;
@@ -4645,18 +4645,18 @@ int wl_cfg80211_rekey_data_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_rekey_data_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_rekey_data_t * data = NULL;
+	xr_cmd_reply_rekey_data_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_REKEY_DATA;
 	cmd->len = sizeof(xr_cmd_reply_rekey_data_t);
-	data = (xr_cmd_reply_rekey_data_t *) &cmd->data[0];
+	data = (xr_cmd_reply_rekey_data_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -4692,7 +4692,7 @@ int xr_cmd_rekey_data_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_rekey_data_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_rekey_data_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -4715,14 +4715,14 @@ int xr_cmd_reply_rekey_data_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_rekey_data_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_rekey_data_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_rekey_data_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.rekey_data_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.rekey_data_wait);
 
@@ -4743,20 +4743,20 @@ wl_cfg80211_set_pmk_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_pmk_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_pmk_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_PMK;
 	cmd->len = sizeof(xr_cmd_set_pmk_t);
-	data = (xr_cmd_set_pmk_t *) &cmd->data[0];
+	data = (xr_cmd_set_pmk_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -4781,18 +4781,18 @@ int wl_cfg80211_set_pmk_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_pmk_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_pmk_t * data = NULL;
+	xr_cmd_reply_set_pmk_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_PMK;
 	cmd->len = sizeof(xr_cmd_reply_set_pmk_t);
-	data = (xr_cmd_reply_set_pmk_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_pmk_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -4828,7 +4828,7 @@ int xr_cmd_set_pmk_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_set_pmk_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_set_pmk_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -4851,14 +4851,14 @@ int xr_cmd_reply_set_pmk_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_pmk_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_pmk_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_pmk_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_pmk_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_pmk_wait);
 
@@ -4874,20 +4874,20 @@ wl_cfg80211_del_pmk_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_pmk_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_pmk_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_PMK;
 	cmd->len = sizeof(xr_cmd_del_pmk_t);
-	data = (xr_cmd_del_pmk_t *) &cmd->data[0];
+	data = (xr_cmd_del_pmk_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -4912,18 +4912,18 @@ int wl_cfg80211_del_pmk_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_del_pmk_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_del_pmk_t * data = NULL;
+	xr_cmd_reply_del_pmk_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_PMK;
 	cmd->len = sizeof(xr_cmd_reply_del_pmk_t);
-	data = (xr_cmd_reply_del_pmk_t *) &cmd->data[0];
+	data = (xr_cmd_reply_del_pmk_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -4959,7 +4959,7 @@ int xr_cmd_del_pmk_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_del_pmk_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_del_pmk_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -4982,14 +4982,14 @@ int xr_cmd_reply_del_pmk_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_pmk_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_pmk_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_pmk_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_pmk_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_pmk_wait);
 
@@ -5006,20 +5006,20 @@ wl_cfg80211_set_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_set_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_set_pmksa_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_SET_PMKSA;
 	cmd->len = sizeof(xr_cmd_set_pmksa_t);
-	data = (xr_cmd_set_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_set_pmksa_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -5044,18 +5044,18 @@ int wl_cfg80211_set_pmksa_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_set_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_set_pmksa_t * data = NULL;
+	xr_cmd_reply_set_pmksa_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_SET_PMKSA;
 	cmd->len = sizeof(xr_cmd_reply_set_pmksa_t);
-	data = (xr_cmd_reply_set_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_reply_set_pmksa_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -5091,7 +5091,7 @@ int xr_cmd_set_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_set_pmksa_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_set_pmksa_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -5114,14 +5114,14 @@ int xr_cmd_reply_set_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_set_pmksa_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_set_pmksa_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_set_pmksa_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.set_pmksa_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.set_pmksa_wait);
 
@@ -5137,20 +5137,20 @@ wl_cfg80211_del_pmksa_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_del_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_del_pmksa_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_DEL_PMKSA;
 	cmd->len = sizeof(xr_cmd_del_pmksa_t);
-	data = (xr_cmd_del_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_del_pmksa_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -5175,18 +5175,18 @@ int wl_cfg80211_del_pmksa_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_del_pmksa_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_del_pmksa_t * data = NULL;
+	xr_cmd_reply_del_pmksa_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_DEL_PMKSA;
 	cmd->len = sizeof(xr_cmd_reply_del_pmksa_t);
-	data = (xr_cmd_reply_del_pmksa_t *) &cmd->data[0];
+	data = (xr_cmd_reply_del_pmksa_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -5222,7 +5222,7 @@ int xr_cmd_del_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_del_pmksa_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_del_pmksa_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -5245,14 +5245,14 @@ int xr_cmd_reply_del_pmksa_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_del_pmksa_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_del_pmksa_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_del_pmksa_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.del_pmksa_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.del_pmksa_wait);
 
@@ -5270,20 +5270,20 @@ wl_cfg80211_update_connect_params_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_update_connect_params_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_update_connect_params_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_UPDATE_CONNECT_PARAMS;
 	cmd->len = sizeof(xr_cmd_update_connect_params_t);
-	data = (xr_cmd_update_connect_params_t *) &cmd->data[0];
+	data = (xr_cmd_update_connect_params_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -5309,18 +5309,18 @@ int wl_cfg80211_update_connect_params_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_update_connect_params_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_update_connect_params_t * data = NULL;
+	xr_cmd_reply_update_connect_params_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_UPDATE_CONNECT_PARAMS;
 	cmd->len = sizeof(xr_cmd_reply_update_connect_params_t);
-	data = (xr_cmd_reply_update_connect_params_t *) &cmd->data[0];
+	data = (xr_cmd_reply_update_connect_params_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -5356,7 +5356,7 @@ int xr_cmd_update_connect_params_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_update_connect_params_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_update_connect_params_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -5379,14 +5379,14 @@ int xr_cmd_reply_update_connect_params_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_update_connect_params_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_update_connect_params_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_update_connect_params_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.update_connect_params_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.update_connect_params_wait);
 
@@ -5404,20 +5404,20 @@ wl_cfg80211_update_owe_info_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_update_owe_info_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
 	xr_cmd_update_owe_info_t *data = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(src_pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(src_pub);
 	xr_comp_wait_t *cmd_wait = &xr_ctx->xr_cmd_wait;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 
 	if (cmd == NULL) {
 		return -EINVAL;
 	}
 
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_UPDATE_CONNECT_PARAMS;
 	cmd->len = sizeof(xr_cmd_update_owe_info_t);
-	data = (xr_cmd_update_owe_info_t *) &cmd->data[0];
+	data = (xr_cmd_update_owe_info_t *)&cmd->data[0];
 
 	data->wiphy = wiphy;
 	data->dev = dev;
@@ -5442,18 +5442,18 @@ int wl_cfg80211_update_owe_info_xr_reply(dhd_pub_t *dest_pub, s32 status)
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_reply_update_owe_info_t);
 	gfp_t flags = (in_atomic()) ? GFP_ATOMIC : GFP_KERNEL;
-	xr_cmd_reply_update_owe_info_t * data = NULL;
+	xr_cmd_reply_update_owe_info_t *data = NULL;
 	int ret = BCME_OK;
 
-	cmd = (xr_cmd_t *) kzalloc(size, flags);
+	cmd = (xr_cmd_t *)kzalloc(size, flags);
 	if (cmd == NULL) {
 		DHD_ERROR(("cmd is NULL\n"));
 		return BCME_ERROR;
 	}
-	/*Create cmd*/
+	/* Create cmd */
 	cmd->cmd_id = XR_CMD_REPLY_UPDATE_CONNECT_PARAMS;
 	cmd->len = sizeof(xr_cmd_reply_update_owe_info_t);
-	data = (xr_cmd_reply_update_owe_info_t *) &cmd->data[0];
+	data = (xr_cmd_reply_update_owe_info_t *)&cmd->data[0];
 
 	data->status = status;
 
@@ -5489,7 +5489,7 @@ int xr_cmd_update_owe_info_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 		ret = BCME_ERROR;
 	}
 
-	cmd  = (xr_cmd_update_owe_info_t *) &xr_cmd->data[0];
+	cmd  = (xr_cmd_update_owe_info_t *)&xr_cmd->data[0];
 	cfg = (struct bcm_cfg80211 *)wiphy_priv(cmd->wiphy);
 
 	if (!cfg) {
@@ -5512,14 +5512,14 @@ int xr_cmd_reply_update_owe_info_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 {
 	int ret = BCME_OK;
 	xr_cmd_reply_update_owe_info_t *reply = NULL;
-	xr_ctx_t *xr_ctx = (xr_ctx_t *) DHD_GET_XR_CTX(pub);
+	xr_ctx_t *xr_ctx = (xr_ctx_t *)DHD_GET_XR_CTX(pub);
 
 	if (!xr_cmd) {
 		DHD_ERROR(("%s: xr_cmd null\n", __func__));
 		ret = BCME_ERROR;
 	}
 
-	reply = (xr_cmd_reply_update_owe_info_t *) &xr_cmd->data[0];
+	reply = (xr_cmd_reply_update_owe_info_t *)&xr_cmd->data[0];
 	xr_ctx->xr_cmd_reply_status.update_owe_info_status = reply->status;
 	complete(&xr_ctx->xr_cmd_wait.update_owe_info_wait);
 
@@ -5537,7 +5537,7 @@ int xr_cmd_deferred_handler(dhd_pub_t *pub, xr_buf_t *xr_buf)
 		return BCME_ERROR;
 	}
 
-	xr_cmd = (xr_cmd_t *) &xr_buf->buf[0];
+	xr_cmd = (xr_cmd_t *)&xr_buf->buf[0];
 
 	switch (xr_cmd->cmd_id) {
 	case XR_CMD_ADD_IF:
@@ -5582,7 +5582,7 @@ int xr_cmd_handler(dhd_pub_t *pub, xr_buf_t *xr_buf)
 		goto fail;
 	}
 
-	xr_cmd = (xr_cmd_t *) &xr_buf->buf[0];
+	xr_cmd = (xr_cmd_t *)&xr_buf->buf[0];
 
 	switch (xr_cmd->cmd_id) {
 	case XR_CMD_ADD_IF:
@@ -6176,7 +6176,7 @@ void xr_sta_sm_evt_handler(struct bcm_cfg80211 *cfg, int event)
  * to the master primary I/F before invoking any kernel cfg80211_api or netlink API.
  * This API returns the struct net_device that has to be sent to the upper layers
  * */
-struct net_device * xr_sta_get_ndev_for_cfg_event(struct bcm_cfg80211 *cfg, struct net_device *dev) {
+struct net_device *xr_sta_get_ndev_for_cfg_event(struct bcm_cfg80211 *cfg, struct net_device *dev) {
 
 	if ((XR_STA_GET_MODE(cfg) != XR_STA_MODE_SINGLE)) {
 		DHD_INFO(("XR STA in mode %d\n", XR_STA_GET_MODE(cfg)));
@@ -6192,12 +6192,12 @@ struct net_device * xr_sta_get_ndev_for_cfg_event(struct bcm_cfg80211 *cfg, stru
 
 	/* RX case: When netdev is matches current active XR sta return master primary I/F */
 	if ((dev == cfg->xr_sta_active_wdev->netdev)
-		 && (dev == DHD_XR_GET_SLAVE_NDEV(cfg))) {
+		&& (dev == DHD_XR_GET_SLAVE_NDEV(cfg))) {
 		DHD_INFO(("RX send %s instead of %s \n", cfg->wdev->netdev->name ,dev->name));
 		return cfg->wdev->netdev;
 	}
 	if ((dev != cfg->xr_sta_active_wdev->netdev)
-		 && (dev == cfg->wdev->netdev)) {
+		&& (dev == cfg->wdev->netdev)) {
 	/* TX case: When netdev is matches master primary but current active dev is slave primary I/F */
 		DHD_INFO(("TX send %s instead of %s \n",
 			((struct net_device *)(DHD_XR_GET_SLAVE_NDEV(cfg)))->name, dev->name));
