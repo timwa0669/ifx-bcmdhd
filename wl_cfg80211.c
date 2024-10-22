@@ -14499,11 +14499,10 @@ wl_cfg80211_start_ap(
 
 #if ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0)) && !defined(WL_COMPAT_WIRELESS))
 	if ((err = wl_cfg80211_set_channel(wiphy, dev,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2)) || \
-	defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
-		dev->ieee80211_ptr->u.ap.preset_chandef.chan,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
+		info->chandef.chan,
 #else
-		dev->ieee80211_ptr->preset_chandef.chan,
+		info->channel,
 #endif // endif
 		NL80211_CHAN_HT20) < 0)) {
 		WL_ERR(("Set channel failed \n"));
@@ -14741,11 +14740,10 @@ wl_cfg80211_start_ap(
 #endif /* SUPPORT_AP_RADIO_PWRSAVE */
 
 #ifdef ENABLE_HOGSQS
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2)) || \
-	defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
-	chan_h = dev->ieee80211_ptr->u.ap.preset_chandef.chan;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
+	chan_h = info->chandef.chan;
 #else
-	chan_h = dev->ieee80211_ptr->preset_chandef.chan;
+	chan_h = info->channel;
 #endif // endif
 	if (chan_h->band == IEEE80211_BAND_5GHZ) {
 		s32 value = 0x0;
