@@ -807,16 +807,16 @@ s32 wl_cfg80211_get_station(struct wiphy *wiphy,
 	struct net_device *dev, u8 *mac,
 	struct station_info *sinfo);
 #endif // endif
-#if defined(WL_6E) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0))
+#if defined(WL_6E) && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
 static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
-                               struct net_device *dev,
+	struct net_device *dev,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2)) || \
 	defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
-                               unsigned int link_id,
+	unsigned int link_id,
 #endif // endif
-                               const u8 *addr,
-                               const struct cfg80211_bitrate_mask *mask);
-#endif /* WL_6E || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) */
+	const u8 *addr,
+	const struct cfg80211_bitrate_mask *mask);
+#endif /* WL_6E && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
 
 #ifndef WL_DHD_XR
 static
@@ -7596,15 +7596,15 @@ wl_notify_mgmt_frame_tx_complete(struct bcm_cfg80211 *cfg,
 }
 #endif /* WL_SAE */
 
-#if defined(WL_6E) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0))
+#if defined(WL_6E) && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
 static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
-                                struct net_device *dev,
+	struct net_device *dev,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2)) || \
 	defined(DHD_ANDROID_CFG80211_BACKPORT_V1)
-                               unsigned int link_id,
+	unsigned int link_id,
 #endif // endif
-                                const u8 *addr,
-                                const struct cfg80211_bitrate_mask *mask)
+	const u8 *addr,
+	const struct cfg80211_bitrate_mask *mask)
 {
 	int he = 0;
 	uint32 rspec = 0;
@@ -7614,12 +7614,12 @@ static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
 
 	ret = wldev_iovar_getint(dev, "he", &he);
 	if (unlikely(ret)) {
-               WL_ERR(("error reading he (%d)\n", ret));
-               return -ENOTSUPP;
+		WL_ERR(("error reading he (%d)\n", ret));
+		return -ENOTSUPP;
 	}
 	for (band = 0; band < NUM_NL80211_BANDS; band++) {
 		if (band != NL80211_BAND_2GHZ && band != NL80211_BAND_5GHZ &&
-		    band != NL80211_BAND_6GHZ) {
+			band != NL80211_BAND_6GHZ) {
 			continue;
 		}
 
@@ -7629,7 +7629,7 @@ static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
 		}
 
 		if (he) {
-			rspec = WL_RSPEC_ENCODE_HE;     /* 11ax HE */
+			rspec = WL_RSPEC_ENCODE_HE; /* 11ax HE */
 			rspec |= (WL_RSPEC_HE_NSS_UNSPECIFIED << WL_RSPEC_HE_NSS_SHIFT) | mask->control[band].he_mcs[0];
 			/* set the other rspec fields */
 			hegi = mask->control[band].he_gi;
@@ -7660,7 +7660,7 @@ static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
 	}
 	return ret;
 }
-#endif /* WL_6E || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) */
+#endif /* WL_6E && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
 
 #ifdef BCMSUP_4WAY_HANDSHAKE_SAE
 static int wl_set_pmk(struct net_device *dev, const u8 *pmk_data, u16 pmk_len)
@@ -16124,9 +16124,9 @@ static struct cfg80211_ops wl_cfg80211_ops = {
 	.sched_scan_start = wl_cfg80211_sched_scan_start,
 	.sched_scan_stop = wl_cfg80211_sched_scan_stop,
 #endif /* WL_SCHED_SCAN */
-#if defined(WL_6E) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0))
-       .set_bitrate_mask = wl_cfg80211_set_bitrate,
-#endif /* WL_6E || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) */
+#if defined(WL_6E) && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+	.set_bitrate_mask = wl_cfg80211_set_bitrate,
+#endif /* WL_6E && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
 #if defined(WL_SUPPORT_BACKPORTED_KPATCHES) || (LINUX_VERSION_CODE >= KERNEL_VERSION(3, \
 	2, 0))
 	.del_station = wl_cfg80211_del_station,
