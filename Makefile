@@ -122,16 +122,10 @@ DHDCFLAGS += -DEWP_ETD_PRSRV_LOGS
 DHDCFLAGS += -DCFI_CHECK
 
 # DMA64 suppports on 64bit Architecture
-ifeq ($(CONFIG_ARM64),y)
+ifeq ($(CONFIG_64BIT),y)
 DHDCFLAGS := $(filter-out -DBCMDMA32,$(DHDCFLAGS))
 DHDCFLAGS += -DBCMDMA64OSL
 endif
-
-# DMA64 suppports on x64bit Architecture
-#ifeq ($(CONFIG_64BIT),y)
-#DHDCFLAGS := $(filter-out -DBCMDMA32,$(DHDCFLAGS))
-#DHDCFLAGS += -DBCMDMA64OSL
-#endif
 
 # keepalive
 DHDCFLAGS += -DCUSTOM_KEEP_ALIVE_SETTING=28000
