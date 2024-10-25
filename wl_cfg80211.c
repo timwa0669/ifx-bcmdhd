@@ -16848,11 +16848,17 @@ static void wl_free_wdev(struct bcm_cfg80211 *cfg)
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 14, 0)) || defined(WL_VENDOR_EXT_SUPPORT)
 		wl_cfgvendor_detach(wdev->wiphy);
 #endif /* (LINUX_VERSION_CODE > KERNEL_VERSION(3, 14, 0)) || defined(WL_VENDOR_EXT_SUPPORT) */
+#if defined(CONFIG_PM) && defined(WL_CFG80211_P2P_DEV_IF)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0))
 		/* Reset wowlan & wowlan_config before Unregister to avoid Kernel Panic */
 		WL_DBG(("clear wowlan\n"));
 		wdev->wiphy->wowlan = NULL;
+		if (wdev->wiphy->wowlan_config) {
+			kfree(wdev->wiphy->wowlan_config);
+			wdev->wiphy->wowlan_config = NULL;
+		}
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0) */
+#endif /* CONFIG_PM && WL_CFG80211_P2P_DEV_IF */
 #if defined(WL_SELF_MANAGED_REGDOM) && \
 			(LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
 		/* Making regd ptr NULL, to avoid reference/freeing by regulatory unregister */
