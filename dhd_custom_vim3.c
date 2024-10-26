@@ -50,6 +50,7 @@
 
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
 extern int dhd_init_wlan_mem(void);
+extern void dhd_exit_wlan_mem(void);
 extern void *dhd_wlan_mem_prealloc(int section, unsigned long size);
 #endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 
@@ -73,8 +74,6 @@ module_param(hostwake_param, int, 0644);
 int
 dhd_wlan_power(int onoff)
 {
-	printk(KERN_INFO"------------------------------------------------");
-	printk(KERN_INFO"------------------------------------------------\n");
 	printk(KERN_INFO"%s Enter: power %s\n", __func__, onoff ? "on" : "off");
 
 	if (!gpio_is_valid(wlan_reg_on)) {
@@ -88,7 +87,6 @@ dhd_wlan_power(int onoff)
 
 	return 0;
 }
-// EXPORT_SYMBOL(dhd_wlan_power);
 
 int dhd_wifi_init_gpio(void)
 {
@@ -174,7 +172,6 @@ dhd_get_wlan_oob_gpio(void)
 	return gpio_is_valid(wlan_host_wake_up) ?
 		gpio_get_value(wlan_host_wake_up) : -1;
 }
-// EXPORT_SYMBOL(dhd_get_wlan_oob_gpio);
 #endif /* CONFIG_BCMDHD_OOB_HOST_WAKE && CONFIG_BCMDHD_GET_OOB_STATE */
 
 struct resource dhd_wlan_resources = {
@@ -188,7 +185,6 @@ struct resource dhd_wlan_resources = {
 	IORESOURCE_IRQ_HIGHLEVEL,
 #endif /* BCMPCIE */
 };
-// EXPORT_SYMBOL(dhd_wlan_resources);
 
 struct wifi_platform_data dhd_wlan_control = {
 	.set_power	= dhd_wlan_power,
@@ -198,7 +194,6 @@ struct wifi_platform_data dhd_wlan_control = {
 	.mem_prealloc	= dhd_wlan_mem_prealloc,
 #endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 };
-// EXPORT_SYMBOL(dhd_wlan_control);
 
 int dhd_wlan_deinit(void)
 {
@@ -242,4 +237,3 @@ fail:
 	printk(KERN_INFO"%s: FINISH.......\n", __FUNCTION__);
 	return ret;
 }
-// late_initcall(dhd_wlan_init);
