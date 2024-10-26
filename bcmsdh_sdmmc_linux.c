@@ -42,6 +42,7 @@
 #include <linux/mmc/host.h>
 #include <linux/mmc/sdio_func.h>
 #include <linux/mmc/sdio_ids.h>
+#include <linux/pm_runtime.h>
 #include <dhd_linux.h>
 #include <bcmsdh_sdmmc.h>
 #include <dhd_dbg.h>
@@ -84,6 +85,7 @@ extern volatile bool dhd_mmc_suspend;
 
 static int sdioh_probe(struct sdio_func *func)
 {
+	struct mmc_host *host = func->card->host;
 	int host_idx = func->card->host->index;
 	uint32 rca = func->card->rca;
 	wifi_adapter_info_t *adapter;
@@ -119,6 +121,13 @@ static int sdioh_probe(struct sdio_func *func)
 		 goto fail;
 	 }
 
+	/* Disable mmc host suspension */
+	pm_runtime_forbid(host->parent);
+	if (!(host->caps & MMC_CAP_NONREMOVABLE)) {
+		sdioh->host_cap_non_removable_fixup = TRUE;
+		host->caps |= MMC_CAP_NONREMOVABLE;
+	}
+
 	sdio_set_drvdata(func, sdioh);
 	return 0;
 
@@ -132,6 +141,7 @@ fail:
 
 static void sdioh_remove(struct sdio_func *func)
 {
+	struct mmc_host *host = func->card->host;
 	sdioh_info_t *sdioh;
 	osl_t *osh;
 
@@ -143,6 +153,14 @@ static void sdioh_remove(struct sdio_func *func)
 
 	osh = sdioh->osh;
 	bcmsdh_remove(sdioh->bcmsdh);
+
+	/* Re-enable mmc host suspension */
+	pm_runtime_allow(host->parent);
+	if (sdioh->host_cap_non_removable_fixup) {
+		sdioh->host_cap_non_removable_fixup = FALSE;
+		host->caps &= ~MMC_CAP_NONREMOVABLE;
+	}
+
 	sdioh_detach(osh, sdioh);
 	osl_detach(osh);
 }

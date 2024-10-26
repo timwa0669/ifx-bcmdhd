@@ -106,6 +106,7 @@ struct sdioh_info {
 #if defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF)
 	uint8		*copy_buf;
 #endif /* defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF) */
+	uint		host_cap_non_removable_fixup;
 };
 
 /************************************************************
