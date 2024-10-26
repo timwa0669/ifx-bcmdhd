@@ -97,6 +97,12 @@ extern void* wl_cfg80211_get_dhdp(struct net_device *dev);
 extern int dhd_wlan_init(void);
 extern int dhd_wlan_deinit(void);
 extern void post_power_operation(int on);
+#else /* DHD_OF_SUPPORT */
+#ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+extern int dhd_init_wlan_mem(void);
+extern void dhd_exit_wlan_mem(void);
+extern void *dhd_wlan_mem_prealloc(int section, unsigned long size);
+#endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 #endif /* DHD_OF_SUPPORT */
 
 #ifdef ENABLE_4335BT_WAR
@@ -127,19 +133,26 @@ wifi_adapter_info_t* dhd_wifi_platform_get_adapter(uint32 bus_type, uint32 bus_n
 void* wifi_platform_prealloc(wifi_adapter_info_t *adapter, int section, unsigned long size)
 {
 	void *alloc_ptr = NULL;
-	struct wifi_platform_data *plat_data;
 
+#ifdef DHD_OF_SUPPORT
+	struct wifi_platform_data *plat_data;
 	if (!adapter || !adapter->wifi_plat_data)
 		return NULL;
 	plat_data = adapter->wifi_plat_data;
 	if (plat_data->mem_prealloc) {
 		alloc_ptr = plat_data->mem_prealloc(section, size);
-		if (alloc_ptr) {
-			DHD_INFO(("success alloc section %d\n", section));
-			if (size != 0L)
-				bzero(alloc_ptr, size);
-			return alloc_ptr;
-		}
+	}
+#else /* DHD_OF_SUPPORT */
+#ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+	alloc_ptr = dhd_wlan_mem_prealloc(section, size);
+#endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
+#endif /* DHD_OF_SUPPORT */
+
+	if (alloc_ptr) {
+		DHD_INFO(("success alloc section %d\n", section));
+		if (size != 0L)
+			bzero(alloc_ptr, size);
+		return alloc_ptr;
 	} else
 		DHD_ERROR(("%s: No mem_prealloc function provided\n", __FUNCTION__));
 
@@ -498,6 +511,15 @@ static int wifi_ctrlfunc_register_drv(void)
 		DHD_ERROR(("%s: dhd_wlan_init() failed(%d)\n", __FUNCTION__, err));
 		return err;
 	}
+#else /* DHD_OF_SUPPORT */
+#ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+	err = dhd_init_wlan_mem();
+	if (err < 0) {
+		DHD_ERROR(("%s: failed to alloc reserved memory,"
+			" ret=%d\n", __FUNCTION__, err));
+		return err;
+	}
+#endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 #endif /* DHD_OF_SUPPORT */
 
 	if (!dts_enabled) {
@@ -595,6 +617,10 @@ void wifi_ctrlfunc_unregister_drv(void)
 	}
 #ifdef DHD_OF_SUPPORT
 	dhd_wlan_deinit();
+#else /* DHD_OF_SUPPORT */
+#ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+	dhd_exit_wlan_mem();
+#endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 #endif /* DHD_OF_SUPPORT */
 #endif /* !defined(CONFIG_DTS) */
 
