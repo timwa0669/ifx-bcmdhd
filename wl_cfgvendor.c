@@ -9873,6 +9873,7 @@ const struct nla_policy acs_offload_attr_policy[IFX_VENDOR_ATTR_ACS_LAST] = {
 #endif /* LINUX_VER >= 5.3 */
 
 #ifdef WL11AX
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
 const struct nla_policy
 ifx_vendor_attr_twt_param_policy[IFX_VENDOR_ATTR_TWT_PARAM_MAX + 1] = {
 	[IFX_VENDOR_ATTR_TWT_PARAM_UNSPEC] = {.type = NLA_U8},
@@ -9905,6 +9906,7 @@ const struct nla_policy ifx_vendor_attr_twt_policy[IFX_VENDOR_ATTR_TWT_MAX + 1] 
 		NLA_POLICY_NESTED(ifx_vendor_attr_twt_param_policy),
 	[IFX_VENDOR_ATTR_TWT_MAX] = {.type = NLA_U8},
 };
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 #endif /* WL11AX */
 
 const struct nla_policy ifx_vendor_attr_policy[IFX_VENDOR_ATTR_MAX + 1] = {
