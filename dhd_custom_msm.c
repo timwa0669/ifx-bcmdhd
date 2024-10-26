@@ -56,6 +56,7 @@
 	*/
 
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+extern void dhd_exit_wlan_mem(void);
 extern int dhd_init_wlan_mem(void);
 extern void *dhd_wlan_mem_prealloc(int section, unsigned long size);
 #endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
@@ -64,11 +65,7 @@ extern void *dhd_wlan_mem_prealloc(int section, unsigned long size);
 #define WIFI_TURNON_DELAY	200
 #endif /* WIFI_TURNON_DELAY */
 static int wlan_reg_on = -1;
-#ifdef CUSTOM_DT_COMPAT_ENTRY
-#define DHD_DT_COMPAT_ENTRY		CUSTOM_DT_COMPAT_ENTRY
-#else /* CUSTOM_DT_COMPAT_ENTRY */
 #define DHD_DT_COMPAT_ENTRY		"android,bcmdhd_wlan"
-#endif /* CUSTOM_DT_COMPAT_ENTRY */
 
 #ifdef CUSTOMER_HW2
 #define WIFI_WL_REG_ON_PROPNAME		"wl_reg_on"
@@ -87,21 +84,18 @@ static int wlan_reg_on = -1;
 	  || CONFIG_ARCH_SDM845 || CONFIG_ARCH_SM8150
 	*/
 
-#ifdef BCMPCIE_OOB_HOST_WAKE
+#ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
 static int wlan_host_wake_up = -1;
 static int wlan_host_wake_irq = 0;
+
 #ifdef CUSTOMER_HW2
 #define WIFI_WLAN_HOST_WAKE_PROPNAME    "wl_host_wake"
 #else
 #define WIFI_WLAN_HOST_WAKE_PROPNAME    "wlan-host-wake-gpio"
 #endif /* CUSTOMER_HW2 */
-#endif /* BCMPCIE_OOB_HOST_WAKE */
+#endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
 
-#ifndef USE_CUSTOM_MSM_PCIE
-int __init
-#else
 int
-#endif /* USE_CUSTOM_MSM_PCIE */
 dhd_wifi_init_gpio(void)
 {
 	char *wlan_node = DHD_DT_COMPAT_ENTRY;
@@ -111,6 +105,11 @@ dhd_wifi_init_gpio(void)
 	if (!root_node) {
 		WARN(1, "failed to get device node of BRCM WLAN\n");
 		return -ENODEV;
+	}
+
+	if (!of_device_is_available(root_node)) {
+		printk(KERN_ERR "%s: brcm wlan device status is disable\n", __FUNCTION__);
+		return -ENXIO;
 	}
 
 	/* ========== WLAN_PWR_EN ============ */
@@ -139,7 +138,7 @@ dhd_wifi_init_gpio(void)
 	/* Wait for WIFI_TURNON_DELAY due to power stability */
 	msleep(WIFI_TURNON_DELAY);
 
-#ifdef BCMPCIE_OOB_HOST_WAKE
+#ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
 	/* ========== WLAN_HOST_WAKE ============ */
 	wlan_host_wake_up = of_get_named_gpio(root_node, WIFI_WLAN_HOST_WAKE_PROPNAME, 0);
 	printk(KERN_INFO "%s: gpio_wlan_host_wake : %d\n", __FUNCTION__, wlan_host_wake_up);
@@ -158,13 +157,7 @@ dhd_wifi_init_gpio(void)
 
 	gpio_direction_input(wlan_host_wake_up);
 	wlan_host_wake_irq = gpio_to_irq(wlan_host_wake_up);
-#endif /* BCMPCIE_OOB_HOST_WAKE */
-
-#if defined(CONFIG_BCM4359) || defined(CONFIG_BCM4361) || defined(CONFIG_BCM4375) || \
-	defined(USE_CUSTOM_MSM_PCIE)
-	printk(KERN_INFO "%s: Call msm_pcie_enumerate\n", __FUNCTION__);
-	msm_pcie_enumerate(MSM_PCIE_CH_NUM);
-#endif /* CONFIG_BCM4359 || CONFIG_BCM4361 || CONFIG_BCM4375 */
+#endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
 
 	return 0;
 }
@@ -172,8 +165,6 @@ dhd_wifi_init_gpio(void)
 int
 dhd_wlan_power(int onoff)
 {
-	printk(KERN_INFO"------------------------------------------------");
-	printk(KERN_INFO"------------------------------------------------\n");
 	printk(KERN_INFO"%s Enter: power %s\n", __func__, onoff ? "on" : "off");
 
 	if (onoff) {
@@ -203,19 +194,6 @@ dhd_wlan_power(int onoff)
 	}
 	return 0;
 }
-EXPORT_SYMBOL(dhd_wlan_power);
-
-void
-post_power_operation(int on)
-{
-#if defined(CONFIG_BCM4359) || defined(CONFIG_BCM4361) || defined(CONFIG_BCM4375) || \
-	defined(USE_CUSTOM_MSM_PCIE)
-	printk(KERN_INFO "%s: Call msm_pcie_enumerate\n", __FUNCTION__);
-	if (on) {
-		msm_pcie_enumerate(MSM_PCIE_CH_NUM);
-	}
-#endif /* CONFIG_BCM4359 || CONFIG_BCM4361 || CONFIG_BCM4375 */
-}
 
 static int
 dhd_wlan_reset(int onoff)
@@ -226,6 +204,10 @@ dhd_wlan_reset(int onoff)
 static int
 dhd_wlan_set_carddetect(int val)
 {
+#ifdef BCMPCIE
+	printk(KERN_INFO "%s: Call msm_pcie_enumerate\n", __FUNCTION__);
+	msm_pcie_enumerate(MSM_PCIE_CH_NUM);
+#endif /* BCMPCIE */
 	return 0;
 }
 
@@ -236,7 +218,13 @@ dhd_get_wlan_oob_gpio(void)
 	return gpio_is_valid(wlan_host_wake_up) ?
 		gpio_get_value(wlan_host_wake_up) : -1;
 }
-EXPORT_SYMBOL(dhd_get_wlan_oob_gpio);
+
+int
+dhd_get_wlan_oob_gpio_number(void)
+{
+	return gpio_is_valid(wlan_host_wake_up) ?
+		wlan_host_wake_up : -1;
+}
 #endif /* CONFIG_BCMDHD_OOB_HOST_WAKE && CONFIG_BCMDHD_GET_OOB_STATE */
 
 struct resource dhd_wlan_resources = {
@@ -250,7 +238,6 @@ struct resource dhd_wlan_resources = {
 	IORESOURCE_IRQ_HIGHLEVEL,
 #endif /* BCMPCIE */
 };
-EXPORT_SYMBOL(dhd_wlan_resources);
 
 struct wifi_platform_data dhd_wlan_control = {
 	.set_power	= dhd_wlan_power,
@@ -260,13 +247,8 @@ struct wifi_platform_data dhd_wlan_control = {
 	.mem_prealloc	= dhd_wlan_mem_prealloc,
 #endif /* CONFIG_BROADCOM_WIFI_RESERVED_MEM */
 };
-EXPORT_SYMBOL(dhd_wlan_control);
 
-#ifndef USE_CUSTOM_MSM_PCIE
-int __init
-#else
 int
-#endif /* USE_CUSTOM_MSM_PCIE */
 dhd_wlan_init(void)
 {
 	int ret;
@@ -296,17 +278,17 @@ fail:
 	printk(KERN_INFO"%s: FINISH.......\n", __FUNCTION__);
 	return ret;
 }
-#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
-	defined(CONFIG_ARCH_SDM845) || defined(CONFIG_ARCH_SM8150)
-#if defined(CONFIG_DEFERRED_INITCALLS)
-deferred_module_init(dhd_wlan_init);
-#else
-late_initcall(dhd_wlan_init);
-#endif /* CONFIG_DEFERRED_INITCALLS */
-#else
-#ifndef USE_CUSTOM_MSM_PCIE
-device_initcall(dhd_wlan_init);
-#endif /* !USE_CUSTOM_MSM_PCIE */
-#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998
-	* CONFIG_ARCH_SDM845 || CONFIG_ARCH_SM8150
-	*/
+
+int
+dhd_wlan_deinit(void)
+{
+#ifdef CONFIG_BCMDHD_OOB_HOST_WAKE
+	gpio_free(wlan_host_wake_up);
+#endif /* CONFIG_BCMDHD_OOB_HOST_WAKE */
+	gpio_free(wlan_reg_on);
+
+#ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
+	dhd_exit_wlan_mem();
+#endif /*  CONFIG_BROADCOM_WIFI_RESERVED_MEM */
+	return 0;
+}
