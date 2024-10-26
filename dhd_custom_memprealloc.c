@@ -367,7 +367,6 @@ dhd_init_wlan_mem(void)
 		goto err_mem_alloc;
 	}
 
-#ifdef CONFIG_BCMDHD_PREALLOC_PKTIDMAP
 	wlan_static_dhd_pktid_map = kmalloc(WLAN_DHD_PKTID_MAP_SIZE,
 		GFP_KERNEL);
 	if (!wlan_static_dhd_pktid_map) {
@@ -381,7 +380,6 @@ dhd_init_wlan_mem(void)
 		pr_err("Failed to alloc wlan_static_dhd_pktid_ioctl_map\n");
 		goto err_mem_alloc;
 	}
-#endif /* CONFIG_BCMDHD_PREALLOC_PKTIDMAP */
 #else
 	wlan_static_dhd_wlfc_buf = kmalloc(WLAN_DHD_WLFC_BUF_SIZE,
 		GFP_KERNEL);
@@ -398,13 +396,11 @@ dhd_init_wlan_mem(void)
 	}
 #endif /* BCMPCIE */
 
-#ifdef CONFIG_BCMDHD_PREALLOC_MEMDUMP
 	wlan_static_dhd_memdump_ram = kmalloc(WLAN_DHD_MEMDUMP_SIZE, GFP_KERNEL);
 	if (!wlan_static_dhd_memdump_ram) {
 		pr_err("Failed to alloc wlan_static_dhd_memdump_ram\n");
 		goto err_mem_alloc;
 	}
-#endif /* CONFIG_BCMDHD_PREALLOC_MEMDUMP */
 
 	wlan_static_dhd_pktlog_dump_buf = kmalloc(DHD_PKTLOG_DUMP_BUF_SIZE, GFP_KERNEL);
 	if (!wlan_static_dhd_pktlog_dump_buf) {
@@ -416,19 +412,15 @@ dhd_init_wlan_mem(void)
 	return 0;
 
 err_mem_alloc:
-#ifdef CONFIG_BCMDHD_PREALLOC_MEMDUMP
 	if (wlan_static_dhd_memdump_ram) {
 		kfree(wlan_static_dhd_memdump_ram);
 	}
-
-#endif /* CONFIG_BCMDHD_PREALLOC_MEMDUMP */
 
 #ifdef BCMPCIE
 	if (wlan_static_if_flow_lkup) {
 		kfree(wlan_static_if_flow_lkup);
 	}
 
-#ifdef CONFIG_BCMDHD_PREALLOC_PKTIDMAP
 	if (wlan_static_dhd_pktid_map) {
 		kfree(wlan_static_dhd_pktid_map);
 	}
@@ -436,7 +428,6 @@ err_mem_alloc:
 	if (wlan_static_dhd_pktid_ioctl_map) {
 		kfree(wlan_static_dhd_pktid_ioctl_map);
 	}
-#endif /* CONFIG_BCMDHD_PREALLOC_PKTIDMAP */
 #else
 	if (wlan_static_dhd_wlfc_buf) {
 		kfree(wlan_static_dhd_wlfc_buf);
@@ -493,19 +484,15 @@ dhd_exit_wlan_mem(void)
 {
 	int i = 0;
 
-#ifdef CONFIG_BCMDHD_PREALLOC_MEMDUMP
 	if (wlan_static_dhd_memdump_ram) {
 		kfree(wlan_static_dhd_memdump_ram);
 	}
-
-#endif /* CONFIG_BCMDHD_PREALLOC_MEMDUMP */
 
 #ifdef BCMPCIE
 	if (wlan_static_if_flow_lkup) {
 		kfree(wlan_static_if_flow_lkup);
 	}
 
-#ifdef CONFIG_BCMDHD_PREALLOC_PKTIDMAP
 	if (wlan_static_dhd_pktid_map) {
 		kfree(wlan_static_dhd_pktid_map);
 	}
@@ -513,7 +500,6 @@ dhd_exit_wlan_mem(void)
 	if (wlan_static_dhd_pktid_ioctl_map) {
 		kfree(wlan_static_dhd_pktid_ioctl_map);
 	}
-#endif /* CONFIG_BCMDHD_PREALLOC_PKTIDMAP */
 #else
 	if (wlan_static_dhd_wlfc_buf) {
 		kfree(wlan_static_dhd_wlfc_buf);
