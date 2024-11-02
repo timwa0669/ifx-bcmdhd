@@ -12696,7 +12696,6 @@ dhd_register_if(dhd_pub_t *dhdp, int ifidx, bool need_rtnl_lock)
 		net->netdev_ops = &dhd_ops_pri;
 		if (!ETHER_ISNULLADDR(dhd->pub.mac.octet))
 			memcpy(temp_addr, dhd->pub.mac.octet, ETHER_ADDR_LEN);
-		memcpy(dhd->iflist[0]->mac_addr, dhd->pub.mac.octet, ETHER_ADDR_LEN);
 	} else {
 		/*
 		 * We have to use the primary MAC for virtual interfaces
