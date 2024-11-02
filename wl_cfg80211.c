@@ -13162,7 +13162,8 @@ wl_cfg80211_bcn_validate_sec(
 	struct parsed_ies *ies,
 	u32 dev_role,
 	s32 bssidx,
-	bool privacy)
+	bool privacy,
+	struct cfg80211_crypto_settings *crypto)
 {
 	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
 	wl_cfgbss_t *bss = wl_get_cfgbss_by_wdev(cfg, dev->ieee80211_ptr);
@@ -13172,6 +13173,10 @@ wl_cfg80211_bcn_validate_sec(
 #else
 	osl_t *oshp = cfg->osh;
 #endif /* WL_DHD_XR */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && defined(WL_SAE)
+	u32 wpa_auth = 0;
+	int sae_pwe = -1;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && WL_SAE */
 
 	if (!bss) {
 		WL_ERR(("cfgbss is NULL \n"));
@@ -13279,10 +13284,35 @@ wl_cfg80211_bcn_validate_sec(
 				memcpy(bss->wps_ie, ies->wps_ie, ies->wps_ie_len);
 			}
 		}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && defined(WL_SAE)
+		if (wldev_iovar_getint_bsscfg(dev, "wpa_auth", &wpa_auth, bssidx) < 0) {
+			WL_ERR(("wpa_auth get error\n"));
+			return BCME_ERROR;
+		}
+
+		if (crypto && WPA3_AUTH_ENABLED(wpa_auth)) {
+			switch (crypto->sae_pwe) {
+			case NL80211_SAE_PWE_HUNT_AND_PECK:
+				sae_pwe = 0;
+				break;
+			case NL80211_SAE_PWE_HASH_TO_ELEMENT:
+				sae_pwe = 1;
+				break;
+			case NL80211_SAE_PWE_BOTH:
+				sae_pwe = 2;
+				break;
+			default:
+				sae_pwe = -1;
+				break;
+			}
+			if (sae_pwe >= 0)
+				wl_cfg80211_set_sae_pwe(dev, sae_pwe);
+		}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && WL_SAE */
 	}
 
 	return 0;
-
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0)) || defined(WL_COMPAT_WIRELESS)
@@ -14370,6 +14400,7 @@ wl_cfg80211_start_ap(
 	struct parsed_ies ies;
 	s32 bssidx = 0;
 	u32 dev_role = 0;
+	u32 wpa_auth = 0;
 	chanspec_bw_t chspec_bw = INVCHANSPEC;
 #ifdef WL11AX
 #if (defined(IFX_CFG80211_5_4_21) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0) && \
@@ -14396,9 +14427,6 @@ wl_cfg80211_start_ap(
 	dhd_pub_t *dhd6g;
 	s32 stop_fils_status = 0;
 #endif /* defined(WL_DHD_XR_MASTER) && defined(WL_6E) */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0))
-	int sae_pwe = -1;
-#endif // endif
 #ifdef WL_DHD_XR
 	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(dev);
 #if defined(WL_DHD_XR_CLIENT) && defined(WL_6E)
@@ -14533,7 +14561,7 @@ wl_cfg80211_start_ap(
 				"WLAN_CIPHER_SUITE_SMS4 \n", __FUNCTION__));
 
 		if ((err = wl_cfg80211_bcn_validate_sec(dev, &ies,
-			dev_role, bssidx, info->privacy)) < 0)
+			dev_role, bssidx, info->privacy, &info->crypto)) < 0)
 		{
 			WL_ERR(("Beacon set security failed \n"));
 			goto fail;
@@ -14561,24 +14589,6 @@ wl_cfg80211_start_ap(
 
 	wl_set_drv_status(cfg, CONNECTED, dev);
 	WL_DBG(("** AP/GO Created **\n"));
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0))
-	switch(info->crypto.sae_pwe) {
-		case NL80211_SAE_PWE_HUNT_AND_PECK:
-			sae_pwe = 0;
-			break;
-		case NL80211_SAE_PWE_HASH_TO_ELEMENT:
-			sae_pwe = 1;
-			break;
-		case NL80211_SAE_PWE_BOTH:
-			sae_pwe = 2;
-			break;
-		default:
-			sae_pwe = -1;
-			break;
-	}
-	if (sae_pwe >= 0)
-		wl_cfg80211_set_sae_pwe(dev, sae_pwe);
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) */
 
 #ifdef WL11AX
 #if (defined IFX_CFG80211_5_4_21 || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0) && \
@@ -15284,7 +15294,8 @@ wl_cfg80211_add_set_beacon(struct wiphy *wiphy, struct net_device *dev,
 	privacy = 0;
 #endif // endif
 	if (!is_bss_up &&
-		(wl_cfg80211_bcn_validate_sec(dev, &ies, dev_role, bssidx, privacy) < 0))
+		(wl_cfg80211_bcn_validate_sec(dev, &ies, dev_role, bssidx,
+		privacy, NULL) < 0))
 	{
 		WL_ERR(("Beacon set security failed \n"));
 		err = -EINVAL;
@@ -29120,7 +29131,11 @@ wl_cfg80211_set_sae_pwe(struct net_device *ndev, u8 sae_pwe)
 {
 	int ret = BCME_UNSUPPORTED;
 	struct bcm_cfg80211 *cfg = wl_get_cfg(ndev);
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(dev);
+#else
 	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
 
 	/* sae_pwe 0: HnP, 1: H2E, 2: Both HnP and H2E */
 	WL_DBG(("Set SAE PWE derivation machanisme %d\n", sae_pwe));
