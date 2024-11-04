@@ -1914,9 +1914,6 @@ extern int dhd_attach_p2p(dhd_pub_t *);
 extern int dhd_detach_p2p(dhd_pub_t *);
 #endif /* WLP2P && WL_CFG80211 */
 extern int dhd_register_if(dhd_pub_t *dhdp, int idx, bool need_rtnl_lock);
-#ifdef WL_VIF_SUPPORT
-extern int dhd_register_vif(dhd_pub_t *dhdp);
-#endif /* WL_VIF_SUPPORT */
 
 /* Indication from bus module regarding removal/absence of dongle */
 extern void dhd_detach(dhd_pub_t *dhdp);

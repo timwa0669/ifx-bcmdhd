@@ -2190,14 +2190,6 @@ int dhdpcie_init(struct pci_dev *pdev)
 			DHD_ERROR(("%s(): ERROR.. dhd_register_if() failed\n", __FUNCTION__));
 			break;
 		}
-#ifdef WL_VIF_SUPPORT
-		/* Attach to the virtual interface */
-		DHD_TRACE(("%s(): Calling dhd_register_vif() \n", __FUNCTION__));
-		if (dhd_register_vif(bus->dhd) != 0) {
-			DHD_ERROR(("%s(): ERROR.. dhd_register_vif() failed\n", __FUNCTION__));
-		}
-#endif // endif
-
 		dhdpcie_init_succeeded = TRUE;
 
 #ifdef DHD_PCIE_NATIVE_RUNTIMEPM

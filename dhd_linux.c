@@ -816,15 +816,6 @@ uint dhd_radio_up = 1;
 char iface_name[IFNAMSIZ] = {'\0'};
 module_param_string(iface_name, iface_name, IFNAMSIZ, 0);
 
-#ifdef WL_VIF_SUPPORT
-/* Virtual inteface name */
-char vif_name[IFNAMSIZ] = "wlan";
-module_param_string(vif_name, vif_name, IFNAMSIZ, 0);
-
-int vif_num = 0;
-module_param(vif_num, int, 0);
-#endif /* WL_VIF_SUPPORT */
-
 /* The following are specific to the SDIO dongle */
 
 /* IOCTL response timeout */
@@ -6994,15 +6985,6 @@ struct net_info *iter, *next;
 
 #endif /* WL_STATIC_IF && WL_CFG80211 */
 
-#if defined(WL_VIF_SUPPORT)
-	if (vif_num > 0) {
-		DHD_ERROR(("virtual if operational. skip chip reset.\n"));
-		skip_reset = true;
-		wl_cfg80211_sta_ifdown(net);
-		goto exit;
-	}
-#endif /* WL_VIF_SUPPORT */
-
 #ifdef WL_DHD_XR
 	GCC_DIAGNOSTIC_PUSH_SUPPRESS_CAST();
 	for_each_ndev(cfg, iter, next) {
@@ -12836,49 +12818,6 @@ fail:
 	return err;
 }
 
-#ifdef WL_VIF_SUPPORT
-#define MAX_VIF_NUM 8
-int
-dhd_register_vif(dhd_pub_t *dhdp)
-{
-	dhd_info_t *dhd = (dhd_info_t *)dhdp->info;
-	dhd_if_t *ifp;
-	struct net_device *net;
-	int err = BCME_OK, i;
-	char viface_name[IFNAMSIZ] = {'\0'};
-	ifp = dhd->iflist[0];
-	net = ifp->net;
-	if (vif_num && vif_num > MAX_VIF_NUM)
-		vif_num = MAX_VIF_NUM;
-	/* Set virtual interface name if it was provided as module parameter */
-	if (vif_name[0]) {
-		int len;
-		char ch;
-		strncpy(viface_name, vif_name, IFNAMSIZ);
-		viface_name[IFNAMSIZ - 1] = 0;
-		len = strlen(viface_name);
-		ch = viface_name[len - 1];
-		if ((ch > '9' || ch < '0') && (len < IFNAMSIZ - 2))
-			strcat(viface_name, "%d");
-	} else {
-		DHD_ERROR(("%s check vif_name\n", __FUNCTION__));
-		return BCME_BADOPTION;
-	}
-
-	DHD_INFO(("%s Virtual interface [%s]:\n", __FUNCTION__, viface_name));
-	rtnl_lock();
-	for (i = 0; i < vif_num; i++) {
-		if (wl_cfg80211_add_if(wl_get_cfg(net), net, WL_IF_TYPE_STA, viface_name, NULL)
-			== NULL) {
-			DHD_ERROR(("%s error Virtual interface [%s], i:%d\n", __FUNCTION__,
-				viface_name, i));
-			break;
-		}
-	}
-	rtnl_unlock();
-	return err;
-}
-#endif /* WL_VIF_SUPPORT */
 void
 dhd_bus_detach(dhd_pub_t *dhdp)
 {
