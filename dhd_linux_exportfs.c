@@ -140,6 +140,7 @@ exit:
 void
 dhd_dbg_ring_proc_create(dhd_pub_t *dhdp)
 {
+	BCM_REFERENCE(dhd_ring_proc_fops);
 #ifdef DEBUGABILITY
 	dhd_dbg_ring_t *dbg_verbose_ring = NULL;
 

@@ -7300,7 +7300,7 @@ wl_android_set_rps_cpus(struct net_device *dev, char *command)
 
 #if defined(DHDTCPACK_SUPPRESS) && defined(BCMPCIE) && defined(WL_CFG80211)
 	if (!error) {
-		void *dhdp = wl_cfg80211_get_dhdp(net);
+		void *dhdp = wl_cfg80211_get_dhdp(dev);
 		if (enable) {
 			DHD_TRACE(("wl_android_set_rps_cpus: set ack suppress."
 			" TCPACK_SUP_HOLD.\n"));
@@ -10624,7 +10624,7 @@ wl_cfg80211_unregister_static_if(struct bcm_cfg80211 *cfg)
 		/* wdev free will happen from notifier context */
 		/* free_netdev(cfg->static_ndev);
 		*/
-		dhd_unregister_net(ifp->net, true);
+		dhd_unregister_net(cfg->static_ndev[i], true);
 	}
 }
 

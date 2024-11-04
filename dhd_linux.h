@@ -57,9 +57,7 @@
 #if defined(CONFIG_WIFI_CONTROL_FUNC)
 #include <linux/wlan_plat.h>
 #endif // endif
-#ifdef PCIE_FULL_DONGLE
 #include <etd.h>
-#endif /* PCIE_FULL_DONGLE */
 #ifdef WL_MONITOR
 #include <bcmmsgbuf.h>
 #define MAX_RADIOTAP_SIZE      256 /* Maximum size to hold HE Radiotap header format */

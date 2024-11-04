@@ -8920,7 +8920,7 @@ wl_cfgvendor_acs_offload_post(struct wiphy *wiphy)
 	int chosen = 0, retry=0, buflen = 0, i;
 	int selected = 0, bw = 0, spect = 0;
 	int ret = BCME_OK;
-	uint16 band;
+	uint16 band = WL_CHANSPEC_BAND_2G;
 
 	if (!wiphy){
 		WL_ERR(("ACS: wiphy is NULL\n"));
@@ -8940,7 +8940,7 @@ wl_cfgvendor_acs_offload_post(struct wiphy *wiphy)
 	WL_INFORM_MEM(("ACS: hw_mode=%d, band=%d ht_enabled:%d,%d vht_enabled:%d ch_width:%d ch_cnt:%d\n",
 			params->hw_mode, params->band, params->ht_enabled , params->ht40_enabled,
 			params->vht_enabled, params->ch_width, params->chan_cnt));
-	if ( params->band == WLC_BAND_2G)
+	if (params->band == WLC_BAND_2G)
 		band = WL_CHANSPEC_BAND_2G;
 	else if (params->band == WLC_BAND_5G)
 		band = WL_CHANSPEC_BAND_5G;
@@ -9921,6 +9921,7 @@ enum ifx_vendor_attr_wnm_param {
 	IFX_VENDOR_ATTR_WNM_PARAM_MAX
 };
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
 static const struct nla_policy
 ifx_vendor_attr_wnm_param_policy[IFX_VENDOR_ATTR_WNM_PARAM_MAX + 1] = {
 	[IFX_VENDOR_ATTR_WNM_PARAM_UNSPEC] = {.type = NLA_U8},
@@ -9930,7 +9931,6 @@ ifx_vendor_attr_wnm_param_policy[IFX_VENDOR_ATTR_WNM_PARAM_MAX + 1] = {
 	[IFX_VENDOR_ATTR_WNM_PARAM_MAX] = {.type = NLA_U8},
 };
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
 static const struct nla_policy ifx_vendor_attr_wnm_policy[IFX_VENDOR_ATTR_WNM_MAX + 1] = {
 	[IFX_VENDOR_ATTR_WNM_UNSPEC] = {.type = NLA_U8},
 	[IFX_VENDOR_ATTR_WNM_CMD] = {.type = NLA_U8},

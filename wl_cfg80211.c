@@ -3648,7 +3648,7 @@ _wl_cfg80211_check_axi_error(struct bcm_cfg80211 *cfg)
 	WL_ERR(("%s: starts to read %s. Axi error \n", __FUNCTION__, filename));
 
 #ifdef WL_DHD_XR_CLIENT
-	dhd = (dhd_pub_t *) dhd_get_pub(DHD_XR_GET_SLAVE_NDEV(cfg));
+	dhd = (dhd_pub_t *)dhd_get_pub(DHD_XR_GET_SLAVE_NDEV(cfg));
 	if (!dhd) {
 		WL_ERR(("slave pub is NULL\n"));
 		return BCME_ERROR;
@@ -13388,9 +13388,9 @@ wl_cfg80211_parse_ies(const u8 *ptr, u32 len, struct parsed_ies *ies)
 #if defined(WL_DHD_XR) && defined(WL_6E)
 	/* find the RNR_IE */
 	if ((ies->rnr_ie = bcm_parse_tlvs(ptr, len,
-                DOT11_MNG_RNR_ID)) != NULL) {
-                ies->rnr_ie_len = ies->rnr_ie->len;
-        }
+		DOT11_MNG_RNR_ID)) != NULL) {
+		ies->rnr_ie_len = ies->rnr_ie->len;
+	}
 #endif /* defined(WL_DHD_XR) && defined(WL_6E) */
 
 	/* find the FILS_IND_IE */
@@ -13524,7 +13524,7 @@ wl_cfg80211_bcn_bringup_ap(
 	s32 is_rsdb_supported = BCME_ERROR;
 	long timeout;
 #ifdef WL_DHD_XR
-	dhd_pub_t *dhdp = (dhd_pub_t *) dhd_get_pub(dev);
+	dhd_pub_t *dhdp = (dhd_pub_t *)dhd_get_pub(dev);
 #else
 	dhd_pub_t *dhdp = (dhd_pub_t *)(cfg->pub);
 #endif /* WL_DHD_XR */
@@ -13726,10 +13726,10 @@ wl_cfg80211_bcn_bringup_ap(
 			WL_DBG((" SoftAP SSID \"%s\" \n", join_params.ssid.SSID));
 		}
 
-			if ((err = wl_cfg80211_bss_up(cfg, dev, bssidx, 1)) < 0) {
-				WL_ERR(("AP Bring up error %d\n", err));
-				goto exit;
-			}
+		if ((err = wl_cfg80211_bss_up(cfg, dev, bssidx, 1)) < 0) {
+			WL_ERR(("AP Bring up error %d\n", err));
+			goto exit;
+		}
 
 	} else {
 		WL_ERR(("Wrong interface type %d\n", dev_role));
@@ -15112,15 +15112,15 @@ wl_cfg80211_change_beacon(
 
 #if defined(WL_DHD_XR) && defined(WL_6E)
 	/* Check if parsed ies has RNR IE available */
-        if (ies.rnr_ie != NULL)
-        {
+	if (ies.rnr_ie != NULL)
+	{
 		/* Add RNR IE */
-                err = wl_add_rnr_ie(cfg, dev, bssidx,
-                                VNDR_IE_CUSTOM_FLAG, ies.rnr_ie->id,
-                                ies.rnr_ie->data, ies.rnr_ie->len);
-                if(unlikely(err)) {
-                       WL_ERR(("Failed to add RNR IE err=%d\n", err));
-                }
+		err = wl_add_rnr_ie(cfg, dev, bssidx,
+			VNDR_IE_CUSTOM_FLAG, ies.rnr_ie->id,
+			ies.rnr_ie->data, ies.rnr_ie->len);
+		if (unlikely(err)) {
+			WL_ERR(("Failed to add RNR IE err=%d\n", err));
+		}
 #ifdef WL_DHD_XR_MASTER
 		else {
 			/* Send XR CMD to indicating available Colacated AP
@@ -15136,31 +15136,31 @@ wl_cfg80211_change_beacon(
 			}
 		}
 #endif /* WL_DHD_XR_MASTER */
-        }
+		}
 	else {
 		/* Parsed ies doesn't have RNR IE
 		 * Check if Firmware contains RNR IE
 		 * If yes, then clear the configured RNR IE
 		 * This occurs when 6G AP is turned OFF after colocated AP scenario */
-                ie_getbuf_t ie_getbufp;
-                char getbuf[WLC_IOCTL_SMLEN];
-                ie_getbufp.id = DOT11_MNG_RNR_ID;
+		ie_getbuf_t ie_getbufp;
+		char getbuf[WLC_IOCTL_SMLEN];
+		ie_getbufp.id = DOT11_MNG_RNR_ID;
 		/* Check if RNR is added in Firmware */
-                if (wldev_iovar_getbuf_bsscfg(dev, "neighbour_ap_info", (void *)&ie_getbufp,
-                        sizeof(ie_getbufp), getbuf, WLC_IOCTL_SMLEN, bssidx, &cfg->ioctl_buf_sync)
-                        == BCME_OK) {
+		if (wldev_iovar_getbuf_bsscfg(dev, "neighbour_ap_info", (void *)&ie_getbufp,
+				sizeof(ie_getbufp), getbuf, WLC_IOCTL_SMLEN, bssidx, &cfg->ioctl_buf_sync)
+				== BCME_OK) {
 			/* Get len of buffer */
-                        u8 len = getbuf[1];
-                        if (len != 0) {
+			u8 len = getbuf[1];
+			if (len != 0) {
 				/* Clear RNR IE */
-                                err = wl_clear_rnr_ie(cfg, dev, bssidx,
-                                VNDR_IE_CUSTOM_FLAG);
-                                if(unlikely(err)) {
-                                        WL_ERR(("Failed to clear RNR IE err=%d\n", err));
-                                }
-                        }
-                }
-        }
+				err = wl_clear_rnr_ie(cfg, dev, bssidx,
+					VNDR_IE_CUSTOM_FLAG);
+				if (unlikely(err)) {
+					WL_ERR(("Failed to clear RNR IE err=%d\n", err));
+				}
+			}
+		}
+	}
 #endif /* defined(WL_DHD_XR) && defined(WL_6E) */
 
 #ifdef WL11U

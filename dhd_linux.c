@@ -3542,19 +3542,11 @@ __dhd_sendpkt(dhd_pub_t *dhdp, int ifidx, void *pktbuf)
 		if (dhd_wlfc_commit_packets(dhdp, (f_commitpkt_t)dhd_bus_txdata,
 			dhdp->bus, pktbuf, TRUE) == WLFC_UNSUPPORTED) {
 			/* non-proptxstatus way */
-#ifdef BCMPCIE
-			ret = dhd_bus_txdata(dhdp->bus, pktbuf, (uint8)ifidx);
-#else
 			ret = dhd_bus_txdata(dhdp->bus, pktbuf);
-#endif /* BCMPCIE */
 		}
 	}
 #else
-#ifdef BCMPCIE
-	ret = dhd_bus_txdata(dhdp->bus, pktbuf, (uint8)ifidx);
-#else
 	ret = dhd_bus_txdata(dhdp->bus, pktbuf);
-#endif /* BCMPCIE */
 #endif /* PROP_TXSTATUS */
 
 	return ret;
@@ -20459,11 +20451,19 @@ int custom_rps_map_set(struct netdev_rx_queue *queue, char *buf, size_t len)
 	spin_unlock(&rps_map_lock);
 
 	if (map) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
+		static_key_slow_inc(&rps_needed.key);
+#else
 		static_key_slow_inc(&rps_needed);
+#endif
 	}
 	if (old_map) {
 		kfree_rcu(old_map, rcu);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 2, 0))
+		static_key_slow_dec(&rps_needed.key);
+#else
 		static_key_slow_dec(&rps_needed);
+#endif
 	}
 	free_cpumask_var(mask);
 

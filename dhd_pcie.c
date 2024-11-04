@@ -4230,7 +4230,7 @@ dhd_bus_schedule_queue(struct dhd_bus  *bus, uint16 flow_id, bool txs)
 
 /** Sends an (ethernet) data frame (in 'txp') to the dongle. Callee disposes of txp. */
 int BCMFASTPATH
-dhd_bus_txdata(struct dhd_bus *bus, void *txp, uint8 ifidx)
+dhd_bus_txdata(struct dhd_bus *bus, void *txp)
 {
 	uint16 flowid;
 #ifdef IDLE_TX_FLOW_MGMT

@@ -2211,13 +2211,7 @@ dhd_enable_oob_intr(struct dhd_bus *bus, bool enable)
 }
 #endif /* defined(OOB_INTR_ONLY) || defined(BCMSPI_ANDROID) */
 
-int
-#if defined(CONFIG_ANDROID_VERSION) && (CONFIG_ANDROID_VERSION >= 13) && \
-	defined(PLATFORM_IMX)
-dhd_bus_txdata(void *ctx, void *pkt)
-#else
-dhd_bus_txdata(struct dhd_bus *bus, void *pkt)
-#endif /* PLATFORM_IMX && CONFIG_ANDROID_VERSION >= 13 */
+int dhd_bus_txdata(struct dhd_bus *bus, void *pkt)
 {
 #if defined(CONFIG_ANDROID_VERSION) && (CONFIG_ANDROID_VERSION >= 13) && \
 	defined(PLATFORM_IMX)

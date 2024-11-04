@@ -997,11 +997,7 @@ _dhd_wlfc_send_signalonly_packet(athost_wl_status_info_t* ctx, wlfc_mac_descript
 		ctx->stats.signal_only_pkts_sent++;
 #endif // endif
 
-#if defined(BCMPCIE)
-		rc = dhd_bus_txdata(dhdp->bus, p, ctx->host_ifidx);
-#else
 		rc = dhd_bus_txdata(dhdp->bus, p);
-#endif // endif
 		if (rc != BCME_OK) {
 			_dhd_wlfc_pullheader(ctx, p);
 			PKTFREE(ctx->osh, p, TRUE);

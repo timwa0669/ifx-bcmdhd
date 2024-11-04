@@ -65,16 +65,7 @@ extern void dhd_bus_getidletime(dhd_pub_t *dhdp, int *idletime);
 extern void dhd_bus_setidletime(dhd_pub_t *dhdp, int idle_time);
 
 /* Send a data frame to the dongle.  Callee disposes of txp. */
-#ifdef BCMPCIE
-extern int dhd_bus_txdata(struct dhd_bus *bus, void *txp, uint8 ifidx);
-#else
-#if defined(CONFIG_ANDROID_VERSION) && (CONFIG_ANDROID_VERSION >= 13) && \
-	defined(PLATFORM_IMX)
-extern int dhd_bus_txdata(void *ctx, void *txp);
-#else
 extern int dhd_bus_txdata(struct dhd_bus *bus, void *txp);
-#endif /* PLATFORM_IMX && CONFIG_ANDROID_VERSION >= 13 */
-#endif /* BCMPCIE */
 
 #ifdef BCMPCIE
 extern void dhdpcie_cto_recovery_handler(dhd_pub_t *dhd);
