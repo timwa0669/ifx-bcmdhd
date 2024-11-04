@@ -76,7 +76,7 @@ DHDCFLAGS += -Wall -Wstrict-prototypes -Dlinux -DLINUX -DBCMDRIVER        \
 	-DEMBEDDED_PLATFORM -DPNO_SUPPORT -DSHOW_LOGTRACE                     \
 	-DGET_CUSTOM_MAC_ENABLE                                               \
 	-DSEC_ENHANCEMENT -DDHD_FW_COREDUMP -DCHIPS_CUSTOMER_HW6              \
-	-DDHD_RND_DEBUG -DDHD_DUMP_FILE_WRITE_FROM_KERNEL                     \
+	-DDHD_RND_DEBUG                                                       \
 	-DDHD_DONOT_FORWARD_BCMEVENT_AS_NETWORK_PKT
 
 GCCVERSIONGTEQ9 := $(shell expr `$(CROSS_COMPILE)gcc -dumpversion | cut -f1 -d.` \>= 9)
@@ -295,7 +295,6 @@ DHDCFLAGS += -DEWP_ECNTRS_LOGGING
 ifeq ($(shell expr '$(CONFIG_ANDROID_VERSION)' \>= 14), 1)
 DHDCFLAGS += -DDHD_FILE_DUMP_EVENT
 DHDCFLAGS += -DDHD_HAL_RING_DUMP
-DHDCFLAGS := $(filter-out -DDHD_DUMP_FILE_WRITE_FROM_KERNEL,$(DHDCFLAGS))
 endif
 
 KERNELVER=$(VERSION)_$(PATCHLEVEL)
