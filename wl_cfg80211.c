@@ -14852,8 +14852,8 @@ wl_cfg80211_stop_ap(
 
 #if defined(WL_DHD_XR_CLIENT) && defined(WL_6E)
 	/* clean-up cfg flag when 6G AP is turned OFF */
-        if (cfg->xr_6g_wdev != NULL && dev == cfg->xr_6g_wdev->netdev)
-                cfg->xr_6g_wdev = NULL;
+	if (cfg->xr_6g_wdev != NULL && dev == cfg->xr_6g_wdev->netdev)
+		cfg->xr_6g_wdev = NULL;
 #endif /* defined(WL_DHD_XR_CLIENT) && defined(WL_6E) */
 
 	if (wl_cfg80211_get_bus_state(cfg)) {
@@ -14884,51 +14884,21 @@ wl_cfg80211_stop_ap(
 		dev_role = NL80211_IFTYPE_AP;
 		WL_DBG(("stopping AP operation\n"));
 #ifdef DHD_BANDSTEER
-#ifdef WL_DHD_XR
-#ifdef WL_DHD_XR_MASTER
-		if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_AP) {
-			/* Disable bandsteer  */
-			cfg->ap_bs = 1;
-			cfg->p2p_bs = 1;
-			dhd_bandsteer_module_deinit(
-				bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
-		}
-
-#endif /* WL_DHD_XR_MASTER*/
-#else
-		if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_AP) {
-			/* Disable bandsteer  */
-			cfg->ap_bs = 1;
-			cfg->p2p_bs = 1;
-			dhd_bandsteer_module_deinit(
-				bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
-		}
-#endif /* WL_DHD_XR*/
+		/* Disable bandsteer  */
+		cfg->ap_bs = 1;
+		cfg->p2p_bs = 1;
+		dhd_bandsteer_module_deinit(
+			bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
 #endif /* DHD_BANDSTEER */
 	} else if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_P2P_GO) {
 		dev_role = NL80211_IFTYPE_P2P_GO;
 		WL_DBG(("stopping P2P GO operation\n"));
 #ifdef DHD_BANDSTEER
-#ifdef WL_DHD_XR
-#ifdef WL_DHD_XR_MASTER
-		if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_P2P_GO) {
-			/* Disable bandsteer  */
-			cfg->ap_bs = 1;
-			cfg->p2p_bs = 1;
-			dhd_bandsteer_module_deinit(
-				bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
-		}
-
-#endif /* WL_DHD_XR_MASTER*/
-#else
-		if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_P2P_GO) {
-			/* Disable bandsteer  */
-			cfg->ap_bs = 1;
-			cfg->p2p_bs = 1;
-			dhd_bandsteer_module_deinit(
-				bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
-		}
-#endif /* WL_DHD_XR*/
+		/* Disable bandsteer  */
+		cfg->ap_bs = 1;
+		cfg->p2p_bs = 1;
+		dhd_bandsteer_module_deinit(
+			bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
 #endif /* DHD_BANDSTEER */
 	} else {
 		WL_ERR(("no AP/P2P GO interface is operational.\n"));
