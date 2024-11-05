@@ -14866,11 +14866,6 @@ wl_cfg80211_stop_ap(
 		cfg->xr_6g_wdev = NULL;
 #endif /* defined(WL_DHD_XR_CLIENT) && defined(WL_6E) */
 
-	if (wl_cfg80211_get_bus_state(cfg)) {
-		/* since bus is down, iovar will fail. recovery path will bringup the bus. */
-		WL_ERR(("bus is not ready\n"));
-		return BCME_OK;
-	}
 	is_rsdb_supported = DHD_OPMODE_SUPPORTED(cfg->pub, DHD_FLAG_RSDB_MODE);
 	if (is_rsdb_supported < 0)
 		return (-ENODEV);
@@ -14931,11 +14926,48 @@ wl_cfg80211_stop_ap(
 
 	/* Clear AP/GO connected status */
 	wl_clr_drv_status(cfg, CONNECTED, dev);
+
+	if (wl_cfg80211_get_bus_state(cfg)) {
+		/* since bus is down, iovar will fail. recovery path will bringup the bus. */
+		WL_ERR(("bus is not ready\n"));
+		return BCME_OK;
+	}
+
 	if ((err = wl_cfg80211_bss_up(cfg, dev, bssidx, 0)) < 0) {
 		WL_ERR(("bss down error %d\n", err));
 	}
 
 	if (dev_role == NL80211_IFTYPE_AP) {
+		/* Clear the security settings on the Interface */
+		err = wldev_iovar_setint(dev, "wsec", 0);
+		if (unlikely(err)) {
+			WL_ERR(("wsec clear failed (%d)\n", err));
+		}
+		err = wldev_iovar_setint(dev, "auth", 0);
+		if (unlikely(err)) {
+			WL_ERR(("auth clear failed (%d)\n", err));
+		}
+		err = wldev_iovar_setint(dev, "wpa_auth", 0);
+		if (unlikely(err)) {
+			WL_ERR(("set wpa_auth failed (%d)\n", err));
+		}
+		wl_cfg80211_set_sae_pwe(dev, -1);
+#ifdef CUSTOMER_HW4
+#ifdef DHD_PCIE_RUNTIMEPM
+		if (!dhd_get_idletime(dhd)) {
+			err = dhd_bus_iovar_op(dhd, "idletime", NULL, 0, (void *) &idletime,
+				sizeof(idletime), IOV_SET);
+			WL_ERR(("RPM Disable - Now enable\n"));
+
+			if (!err) {
+				WL_ERR(("RPM Enable\n"));
+			} else {
+				WL_ERR(("RPM Enable err : %d\n", err));
+			}
+		}
+#endif /* DHD_PCIE_RUNTIMEPM */
+#endif /* CUSTOMER_HW4 */
+
 #ifdef DISABLE_WL_FRAMEBURST_SOFTAP
 		wl_cfg80211_set_frameburst(cfg, TRUE);
 #endif /* DISABLE_WL_FRAMEBURST_SOFTAP */
