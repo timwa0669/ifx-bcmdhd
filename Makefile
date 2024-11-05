@@ -639,7 +639,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_ROCKCHIP),y)
 DHDCFLAGS += -DCONFIG_DHD_PLAT_ROCKCHIP
-DHDCFLAGS += -DWL_ENABLE_P2P_IF
 DHDOFILES += dhd_custom_rockchip.o
 endif
 
