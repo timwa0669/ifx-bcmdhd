@@ -16553,25 +16553,6 @@ void wl_config_custom_regulatory(struct wiphy *wiphy)
 #endif /* WL_SELF_MANAGED_REGDOM && KERNEL >= 4.0 */
 }
 
-#ifdef WL_SAE
-static s32 wl_wiphy_update_sae(struct wiphy *wiphy, dhd_pub_t *dhd)
-{
-
-	if (FW_SUPPORTED(dhd, sae_ext)) {
-		WL_DBG(("%s extsae enabled\n", __FUNCTION__));
-		wiphy->features |= NL80211_FEATURE_SAE;
-	} else if ((FW_SUPPORTED(dhd, sae)) && (FW_SUPPORTED(dhd, idsup))) {
-		wiphy_ext_feature_set(wiphy, NL80211_EXT_FEATURE_SAE_OFFLOAD);
-		WL_DBG(("%s intsae enabled\n", __FUNCTION__));
-	}
-
-	if (FW_SUPPORTED(dhd, ap_pmksa)) {
-		WL_ERR(("Firmware support AP PMKSA\n"));
-		wiphy_ext_feature_set(wiphy, NL80211_EXT_FEATURE_AP_PMKSA_CACHING);
-	}
-	return BCME_OK;
-}
-#endif /* WL_SAE */
 static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev, void *context)
 {
 	s32 err = 0;
@@ -16701,9 +16682,8 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 #endif /* WL_SUPPORT_BACKPORTED_KPATCHES) || (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0)) */
 
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
-	if (FW_SUPPORTED(dhd, tdls))
-		wdev->wiphy->flags |= WIPHY_FLAG_SUPPORTS_TDLS;
-#endif // endif
+	wdev->wiphy->flags |= WIPHY_FLAG_SUPPORTS_TDLS;
+#endif /* (LINUX_VERSION_CODE > KERNEL_VERSION(3, 2, 0)) || WL_COMPAT_WIRELESS */
 
 #ifdef WL_6E
 #if (defined IFX_CFG80211_5_4_21 || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)))
@@ -16761,12 +16741,15 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 		WL_ERR(("Couldn not attach vendor commands (%d)\n", err));
 	}
 #endif /* (LINUX_VERSION_CODE > KERNEL_VERSION(3, 14, 0)) || defined(WL_VENDOR_EXT_SUPPORT) */
+
 #ifdef WL_FILS
 	wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_FILS_SK_OFFLOAD);
 #endif /* WL_FILS */
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0))
 	wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_DFS_OFFLOAD);
 #endif /* LINUX_VERSION_CODE > KERNEL_VERSION(4, 17, 0) */
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 12, 0))
 	wdev->wiphy->flags |= WIPHY_FLAG_HAS_CHANNEL_SWITCH;
 	wdev->wiphy->max_num_csa_counters = WL_MAX_NUM_CSA_COUNTERS;
@@ -16779,33 +16762,16 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) && \
 	defined(SUPPORT_RANDOM_MAC_SCAN)
-		wdev->wiphy->features |= (NL80211_FEATURE_SCHED_SCAN_RANDOM_MAC_ADDR |
-			NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR);
-		wdev->wiphy->max_sched_scan_plans = 1; /* multiple plans not supported */
+	wdev->wiphy->features |= (NL80211_FEATURE_SCHED_SCAN_RANDOM_MAC_ADDR |
+		NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR);
+	wdev->wiphy->max_sched_scan_plans = 1; /* multiple plans not supported */
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)) && defined(SUPPORT_RANDOM_MAC_SCAN) */
 
 #ifdef WL_SAE
 	wdev->wiphy->features |= NL80211_FEATURE_SAE;
-	if (FW_SUPPORTED(dhd, ap_pmksa)) {
-		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_AP_PMKSA_CACHING);
-	}
+	wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_AP_PMKSA_CACHING);
 #endif /* WL_SAE */
-#ifndef BCMSUP_4WAY_HANDSHAKE_SAE
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) && defined(BCMSUP_4WAY_HANDSHAKE)
-	if (FW_SUPPORTED(dhd, idsup)) {
-		err = wiphy_ext_feature_set(wdev->wiphy,
-			NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_PSK);
-		if (err) {
-			return err;
-		}
-		err = wiphy_ext_feature_set(wdev->wiphy,
-			NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_1X);
-		if (err) {
-			return err;
-		}
-	}
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) && defined(BCMSUP_4WAY_HANDSHAKE) */
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+
 #ifdef WL_SCAN_TYPE
 	/* These scan types will be mapped to default scan on non-supported chipset */
 	/* Advertise scan type capability. */
@@ -24068,9 +24034,6 @@ static s32 __wl_update_wiphybands(struct bcm_cfg80211 *cfg, bool notify)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0))
 	s32 vhtmode = 0;
 #endif // endif
-#ifdef WL_SAE
-	dhd_pub_t *dhd =  (dhd_pub_t *)(cfg->pub);
-#endif /* WL_SAE */
 	u32 bw_cap[4] = { WLC_BW_20MHZ_BIT,	/* 2GHz */
 			  WLC_BW_20MHZ_BIT,	/* 5GHz */
 			  0,			/* 60GHz */
@@ -24208,9 +24171,6 @@ static s32 __wl_update_wiphybands(struct bcm_cfg80211 *cfg, bool notify)
 	if (notify) {
 		wl_notify_regulatory(cfg, dev);
 	}
-#ifdef WL_SAE
-	(void)wl_wiphy_update_sae(wiphy, dhd);
-#endif /* WL_SAE */
 
 	return 0;
 }
