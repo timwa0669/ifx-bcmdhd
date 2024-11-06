@@ -1554,6 +1554,10 @@ struct chan_info {
 extern uint dhd_use_idsup;
 #endif /* BCMSUP_4WAY_HANDSHAKE */
 
+#if defined(WL_IDAUTH)
+extern uint dhd_use_idauth;
+#endif /* WL_IDAUTH */
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0))
 #define CFG80211_PUT_BSS(wiphy, bss) cfg80211_put_bss(wiphy, bss);
 #else
@@ -6930,7 +6934,7 @@ wl_fils_toggle_roaming(struct net_device *dev, u32 auth_type)
 #endif /* WL_FILS */
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if defined(BCMSUP_4WAY_HANDSHAKE_SAE) || defined(WL_IDAUTH)
 static int
 wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 {
@@ -6960,7 +6964,7 @@ wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 
 	return err;
 }
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE || WL_IDAUTH */
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 
 static s32
@@ -7759,7 +7763,7 @@ static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
 #endif /* WL_6E && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
-#ifdef BCMSUP_4WAY_HANDSHAKE
+#if defined(BCMSUP_4WAY_HANDSHAKE_SAE) || defined(WL_IDAUTH)
 static int wl_set_pmk(struct net_device *dev, const u8 *pmk_data, u16 pmk_len)
 {
 	wsec_pmk_t pmk;
@@ -7785,7 +7789,7 @@ static int wl_set_pmk(struct net_device *dev, const u8 *pmk_data, u16 pmk_len)
 
 	return err;
 }
-#endif /* BCMSUP_4WAY_HANDSHAKE */
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE || WL_IDAUTH */
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 #define MAX_SCAN_ABORT_WAIT_CNT 20
@@ -13302,15 +13306,20 @@ wl_cfg80211_bcn_validate_sec(
 	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
 	wl_cfgbss_t *bss = wl_get_cfgbss_by_wdev(cfg, dev->ieee80211_ptr);
 #ifdef WL_DHD_XR
-	dhd_pub_t *dhd = (dhd_pub_t *) dhd_get_pub(dev);
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(dev);
 	osl_t *oshp = dhd->osh;
 #else
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
 	osl_t *oshp = cfg->osh;
 #endif /* WL_DHD_XR */
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && defined(WL_SAE)
 	u32 wpa_auth = 0;
 	int sae_pwe = -1;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && WL_SAE */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH)
+	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) && defined(WL_IDAUTH) */
+	BCM_REFERENCE(dhd);
 
 	if (!bss) {
 		WL_ERR(("cfgbss is NULL \n"));
@@ -13418,6 +13427,29 @@ wl_cfg80211_bcn_validate_sec(
 				memcpy(bss->wps_ie, ies->wps_ie, ies->wps_ie_len);
 			}
 		}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH)
+		profile->use_fwauth = BIT(WL_PROFILE_FWAUTH_NONE);
+		if (crypto && dhd->fw_idauth && bss->security_mode) {
+			if (crypto->psk) {
+				WL_DBG(("using PSK offload\n"));
+				profile->use_fwauth |= BIT(WL_PROFILE_FWAUTH_PSK);
+				if (wl_set_pmk(dev, crypto->psk,
+					WSEC_MAX_PSK_LEN / 2) < 0)
+					return BCME_ERROR;
+			}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+			if (FW_SUPPORTED(dhd, sae) && crypto->sae_pwd) {
+				WL_DBG(("using SAE offload\n"));
+				profile->use_fwauth |= BIT(WL_PROFILE_FWAUTH_SAE);
+				if (wl_set_sae_password(dev, crypto->sae_pwd,
+					crypto->sae_pwd_len) < 0)
+					return BCME_ERROR;
+			}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
+		}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) && defined(WL_IDAUTH) */
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)) && defined(WL_SAE)
 		if (wldev_iovar_getint_bsscfg(dev, "wpa_auth", &wpa_auth, bssidx) < 0) {
@@ -13671,9 +13703,7 @@ wl_cfg80211_bcn_bringup_ap(
 #endif /* WL_DHD_XR_CLIENT */
 #endif // endif
 #endif /* MFP */
-#ifndef IGUANA_LEGACY_CHIPS
 	s32 ap = 1;
-#endif // endif
 
 #ifdef WL_DHD_XR
 	is_rsdb_supported = DHD_OPMODE_SUPPORTED(dhdp, DHD_FLAG_RSDB_MODE);
@@ -13777,13 +13807,21 @@ wl_cfg80211_bcn_bringup_ap(
 			WL_ERR(("failed to disable uapsd, error=%d\n", err));
 		}
 #endif /* SOFTAP_UAPSD_OFF */
-#ifndef IGUANA_LEGACY_CHIPS
+
 		err = wldev_ioctl_set(dev, WLC_UP, &ap, sizeof(s32));
-		if (unlikely(err)) {
+		if (err < 0) {
 			WL_ERR(("WLC_UP error (%d)\n", err));
-			goto exit;
-		}
+#if defined(IGUANA_LEGACY_CHIPS)
+			if (wl_customer6_legacy_chip_check(cfg,
+				primary_ndev)) {
+				err = BCME_OK;
+			} else
 #endif // endif
+			{
+				goto exit;
+			}
+		}
+
 #ifdef MFP
 		if (cfg->bip_pos) {
 			err = wldev_iovar_setbuf_bsscfg(dev, "bip",
@@ -14982,6 +15020,9 @@ wl_cfg80211_stop_ap(
 #else
 	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
 #endif /* WL_DHD_XR */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH)
+	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) && defined(WL_IDAUTH) */
 
 	WL_DBG(("Enter \n"));
 #ifdef WL_DHD_XR_MASTER
@@ -15025,6 +15066,22 @@ wl_cfg80211_stop_ap(
 		dhd_bandsteer_module_deinit(
 			bcmcfg_to_prmry_ndev(cfg), cfg->ap_bs, cfg->p2p_bs);
 #endif /* DHD_BANDSTEER */
+
+		/* Due to most likely deauths outstanding we sleep */
+		/* first to make sure they get processed by fw. */
+		OSL_SLEEP(400);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH)
+		if (dhd->fw_idauth &&
+			profile->use_fwauth != BIT(WL_PROFILE_FWAUTH_NONE)) {
+			if (profile->use_fwauth & BIT(WL_PROFILE_FWAUTH_PSK))
+				wl_set_pmk(dev, NULL, 0);
+			if (FW_SUPPORTED(dhd, sae) &&
+				profile->use_fwauth & BIT(WL_PROFILE_FWAUTH_SAE))
+				wl_set_sae_password(dev, NULL, 0);
+			profile->use_fwauth = BIT(WL_PROFILE_FWAUTH_NONE);
+		}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) && defined(WL_IDAUTH) */
 	} else if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_P2P_GO) {
 		dev_role = NL80211_IFTYPE_P2P_GO;
 		WL_DBG(("stopping P2P GO operation\n"));
@@ -16910,6 +16967,15 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) && defined(BCMSUP_4WAY_HANDSHAKE_SAE) */
 	}
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) && defined(BCMSUP_4WAY_HANDSHAKE) */
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH)
+	if (dhd_use_idauth) {
+		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_4WAY_HANDSHAKE_AP_PSK);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_SAE_OFFLOAD_AP);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
+	}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) && defined(WL_IDAUTH) */
 
 #ifdef WL_SCAN_TYPE
 	/* These scan types will be mapped to default scan on non-supported chipset */

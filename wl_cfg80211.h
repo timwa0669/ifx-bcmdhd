@@ -993,6 +993,12 @@ enum wl_profile_fwsup {
 	WL_PROFILE_FWSUP_ROAM
 };
 
+enum wl_profile_fwauth {
+	WL_PROFILE_FWAUTH_NONE,
+	WL_PROFILE_FWAUTH_PSK,
+	WL_PROFILE_FWAUTH_SAE
+};
+
 #ifdef WL11U
 /* Max length of Interworking element */
 #define IW_IES_MAX_BUF_LEN	8
@@ -1018,6 +1024,7 @@ struct wl_profile {
 #endif /* WL11U */
 	bool dpp_listen;
 	enum wl_profile_fwsup use_fwsup;
+	u16 use_fwauth;
 };
 
 struct wl_wps_ie {

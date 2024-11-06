@@ -873,6 +873,17 @@ uint dhd_use_idsup = 0;
 module_param(dhd_use_idsup, uint, 0);
 #endif /* BCMSUP_4WAY_HANDSHAKE */
 
+#if defined(WL_IDAUTH)
+/* Use in dongle supplicant for SoftAP 4-way handshake */
+#ifdef WL_ENABLE_IDAUTH
+/* Enable idsup by default (if supported in fw) */
+uint dhd_use_idauth = 1;
+#else
+uint dhd_use_idauth = 0;
+#endif /* WL_ENABLE_IDAUTH */
+module_param(dhd_use_idauth, uint, 0);
+#endif /* WL_IDAUTH */
+
 #if (defined(OEM_ANDROID) && !defined(BCMQT))
 /* Allow delayed firmware download for debug purpose */
 int allow_delay_fwdl = FALSE;
@@ -11441,6 +11452,14 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		DHD_TRACE(("4-way handshake mode is: %d\n", dhd->fw_4way_handshake));
 	}
 #endif /* BCMSUP_4WAY_HANDSHAKE */
+#if defined(WL_IDAUTH)
+	/* Read SoftAP 4-way handshake requirements */
+	if (dhd_use_idauth == 1) {
+		if (FW_SUPPORTED(dhd, idauth))
+			dhd->fw_idauth = TRUE;
+		DHD_TRACE(("SoftAP 4-way handshake mode is: %d\n", dhd->fw_idauth));
+	}
+#endif /* WL_IDAUTH */
 #if defined(SUPPORT_2G_VHT) || defined(SUPPORT_5G_1024QAM_VHT)
 	ret = dhd_iovar(dhd, 0, "vht_features", (char *)&vht_features, sizeof(vht_features),
 			NULL, 0, FALSE);

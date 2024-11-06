@@ -1163,6 +1163,7 @@ typedef struct dhd_pub {
 	uint32 arp_version;
 #endif // endif
 	bool fw_4way_handshake;		/* Whether firmware will to do the 4way handshake. */
+	bool fw_idauth;		/* Whether firmware will to offload SoftAP 4way handshake. */
 #ifdef DEBUG_DPC_THREAD_WATCHDOG
 	bool dhd_bug_on;
 #endif /* DEBUG_DPC_THREAD_WATCHDOG */
