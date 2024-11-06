@@ -661,11 +661,23 @@ do {									\
 #define WLAN_AKM_SUITE_FT_8021X_SHA384		0x000FAC0D
 #endif /* WLAN_AKM_SUITE_FT_8021X_SHA384 */
 
-#define WL_AKM_SUITE_SHA256_1X  0x000FAC05
-#define WL_AKM_SUITE_SHA256_PSK 0x000FAC06
-#define WLAN_AKM_SUITE_DPP 0x506F9A02
+#ifndef WL_AKM_SUITE_SHA256_1X
+#define WL_AKM_SUITE_SHA256_1X		0x000FAC05
+#endif /* WL_AKM_SUITE_SHA256_1X */
+#ifndef WL_AKM_SUITE_SHA256_PSK
+#define WL_AKM_SUITE_SHA256_PSK		0x000FAC06
+#endif /* WL_AKM_SUITE_SHA256_PSK */
+
+#ifndef WLAN_AKM_SUITE_SAE
+#define WLAN_AKM_SUITE_SAE		0x000FAC08
+#endif /* WLAN_AKM_SUITE_SAE */
+#ifndef WLAN_AKM_SUITE_SAE
+#define WLAN_AKM_SUITE_FT_OVER_SAE		0x000FAC09
+#endif /* WLAN_AKM_SUITE_SAE */
+
+#define WLAN_AKM_SUITE_DPP		0x506F9A02
 #ifndef WPA2_WFA_AUTH_DPP
-#define WPA2_WFA_AUTH_DPP  0x200000 /* WFA DPP AUTH */
+#define WPA2_WFA_AUTH_DPP		0x200000 /* WFA DPP AUTH */
 #endif /* WPA2_WFA_AUTH_DPP */
 
 #ifndef WLAN_AKM_SUITE_FILS_SHA256
@@ -675,13 +687,11 @@ do {									\
 #define WLAN_AKM_SUITE_FT_FILS_SHA384		0x000FAC11
 #endif /* WLAN_AKM_SUITE_FILS_SHA256 */
 
-#define MIN_VENDOR_EXTN_IE_LEN		2
-#ifdef WL_OWE
 #ifndef WLAN_AKM_SUITE_OWE
-#define WLAN_AKM_SUITE_OWE                0X000FAC12
+#define WLAN_AKM_SUITE_OWE		0X000FAC12
 #endif /* WPA_KEY_MGMT_OWE */
-#endif /* WL_OWE */
 
+#define MIN_VENDOR_EXTN_IE_LEN		2
 /*
  * BRCM local.
  * Use a high number that's unlikely to clash with linux upstream for a while until we can
@@ -975,14 +985,13 @@ typedef struct wl_cfgbss {
 #define RNR_IES_MAX_BUF_LEN	255
 #endif /* defined(WL_DHD_XR) && defined(WL_6E) */
 
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
 enum wl_profile_fwsup {
 	WL_PROFILE_FWSUP_NONE,
 	WL_PROFILE_FWSUP_PSK,
 	WL_PROFILE_FWSUP_1X,
-	WL_PROFILE_FWSUP_SAE
+	WL_PROFILE_FWSUP_SAE,
+	WL_PROFILE_FWSUP_ROAM
 };
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
 
 #ifdef WL11U
 /* Max length of Interworking element */
@@ -1008,9 +1017,7 @@ struct wl_profile {
 	u32 iw_ie_len;
 #endif /* WL11U */
 	bool dpp_listen;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
 	enum wl_profile_fwsup use_fwsup;
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
 };
 
 struct wl_wps_ie {
@@ -1061,7 +1068,7 @@ struct net_info {
 #endif // endif
 	struct list_head list; /* list of all net_info structure */
 };
-#ifdef WL_SAE
+
 #define WL_WSEC_MAX_SAE_PASSWORD_LEN 128
 #define WL_WSEC_MIN_SAE_PASSWORD_LEN 8
 /**
@@ -1075,7 +1082,6 @@ struct wl_wsec_sae_pwd_le {
 	u8 key[WL_WSEC_MAX_SAE_PASSWORD_LEN];
 };
 
-#endif // endif
 #ifdef WL_BCNRECV
 /* PERIODIC Beacon receive for detecting FakeAPs */
 typedef struct wl_bcnrecv_result {
@@ -1631,6 +1637,7 @@ struct bcm_cfg80211 {
 	uint8 fbt_key[FBT_KEYLEN];
 #endif // endif
 	int roam_offload;
+	int okc_enable;
 #ifdef WL_NAN
 	bool nan_enable;
 	nan_svc_inst_t nan_inst_ctrl[NAN_ID_CTRL_SIZE];
@@ -2577,20 +2584,21 @@ wl_iftype_to_str(int wl_iftype)
 	 (!_sme->crypto.n_ciphers_pairwise) && \
 	 (!_sme->crypto.cipher_group))
 
-#ifdef WLFBT
-#if defined(WLAN_AKM_SUITE_FT_8021X) && defined(WLAN_AKM_SUITE_FT_PSK)
-#define IS_AKM_SUITE_FT(sec) (sec->wpa_auth == WLAN_AKM_SUITE_FT_8021X || \
-		sec->wpa_auth == WLAN_AKM_SUITE_FT_PSK)
-#elif defined(WLAN_AKM_SUITE_FT_8021X)
-#define IS_AKM_SUITE_FT(sec) (sec->wpa_auth == WLAN_AKM_SUITE_FT_8021X)
-#elif defined(WLAN_AKM_SUITE_FT_PSK)
-#define IS_AKM_SUITE_FT(sec) (sec->wpa_auth == WLAN_AKM_SUITE_FT_PSK)
-#else
-#define IS_AKM_SUITE_FT(sec) ({BCM_REFERENCE(sec); FALSE;})
-#endif /* WLAN_AKM_SUITE_FT_8021X && WLAN_AKM_SUITE_FT_PSK */
-#else
-#define IS_AKM_SUITE_FT(sec) ({BCM_REFERENCE(sec); FALSE;})
-#endif /* WLFBT */
+#define IS_AKM_SUITE_FT(sec) \
+	( \
+	sec->wpa_auth == WLAN_AKM_SUITE_FT_8021X || \
+	sec->wpa_auth == WLAN_AKM_SUITE_FT_PSK || \
+	sec->wpa_auth == WLAN_AKM_SUITE_FT_OVER_SAE \
+	)
+
+#define IS_AKM_SUITE_OKC(sec) \
+	( \
+	IS_AKM_SUITE_FT(sec) || \
+	sec->wpa_auth == WLAN_AKM_SUITE_8021X || \
+	sec->wpa_auth == WL_AKM_SUITE_SHA256_1X || \
+	sec->wpa_auth == WLAN_AKM_SUITE_8021X_SUITE_B_192 || \
+	sec->wpa_auth == WLAN_AKM_SUITE_SAE \
+	)
 
 #define IS_AKM_SUITE_CCKM(sec) ({BCM_REFERENCE(sec); FALSE;})
 

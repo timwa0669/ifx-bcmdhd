@@ -8327,8 +8327,8 @@ int wl_cfgvendor_set_pmk(struct wiphy *wiphy,
 	}
 
 	sec = wl_read_prof(cfg, ndev, WL_PROF_SEC);
-	if ((sec->wpa_auth == WLAN_AKM_SUITE_8021X) ||
-		(sec->wpa_auth == WL_AKM_SUITE_SHA256_1X)) {
+	if (cfg->okc_enable &&
+		IS_AKM_SUITE_OKC(sec)) {
 		ret = wldev_iovar_setbuf(ndev, "okc_info_pmk", pmk.key, pmk.key_len, cfg->ioctl_buf,
 			WLC_IOCTL_SMLEN,  &cfg->ioctl_buf_sync);
 		if (ret) {

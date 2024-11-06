@@ -1550,6 +1550,10 @@ struct chan_info {
 };
 #endif // endif
 
+#if defined(BCMSUP_4WAY_HANDSHAKE)
+extern uint dhd_use_idsup;
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0))
 #define CFG80211_PUT_BSS(wiphy, bss) cfg80211_put_bss(wiphy, bss);
 #else
@@ -1955,6 +1959,7 @@ static const rsn_akm_wpa_auth_entry_t rsn_akm_wpa_auth_lookup_tbl[] = {
 #endif /* BCMWAPI_WPI */
 #ifdef WL_SAE
 	{WLAN_AKM_SUITE_SAE, WPA3_AUTH_SAE_PSK},
+	{WLAN_AKM_SUITE_FT_OVER_SAE, WPA3_AUTH_SAE_FBT},
 #endif /* WL_SAE */
 	{WLAN_AKM_SUITE_FT_8021X_SHA384, WPA3_AUTH_1X_SHA384 | WPA2_AUTH_FT},
 	{WLAN_AKM_SUITE_DPP, WPA2_WFA_AUTH_DPP}
@@ -6272,14 +6277,12 @@ wl_set_wpa_version(struct net_device *dev, struct cfg80211_connect_params *sme)
 #endif /* WL_OWE */
 			val = WPA2_AUTH_PSK |
 				WPA2_AUTH_UNSPECIFIED;
-#if defined(WL_SAE) && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+#if defined(WL_SAE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
 	else if (sme->crypto.wpa_versions & NL80211_WPA_VERSION_3)
 		val = WPA3_AUTH_SAE_PSK;
-#endif /* WL_SAE */
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-	else if (sme->crypto.wpa_versions & NL80211_WPA_VERSION_3)
-		val = WPA3_AUTH_SAE_PSK;
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* WL_SAE || BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 	else
 		val = WPA_AUTH_DISABLED;
 
@@ -6370,18 +6373,12 @@ wl_set_auth_type(struct net_device *dev, struct cfg80211_connect_params *sme)
 		val = WL_AUTH_FILS_PUBLIC;
 		break;
 #endif /* WL_FILS */
-#ifdef WL_SAE
+#if defined(WL_SAE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
 	case NL80211_AUTHTYPE_SAE:
 		WL_DBG(("SAE authentication\n"));
 		val = WL_AUTH_SAE;
 		break;
-#endif /* WL_SAE */
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-	case NL80211_AUTHTYPE_SAE:
-		val = WL_AUTH_SAE;
-		WL_DBG(("SAE authentication\n"));
-		break;
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* WL_SAE || BCMSUP_4WAY_HANDSHAKE_SAE */
 	default:
 		val = 2;
 		WL_ERR(("invalid auth type (%d)\n", sme->auth_type));
@@ -6442,6 +6439,11 @@ static s32
 wl_set_set_cipher(struct net_device *dev, struct cfg80211_connect_params *sme)
 {
 	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(dev);
+#else
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
 	struct wl_security *sec;
 	s32 pval = 0;
 	s32 gval = 0;
@@ -6455,6 +6457,7 @@ wl_set_set_cipher(struct net_device *dev, struct cfg80211_connect_params *sme)
 #ifdef WL_GCMP
 	uint32 algos = 0, mask = 0;
 #endif /* WL_GCMP */
+	BCM_REFERENCE(dhd);
 
 	if ((bssidx = wl_get_bssidx_by_wdev(cfg, dev->ieee80211_ptr)) < 0) {
 		WL_ERR(("Find p2p index from wdev(%p) failed\n", dev->ieee80211_ptr));
@@ -6505,8 +6508,7 @@ wl_set_set_cipher(struct net_device *dev, struct cfg80211_connect_params *sme)
 	 * Note that the FW feature flag only exists on kernels that support the
 	 * FT-EAP AKM suite.
 	 */
-	if ((cfg->wdev->wiphy->features & NL80211_FEATURE_FW_4WAY_HANDSHAKE) &&
-		(FW_SUPPORTED(dhdp, idsup)))
+	if (dhd->fw_4way_handshake)
 	{
 		err = wldev_iovar_setint_bsscfg(dev, "sup_wpa", 1, bssidx);
 		if (err) {
@@ -6928,7 +6930,7 @@ wl_fils_toggle_roaming(struct net_device *dev, u32 auth_type)
 #endif /* WL_FILS */
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
-#ifdef WL_SAE
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
 static int
 wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 {
@@ -6941,6 +6943,7 @@ wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 			WL_WSEC_MAX_SAE_PASSWORD_LEN));
 		return -EINVAL;
 	}
+
 	if (!pwd_data) {
 		WL_ERR(("pswd cannot be null\n"));
 		return -EINVAL;
@@ -6957,35 +6960,35 @@ wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 
 	return err;
 }
-#endif /* WL_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 
 static s32
 wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 {
 	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
-#ifdef WL_SAE
-
-		dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
-#endif /* WL_SAE */
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(dev);
+#else
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
 	struct wl_security *sec;
 	s32 val = 0;
 	s32 err = 0;
 	s32 bssidx;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+	s32 okc_enable = 0;
 	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+
+	BCM_REFERENCE(dhd);
+	BCM_REFERENCE(okc_enable);
 
 	if ((bssidx = wl_get_bssidx_by_wdev(cfg, dev->ieee80211_ptr)) < 0) {
 		WL_ERR(("Find p2p index from wdev(%p) failed\n", dev->ieee80211_ptr));
 		return BCME_ERROR;
 	}
 
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
 	profile->use_fwsup = WL_PROFILE_FWSUP_NONE;
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+	cfg->okc_enable = false;
 
 	if (sme->crypto.n_akm_suites) {
 		err = wldev_iovar_getint(dev, "wpa_auth", &val);
@@ -6993,15 +6996,140 @@ wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 			WL_ERR(("could not get wpa_auth (%d)\n", err));
 			return err;
 		}
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+		if (val & (WPA_AUTH_PSK |
+			WPA_AUTH_UNSPECIFIED)) {
+			switch (sme->crypto.akm_suites[0]) {
+			case WLAN_AKM_SUITE_8021X:
+				if (sme->want_1x)
+					profile->use_fwsup = WL_PROFILE_FWSUP_1X;
+				else
+					profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+				break;
+			default:
+				break;
+			}
+		} else if (val & (WPA2_AUTH_PSK |
+			WPA2_AUTH_UNSPECIFIED)) {
+			switch (sme->crypto.akm_suites[0]) {
+#ifdef MFP
+			case WL_AKM_SUITE_SHA256_1X:
+#endif /* MFP */
+			case WLAN_AKM_SUITE_8021X:
+			case WLAN_AKM_SUITE_FT_8021X:
+				if (sme->want_1x)
+					profile->use_fwsup = WL_PROFILE_FWSUP_1X;
+				else
+					profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+				break;
+#ifdef WLFBT
+			case WLAN_AKM_SUITE_FT_PSK:
+#endif /* WLFBT */
+				profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+#ifdef BCMSUP_4WAY_HANDSHAKE
+				if (dhd->fw_4way_handshake)
+					profile->use_fwsup = WL_PROFILE_FWSUP_PSK;
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+				break;
+#ifdef WL_OWE
+			case WLAN_AKM_SUITE_OWE:
+				profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+				break;
+#endif /* WL_OWE */
+#ifdef WL_SAE
+			case WLAN_AKM_SUITE_SAE:
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+				if (dhd->fw_4way_handshake) {
+					if (sme->crypto.sae_pwd &&
+						FW_SUPPORTED(dhd, sae))
+						profile->use_fwsup = WL_PROFILE_FWSUP_SAE;
+					else
+						profile->use_fwsup = WL_PROFILE_FWSUP_PSK;
+				}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+				break;
+			case WLAN_AKM_SUITE_FT_OVER_SAE:
+				profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+				if (dhd->fw_4way_handshake &&
+					sme->crypto.sae_pwd &&
+					FW_SUPPORTED(dhd, sae))
+					profile->use_fwsup = WL_PROFILE_FWSUP_SAE;
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
+				break;
+#endif /* WL_SAE */
+			default:
+				break;
+			}
+		}
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+#ifdef WL_SAE
+		else if (val & WPA3_AUTH_SAE_PSK) {
+			switch (sme->crypto.akm_suites[0]) {
+			case WLAN_AKM_SUITE_SAE:
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+				if (dhd->fw_4way_handshake) {
+					if (sme->crypto.sae_pwd &&
+						FW_SUPPORTED(dhd, sae))
+						profile->use_fwsup = WL_PROFILE_FWSUP_SAE;
+					else
+						profile->use_fwsup = WL_PROFILE_FWSUP_PSK;
+				}
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+				break;
+			case WLAN_AKM_SUITE_FT_OVER_SAE:
+				profile->use_fwsup = WL_PROFILE_FWSUP_ROAM;
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+				if (dhd->fw_4way_handshake &&
+					sme->crypto.sae_pwd &&
+					FW_SUPPORTED(dhd, sae))
+					profile->use_fwsup = WL_PROFILE_FWSUP_SAE;
+#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+				break;
+			default:
+				break;
+			}
+		}
+#endif /* WL_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
+
+#ifdef OKC_SUPPORT
+		if (profile->use_fwsup == WL_PROFILE_FWSUP_1X ||
+			profile->use_fwsup == WL_PROFILE_FWSUP_ROAM) {
+			WL_DBG(("using 1X offload\n"));
+			err = wldev_iovar_getint_bsscfg(dev, "okc_enable",
+				&okc_enable, bssidx);
+			if (err) {
+				WL_ERR(("get okc_enable failed (%d)\n", err));
+			} else {
+				WL_DBG(("get okc_enable (%d)\n", okc_enable));
+				cfg->okc_enable = okc_enable;
+			}
+		}
+		else if (profile->use_fwsup != WL_PROFILE_FWSUP_SAE &&
+			(val == WPA3_AUTH_SAE_PSK)) {
+			WL_DBG(("not using SAE offload\n"));
+			err = wldev_iovar_getint_bsscfg(dev, "okc_enable",
+				&okc_enable, bssidx);
+			if (err) {
+				WL_ERR(("get okc_enable failed (%d)\n", err));
+			} else {
+				WL_DBG(("get okc_enable (%d)\n", okc_enable));
+				cfg->okc_enable = okc_enable;
+			}
+		}
+#endif /* OKC_SUPPORT */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
+
 		if (val & (WPA_AUTH_PSK |
 			WPA_AUTH_UNSPECIFIED)) {
 			switch (sme->crypto.akm_suites[0]) {
 			case WLAN_AKM_SUITE_8021X:
 				val = WPA_AUTH_UNSPECIFIED;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-				if (sme->want_1x)
-					profile->use_fwsup = WL_PROFILE_FWSUP_1X;
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
 				break;
 			case WLAN_AKM_SUITE_PSK:
 				val = WPA_AUTH_PSK;
@@ -7015,31 +7143,15 @@ wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 			WPA2_AUTH_UNSPECIFIED)) {
 			switch (sme->crypto.akm_suites[0]) {
 #ifdef MFP
-#if defined(IGUANA_LEGACY_CHIPS)
 			case WL_AKM_SUITE_SHA256_1X:
-				if (wl_customer6_legacy_chip_check(cfg,	dev)) {
-					val = WPA2_AUTH_UNSPECIFIED;
-				} else {
-					val = WPA2_AUTH_1X_SHA256;
-				}
-				break;
-#else
-			case WL_AKM_SUITE_SHA256_1X:
-				val = WPA2_AUTH_1X_SHA256;
-				break;
-#endif // endif
 			case WL_AKM_SUITE_SHA256_PSK:
-				val = WPA2_AUTH_PSK_SHA256;
-                                break;
 #endif /* MFP */
 			case WLAN_AKM_SUITE_8021X:
 			case WLAN_AKM_SUITE_PSK:
-#if defined(WLFBT) && defined(WLAN_AKM_SUITE_FT_8021X)
+#ifdef WLFBT
 			case WLAN_AKM_SUITE_FT_8021X:
-#endif // endif
-#if defined(WLFBT) && defined(WLAN_AKM_SUITE_FT_PSK)
 			case WLAN_AKM_SUITE_FT_PSK:
-#endif // endif
+#endif /* WLFBT */
 			case WLAN_AKM_SUITE_FILS_SHA256:
 			case WLAN_AKM_SUITE_FILS_SHA384:
 			case WLAN_AKM_SUITE_8021X_SUITE_B:
@@ -7049,6 +7161,7 @@ wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 #endif /* WL_OWE */
 #ifdef WL_SAE
 			case WLAN_AKM_SUITE_SAE:
+			case WLAN_AKM_SUITE_FT_OVER_SAE:
 #endif /* WL_SAE */
 			case WLAN_AKM_SUITE_DPP:
 			case WLAN_AKM_SUITE_FT_8021X_SHA384:
@@ -7066,6 +7179,22 @@ wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 				return -EINVAL;
 			}
 		}
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+#ifdef WL_SAE
+		else if (val & WPA3_AUTH_SAE_PSK) {
+			switch (sme->crypto.akm_suites[0]) {
+			case WLAN_AKM_SUITE_SAE:
+			case WLAN_AKM_SUITE_FT_OVER_SAE:
+				val = wl_rsn_akm_wpa_auth_lookup(sme->crypto.akm_suites[0]);
+				break;
+			default:
+				WL_ERR(("invalid cipher group (%d)\n",
+						sme->crypto.cipher_group));
+				return -EINVAL;
+			}
+		}
+#endif /* WL_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 #ifdef BCMWAPI_WPI
 		else if (val & (WAPI_AUTH_PSK | WAPI_AUTH_UNSPECIFIED)) {
 			switch (sme->crypto.akm_suites[0]) {
@@ -7081,51 +7210,16 @@ wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
 				return -EINVAL;
 			}
 		}
-#endif // endif
+#endif /* BCMWAPI_WPI */
 
 #ifdef WL_FILS
 #if !defined(WL_FILS_ROAM_OFFLD)
-	err = wl_fils_toggle_roaming(dev, val);
-	if (unlikely(err)) {
-		return err;
-	}
+		err = wl_fils_toggle_roaming(dev, val);
+		if (unlikely(err)) {
+			return err;
+		}
 #endif /* !WL_FILS_ROAM_OFFLD */
 #endif /* !WL_FILS */
-
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-		else if (val & WPA3_AUTH_SAE_PSK) {
-			switch (sme->crypto.akm_suites[0]) {
-			case WLAN_AKM_SUITE_SAE:
-				val = WPA3_AUTH_SAE_PSK;
-				profile->use_fwsup = WL_PROFILE_FWSUP_SAE;
-				break;
-			default:
-				WL_ERR(("invalid cipher group (%d)\n",
-						sme->crypto.cipher_group));
-				return -EINVAL;
-			}
-		}
-
-		if (profile->use_fwsup == WL_PROFILE_FWSUP_1X)
-			WL_DBG(("using 1X offload\n"));
-		else if (profile->use_fwsup == WL_PROFILE_FWSUP_SAE)
-			WL_DBG(("using SAE offload\n"));
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
-#ifdef WL_SAE
-	if ((val & (WPA3_AUTH_SAE_PSK)) &&
-			FW_SUPPORTED(dhd, sae)) {
-		err = wl_set_sae_password(dev, sme->crypto.sae_pwd, sme->crypto.sae_pwd_len);
-		if (!err && (FW_SUPPORTED(dhd, idsup))) {
-			err = wldev_iovar_setint_bsscfg(dev, "sup_wpa", 1, bssidx);
-			if (err) {
-				WL_ERR(("Error setting sup_wpa (%d)\n", err));
-				return err;
-			}
-		}
-	}
-#endif /* WL_SAE */
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 
 #ifdef MFP
 		if ((err = wl_cfg80211_set_mfp(cfg, dev, sme)) < 0) {
@@ -7169,11 +7263,13 @@ wl_set_set_sharedkey(struct net_device *dev,
 		WL_DBG(("wpa_versions 0x%x cipher_pairwise 0x%x\n",
 			sec->wpa_versions, sec->cipher_pairwise));
 		if (!(sec->wpa_versions & (NL80211_WPA_VERSION_1 |
-#ifndef BCMSUP_4WAY_HANDSHAKE_SAE
-			NL80211_WPA_VERSION_2)) &&
-#else
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) && \
+	(defined(WL_SAE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE))
 			NL80211_WPA_VERSION_2 | NL80211_WPA_VERSION_3)) &&
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#else
+			NL80211_WPA_VERSION_2)) &&
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) &&
+		* (WL_SAE || BCMSUP_4WAY_HANDSHAKE_SAE) */
 #ifdef BCMWAPI_WPI
 			!is_wapi(sec->cipher_pairwise) &&
 #endif // endif
@@ -7662,12 +7758,18 @@ static int wl_cfg80211_set_bitrate(struct wiphy *wiphy,
 }
 #endif /* WL_6E && (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)) */
 
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+#ifdef BCMSUP_4WAY_HANDSHAKE
 static int wl_set_pmk(struct net_device *dev, const u8 *pmk_data, u16 pmk_len)
 {
 	wsec_pmk_t pmk;
 	int i, err = 0;
-	uint8 buf[WSEC_MAX_PSK_LEN+1];
+	uint8 buf[WSEC_MAX_PSK_LEN + 1];
+
+	if (pmk_len > WSEC_MAX_PSK_LEN / 2) {
+		WL_ERR(("pmk_len out of range!\n"));
+		return -ERANGE;
+	}
 
 	/* convert to firmware key format */
 	pmk.key_len = cpu_to_le16(pmk_len << 1);
@@ -7683,31 +7785,8 @@ static int wl_set_pmk(struct net_device *dev, const u8 *pmk_data, u16 pmk_len)
 
 	return err;
 }
-
-static int wl_set_sae_password(struct net_device *dev, const u8 *pwd_data, u16 pwd_len)
-{
-	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
-	wsec_sae_password_t sae_pwd;
-	int err = 0;
-
-	if (pwd_len > WSEC_MAX_SAE_PASSWORD_LEN) {
-		WL_ERR(("sae_password (%d) must be less than %d\n",
-		        pwd_len, WSEC_MAX_SAE_PASSWORD_LEN));
-		return -EINVAL;
-	}
-
-	sae_pwd.password_len = cpu_to_le16(pwd_len);
-	memcpy(sae_pwd.password, pwd_data, pwd_len);
-
-	err = wldev_iovar_setbuf(dev, "sae_password", &sae_pwd, sizeof(sae_pwd),
-	                         cfg->ioctl_buf, WLC_IOCTL_MAXLEN, &cfg->ioctl_buf_sync);
-
-	if (err < 0)
-		WL_ERR(("failed to set SAE password in firmware (len=%u)\n", pwd_len));
-
-	return err;
-}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 #define MAX_SCAN_ABORT_WAIT_CNT 20
 #define WAIT_SCAN_ABORT_OSL_SLEEP_TIME 10
@@ -7746,9 +7825,11 @@ wl_cfg80211_connect(struct wiphy *wiphy, struct net_device *dev,
 	chanspec_t chanspec_list[MAX_ROAM_CHANNEL];
 #endif /* ESCAN_CHANNEL_CACHE */
 	int wait_cnt;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+#ifdef BCMSUP_4WAY_HANDSHAKE
 	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 	WL_DBG(("In\n"));
 	if (!dev) {
@@ -8152,44 +8233,61 @@ wl_cfg80211_connect(struct wiphy *wiphy, struct net_device *dev,
 	}
 #endif /* WL_FILS */
 
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-	if (sme->crypto.psk && profile->use_fwsup != WL_PROFILE_FWSUP_SAE) {
-		if (profile->use_fwsup != WL_PROFILE_FWSUP_NONE)
-			return BCME_ERROR;
-		WL_DBG(("using PSK offload\n"));
-		profile->use_fwsup = WL_PROFILE_FWSUP_PSK;
-	}
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+#ifdef BCMSUP_4WAY_HANDSHAKE
+	if (dhdp->fw_4way_handshake) {
+		if (sme->crypto.psk) {
+			if ((profile->use_fwsup != WL_PROFILE_FWSUP_SAE) &&
+				(profile->use_fwsup != WL_PROFILE_FWSUP_PSK)) {
+				if (WARN_ON(profile->use_fwsup !=
+					WL_PROFILE_FWSUP_NONE)) {
+					return BCME_ERROR;
+				}
+				WL_DBG(("using PSK offload\n"));
+				profile->use_fwsup = WL_PROFILE_FWSUP_PSK;
+			}
+		}
 
-	if (profile->use_fwsup != WL_PROFILE_FWSUP_NONE) {
-		/* enable firmware supplicant for this interface */
-		err = wldev_iovar_setint(dev, "sup_wpa", 1);
-	} else {
-		err = wldev_iovar_setint(dev, "sup_wpa", 0);
-	}
-	if (err < 0) {
-		WL_ERR(("failed to set sup_wpa\n"));
-		return err;
-	}
-
-	if (profile->use_fwsup == WL_PROFILE_FWSUP_PSK)
-		err = wl_set_pmk(dev, sme->crypto.psk, WSEC_MAX_PSK_LEN/2);
-	else if (profile->use_fwsup == WL_PROFILE_FWSUP_SAE) {
-		/* clean up user-space RSNE */
-		err = wldev_iovar_setbuf(dev, "wpaie", NULL, 0, cfg->ioctl_buf,
-		                         WLC_IOCTL_MAXLEN, &cfg->ioctl_buf_sync);
-		if (err) {
-			WL_ERR(("failed to clean up user-space RSNE\n"));
+		if (profile->use_fwsup != WL_PROFILE_FWSUP_NONE) {
+			/* enable firmware supplicant for this interface */
+			err = wldev_iovar_setint(dev, "sup_wpa", 1);
+		} else {
+			err = wldev_iovar_setint(dev, "sup_wpa", 0);
+		}
+		if (err < 0) {
+			WL_ERR(("failed to set sup_wpa\n"));
 			return err;
 		}
 
-		err = wl_set_sae_password(dev, sme->crypto.sae_pwd,
-		                          sme->crypto.sae_pwd_len);
-		if (!err && sme->crypto.psk)
-			err = wl_set_pmk(dev, sme->crypto.psk, WSEC_MAX_PSK_LEN/2);
-	}
-	if (err)
-		return err;
+		if ((profile->use_fwsup == WL_PROFILE_FWSUP_PSK) &&
+			sme->crypto.psk)
+			err = wl_set_pmk(dev, sme->crypto.psk, WSEC_MAX_PSK_LEN / 2);
+		/* if upper layer has passed sae_password,
+		 * set it to firmware for the potential transit up roaming use.
+		 */
+#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
+		if (sme->crypto.sae_pwd && FW_SUPPORTED(dhdp, sae)) {
+			/* clean up user-space RSNE */
+			err = wldev_iovar_setbuf(dev, "wpaie", NULL, 0, cfg->ioctl_buf,
+				WLC_IOCTL_MAXLEN, &cfg->ioctl_buf_sync);
+			if (err) {
+				WL_ERR(("failed to clean up user-space RSNE\n"));
+				return err;
+			}
+
+			err = wl_set_sae_password(dev, sme->crypto.sae_pwd,
+				sme->crypto.sae_pwd_len);
+			if (!err && sme->crypto.psk)
+				err = wl_set_pmk(dev, sme->crypto.psk, WSEC_MAX_PSK_LEN / 2);
+		}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
 #endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+		if (err)
+			return err;
+	}
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 	/*
 	 *  Join with specific BSSID and cached SSID
@@ -9039,7 +9137,7 @@ s32
 wl_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || \
 	defined(DHD_ANDROID_CFG80211_BACKPORT_V2)
-        int link_id,
+	int link_id,
 #endif /* PLATFORM_IMX && CONFIG_ANDROID_VERSION >= 13 */
 	u8 key_idx, bool pairwise, const u8 *mac_addr,
 	struct key_params *params)
@@ -9155,8 +9253,8 @@ wl_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev,
 			break;
 		}
 
-		if ((sec->wpa_auth == WLAN_AKM_SUITE_8021X) ||
-			(sec->wpa_auth == WL_AKM_SUITE_SHA256_1X)) {
+		if (cfg->okc_enable &&
+			IS_AKM_SUITE_OKC(sec)) {
 			err = wldev_iovar_setbuf(dev, "okc_info_pmk", (const void *)params->key,
 				WSEC_MAX_PSK_LEN / 2, keystring, sizeof(keystring), NULL);
 			if (err) {
@@ -10481,6 +10579,10 @@ wl_cfg80211_set_pmksa(struct wiphy *wiphy, struct net_device *dev,
 	s32 err = 0;
 	int i;
 	int npmkids = cfg->pmk_list->pmkids.count;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+	struct wl_security *sec;
+	s32 bssidx;
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 #ifdef WL_DHD_XR
 	dhd_pub_t *dhdp = (dhd_pub_t *) dhd_get_pub(dev);
 #else
@@ -10581,6 +10683,38 @@ wl_cfg80211_set_pmksa(struct wiphy *wiphy, struct net_device *dev,
 #endif /* (WL_DBG_LEVEL > 0) */
 
 	err = wl_update_pmklist(dev, cfg->pmk_list, err);
+	if (err) {
+		WL_ERR(("update pmklist failed (%d)\n", err));
+		return err;
+	}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+	if (pmksa->pmk_len && pmksa->pmk_len < PMK_LEN_MAX) {
+		/* external supplicant stores SUITEB-192 PMK */
+		if ((bssidx = wl_get_bssidx_by_wdev(cfg, dev->ieee80211_ptr)) < 0) {
+			WL_ERR(("Find index failed\n"));
+			err = -EINVAL;
+			return err;
+		}
+
+		sec = wl_read_prof(cfg, dev, WL_PROF_SEC);
+		if (cfg->okc_enable &&
+			IS_AKM_SUITE_OKC(sec)) {
+			err = wldev_iovar_setbuf_bsscfg(dev, "okc_info_pmk", pmksa->pmk,
+				pmksa->pmk_len, cfg->ioctl_buf, WLC_IOCTL_SMLEN, bssidx,
+				&cfg->ioctl_buf_sync);
+			if (err) {
+				/* could fail in case that 'okc' is not supported */
+				WL_INFORM_MEM(("okc_info_pmk failed, err=%d (ignore)\n", err));
+			}
+		}
+#ifdef BCMSUP_4WAY_HANDSHAKE
+		else if (dhdp->fw_4way_handshake) {
+			wl_set_pmk(dev, pmksa->pmk, pmksa->pmk_len);
+		}
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+	}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 	return err;
 }
@@ -14400,7 +14534,6 @@ wl_cfg80211_start_ap(
 	struct parsed_ies ies;
 	s32 bssidx = 0;
 	u32 dev_role = 0;
-	u32 wpa_auth = 0;
 	chanspec_bw_t chspec_bw = INVCHANSPEC;
 #ifdef WL11AX
 #if (defined(IFX_CFG80211_5_4_21) || (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 7, 0) && \
@@ -14516,9 +14649,6 @@ wl_cfg80211_start_ap(
 	case NL80211_CHAN_WIDTH_160:
 		chspec_bw = WL_CHANSPEC_BW_160;
 		break;
-	case NL80211_CHAN_WIDTH_80P80:
-	case NL80211_CHAN_WIDTH_5:
-	case NL80211_CHAN_WIDTH_10:
 	default:
 		WARN_ON_ONCE(1);
 	}
@@ -15678,11 +15808,20 @@ int wl_cfg80211_dump_obss(struct wiphy *wiphy, struct net_device *ndev,
 		SURVEY_INFO_CHANNEL_TIME_TX;
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
 	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
 		ieee80211_frequency_to_channel(chan->center_freq),
 		info->time));
 	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
 		info->noise, info->time_busy, info->time_rx, info->time_tx));
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
+	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
+		ieee80211_frequency_to_channel(chan->center_freq),
+		info->channel_time));
+	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
+		info->noise, info->channel_time_busy, info->channel_time_rx,
+		info->channel_time_tx));
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
 
 	err = 0;
 exit:
@@ -15887,11 +16026,20 @@ int wl_cfg80211_dump_cca_survey(struct wiphy *wiphy, struct net_device *ndev,
 		info->filled = info->filled | SURVEY_INFO_IN_USE;
 	}
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
 	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
 		ieee80211_frequency_to_channel(chan->center_freq),
 		info->time));
 	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
 		info->noise, info->time_busy, info->time_rx, info->time_tx));
+#else /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
+	WL_DBG(("survey dump: channel %d: survey duration %llu\n",
+		ieee80211_frequency_to_channel(chan->center_freq),
+		info->channel_time));
+	WL_DBG(("noise(%d) busy(%llu) rx(%llu) tx(%llu)\n",
+		info->noise, info->channel_time_busy, info->channel_time_rx,
+		info->channel_time_tx));
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)) */
 
 	err = 0;
 exit:
@@ -15999,8 +16147,7 @@ int wl_cfg80211_dump_survey(struct wiphy *wiphy, struct net_device *ndev,
 }
 #endif /* WL_SUPPORT_ACS */
 
-#if defined(BCMSUP_4WAY_HANDSHAKE_SAE) || (defined(WL_OWE) && LINUX_VERSION_CODE >= \
-	KERNEL_VERSION(5, 2, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
 static bool wl_has_pmkid(u8 *parse, u32 len, u32 *offset_in_ie)
 {
 	bcm_tlv_t *rsn_ie;
@@ -16045,38 +16192,7 @@ done:
 		*offset_in_ie = 0;
 	return false;
 }
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
-
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-static int wl_cfg80211_set_pmk(struct wiphy *wiphy, struct net_device *dev,
-                               const struct cfg80211_pmk_conf *conf)
-{
-	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
-	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
-
-	WL_DBG(("Enter\n"));
-
-	/* expect using firmware supplicant for 1X */
-	if (profile->use_fwsup != WL_PROFILE_FWSUP_1X)
-		return -EINVAL;
-
-	return wl_set_pmk(dev, conf->pmk, conf->pmk_len);
-}
-
-static int wl_cfg80211_del_pmk(struct wiphy *wiphy, struct net_device *dev,
-                               const u8 *aa)
-{
-	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
-	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, dev);
-
-	WL_DBG(("Enter\n"));
-
-	if (profile->use_fwsup != WL_PROFILE_FWSUP_1X)
-		return -EINVAL;
-
-	return wl_set_pmk(dev, NULL, 0);
-}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 static struct cfg80211_ops wl_cfg80211_ops = {
 	.add_virtual_intf = wl_cfg80211_add_virtual_iface,
@@ -16784,6 +16900,16 @@ static s32 wl_setup_wiphy(struct wireless_dev *wdev, struct device *sdiofunc_dev
 	wdev->wiphy->features |= NL80211_FEATURE_SAE;
 	wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_AP_PMKSA_CACHING);
 #endif /* WL_SAE */
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) && defined(BCMSUP_4WAY_HANDSHAKE)
+	if (dhd_use_idsup) {
+		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_PSK);
+		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_1X);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) && defined(BCMSUP_4WAY_HANDSHAKE_SAE)
+		wiphy_ext_feature_set(wdev->wiphy, NL80211_EXT_FEATURE_SAE_OFFLOAD);
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) && defined(BCMSUP_4WAY_HANDSHAKE_SAE) */
+	}
+#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) && defined(BCMSUP_4WAY_HANDSHAKE) */
 
 #ifdef WL_SCAN_TYPE
 	/* These scan types will be mapped to default scan on non-supported chipset */
@@ -19848,6 +19974,9 @@ wl_bss_roaming_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 #ifdef DHD_POST_EAPOL_M1_AFTER_ROAM_EVT
 	dhd_if_t *ifp = NULL;
 #endif /* DHD_POST_EAPOL_M1_AFTER_ROAM_EVT */
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(4, 13, 0))
+	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, ndev);
+#endif /* (LINUX_VERSION_CODE > KERNEL_VERSION(4, 13, 0)) */
 #ifdef WL_DHD_XR_CLIENT
 	struct net_device *xr_sta_ndev = xr_sta_get_ndev_for_cfg_event(cfg, ndev);
 #endif /* WL_DHD_XR_CLIENT */
@@ -19992,14 +20121,17 @@ wl_bss_roaming_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 		conn_info->req_ie, conn_info->req_ie_len,
 		conn_info->resp_ie, conn_info->resp_ie_len, GFP_KERNEL);
 #endif /* WL_DHD_XR_CLIENT */
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-	if (profile->use_fwsup == WL_PROFILE_FWSUP_1X &&
-		wl_has_pmkid(conn_info->req_ie, conn_info->req_ie_len, NULL)) {
+#endif /* (CONFIG_ARCH_MSM && CFG80211_ROAMED_API_UNIFIED) || LINUX_VERSION >= 4.12.0 */
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+	if ((profile->use_fwsup == WL_PROFILE_FWSUP_1X ||
+		profile->use_fwsup == WL_PROFILE_FWSUP_ROAM) &&
+		(wl_has_pmkid(conn_info->req_ie, conn_info->req_ie_len, NULL) ||
+		IS_AKM_SUITE_FT(sec) ||
+		(IS_AKM_SUITE_OKC(sec) && cfg->okc_enable))) {
 		CFG80211_PORT_AUTHORIZED(ndev, curbssid, NULL, 0, GFP_KERNEL);
 	}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
-
-#endif /* (CONFIG_ARCH_MSM && CFG80211_ROAMED_API_UNIFIED) || LINUX_VERSION >= 4.12.0 */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 
 	memcpy(&cfg->last_roamed_addr, &e->addr, ETHER_ADDR_LEN);
 	wl_set_drv_status(cfg, CONNECTED, ndev);
@@ -20093,6 +20225,7 @@ wl_cfg80211_verify_bss(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 }
 
 _Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")
+
 #ifdef WL_FILS
 static s32
 wl_get_fils_connect_params(struct bcm_cfg80211 *cfg, struct net_device *ndev)
@@ -20169,6 +20302,7 @@ exit:
 	return err;
 }
 #endif /* WL_FILS */
+
 static s32
 wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	const wl_event_msg_t *e, void *data, bool completed)
@@ -20187,9 +20321,9 @@ wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	u32 event_type = ntoh32(e->event_type);
 	struct cfg80211_bss *bss = NULL;
 	dhd_pub_t *dhdp;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
 	struct wl_profile *profile = wl_get_profile_by_netdev(cfg, ndev);
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 #ifdef WL_DHD_XR
 	struct net_device *primary_dev = NULL;
 #ifdef WL_DHD_XR_CLIENT
@@ -20253,7 +20387,7 @@ wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 			if (ndev != bcmcfg_to_prmry_ndev(cfg))
 #endif /* WL_DHD_XR */
 			{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 				init_completion(&cfg->iface_disable);
 #else
 				/* reinitialize completion to clear previous count */
@@ -20347,7 +20481,6 @@ wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 				sec->auth_assoc_res_status :
 				WLAN_STATUS_UNSPECIFIED_FAILURE,
 				GFP_KERNEL);
-
 #else
 			CFG80211_CONNECT_RESULT(ndev,
 				curbssid,
@@ -20363,12 +20496,15 @@ wl_bss_connect_done(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 				GFP_KERNEL);
 #endif /* WL_DHD_XR_CLIENT */
 		}
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
-		if (completed && profile->use_fwsup == WL_PROFILE_FWSUP_1X &&
-			wl_has_pmkid(conn_info->req_ie, conn_info->req_ie_len, NULL)) {
-			CFG80211_PORT_AUTHORIZED(ndev, curbssid, NULL, 0, GFP_KERNEL);
-		}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
+		if (completed)
+			if (profile->use_fwsup == WL_PROFILE_FWSUP_PSK ||
+				profile->use_fwsup == WL_PROFILE_FWSUP_SAE ||
+				(profile->use_fwsup == WL_PROFILE_FWSUP_1X &&
+				wl_has_pmkid(conn_info->req_ie, conn_info->req_ie_len, NULL))) {
+				CFG80211_PORT_AUTHORIZED(ndev, curbssid, NULL, 0, GFP_KERNEL);
+			}
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)) */
 		if (completed) {
 			WL_INFORM_MEM(("[%s] Report connect result - "
 				"connection succeeded\n", ndev->name));
@@ -25011,27 +25147,7 @@ s32 wl_cfg80211_up(struct net_device *net)
 			return err;
 		}
 	}
-#if defined(BCMSUP_4WAY_HANDSHAKE)
-	if (dhd->fw_4way_handshake) {
-		/* This is a hacky method to indicate fw 4WHS support and
-		 * is used only for kernels (kernels < 3.14). For newer
-		 * kernels, we would be using vendor extn. path to advertise
-		 * FW based 4-way handshake feature support.
-		 */
-		cfg->wdev->wiphy->features |= NL80211_FEATURE_FW_4WAY_HANDSHAKE;
-	}
-#endif /* BCMSUP_4WAY_HANDSHAKE */
-#if defined(BCMSUP_4WAY_HANDSHAKE_SAE)
-	if (dhd->fw_4way_handshake) {
-		wiphy_ext_feature_set(cfg->wdev->wiphy,
-				NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_PSK);
-		wiphy_ext_feature_set(cfg->wdev->wiphy,
-				NL80211_EXT_FEATURE_4WAY_HANDSHAKE_STA_1X);
-		if (FW_SUPPORTED(dhd, sae))
-			wiphy_ext_feature_set(cfg->wdev->wiphy,
-					NL80211_EXT_FEATURE_SAE_OFFLOAD);
-	}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+
 	err = __wl_cfg80211_up(cfg);
 	if (unlikely(err))
 		WL_ERR(("__wl_cfg80211_up failed\n"));
@@ -25424,19 +25540,22 @@ static void wl_link_down(struct bcm_cfg80211 *cfg)
 	struct wl_connect_info *conn_info = wl_to_conn(cfg);
 
 	WL_DBG(("In\n"));
-	cfg->link_up = false;
 	conn_info->req_ie_len = 0;
 	conn_info->resp_ie_len = 0;
-#ifdef BCMSUP_4WAY_HANDSHAKE_SAE
+#ifdef WLAIBSS_MCHAN
+#ifdef BCMSUP_4WAY_HANDSHAKE
 	if (cfg->ibss_cfgdev) {
 		struct net_device *ndev = cfgdev_to_wlc_ndev(cfg->ibss_cfgdev, cfg);
 		struct wl_profile *profile = wl_get_profile_by_netdev(cfg, ndev);
 		if (profile && profile->use_fwsup != WL_PROFILE_FWSUP_NONE) {
-			wl_set_pmk(ndev, NULL, 0);
+			if (cfg->link_up)
+				wl_set_pmk(ndev, NULL, 0);
 			profile->use_fwsup = WL_PROFILE_FWSUP_NONE;
 		}
 	}
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
+#endif /* WLAIBSS_MCHAN */
+	cfg->link_up = false;
 }
 
 static unsigned long wl_lock_eq(struct bcm_cfg80211 *cfg)
@@ -27904,9 +28023,7 @@ wl_cfg80211_set_rekey_data(struct wiphy *wiphy, struct net_device *dev,
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 1, 0) */
 #endif /* GTK_OFFLOAD_SUPPORT */
 
-#ifndef BCMSUP_4WAY_HANDSHAKE_SAE
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0))
-
 #ifndef WL_DHD_XR
 static
 #endif /* WL_DHD_XR */
@@ -27964,8 +28081,8 @@ int wl_cfg80211_set_pmk(struct wiphy *wiphy, struct net_device *dev,
 	}
 
 	sec = wl_read_prof(cfg, dev, WL_PROF_SEC);
-	if ((sec->wpa_auth == WLAN_AKM_SUITE_8021X) ||
-		(sec->wpa_auth == WL_AKM_SUITE_SHA256_1X)) {
+	if (cfg->okc_enable &&
+		IS_AKM_SUITE_OKC(sec)) {
 		ret = wldev_iovar_setbuf_bsscfg(dev, "okc_info_pmk", pmk.key, pmk.key_len,
 			cfg->ioctl_buf, WLC_IOCTL_SMLEN, bssidx, &cfg->ioctl_buf_sync);
 		if (ret) {
@@ -28034,7 +28151,6 @@ int wl_cfg80211_del_pmk(struct wiphy *wiphy, struct net_device *dev,
 	return err;
 }
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) */
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE */
 
 #if defined(WL_SUPPORT_AUTO_CHANNEL)
 int
@@ -30610,9 +30726,6 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 	case NL80211_CHAN_WIDTH_160:
 		bw = WL_CHANSPEC_BW_160;
 		break;
-	case NL80211_CHAN_WIDTH_80P80:
-	case NL80211_CHAN_WIDTH_5:
-	case NL80211_CHAN_WIDTH_10:
 	default:
 		WARN_ON_ONCE(1);
 	}
@@ -30661,9 +30774,6 @@ wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 	case NL80211_CHAN_WIDTH_160:
 		chspec_bw = WL_CHANSPEC_BW_160;
 		break;
-	case NL80211_CHAN_WIDTH_80P80:
-	case NL80211_CHAN_WIDTH_5:
-	case NL80211_CHAN_WIDTH_10:
 	default:
 		WARN_ON_ONCE(1);
 	}

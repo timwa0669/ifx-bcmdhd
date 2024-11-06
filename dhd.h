@@ -1162,9 +1162,7 @@ typedef struct dhd_pub {
 #if defined(ARP_OFFLOAD_SUPPORT)
 	uint32 arp_version;
 #endif // endif
-#if defined(BCMSUP_4WAY_HANDSHAKE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
 	bool fw_4way_handshake;		/* Whether firmware will to do the 4way handshake. */
-#endif /* BCMSUP_4WAY_HANDSHAKE || BCMSUP_4WAY_HANDSHAKE_SAE */
 #ifdef DEBUG_DPC_THREAD_WATCHDOG
 	bool dhd_bug_on;
 #endif /* DEBUG_DPC_THREAD_WATCHDOG */

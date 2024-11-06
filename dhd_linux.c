@@ -863,16 +863,15 @@ uint dhd_pktgen_len = 0;
 module_param(dhd_pktgen_len, uint, 0);
 #endif /* SDTEST */
 
-#if defined(BCMSUP_4WAY_HANDSHAKE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
+#if defined(BCMSUP_4WAY_HANDSHAKE)
 /* Use in dongle supplicant for 4-way handshake */
-#if defined(WLFBT) || defined(WL_ENABLE_IDSUP)
-/* Enable idsup by default (if supported in fw) */
+#ifdef WL_ENABLE_IDSUP
 uint dhd_use_idsup = 1;
-#else
+#else /* WL_ENABLE_IDSUP */
 uint dhd_use_idsup = 0;
-#endif /* WLFBT || WL_ENABLE_IDSUP */
+#endif /* WL_ENABLE_IDSUP */
 module_param(dhd_use_idsup, uint, 0);
-#endif /* BCMSUP_4WAY_HANDSHAKE || BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
 
 #if (defined(OEM_ANDROID) && !defined(BCMQT))
 /* Allow delayed firmware download for debug purpose */
@@ -10546,9 +10545,9 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	uint32 wnm_cap = 0;
 	u8 *chspecs_pbuf = NULL;
 	wl_uint32_list_t *chspecs_list;
-#if defined(BCMSUP_4WAY_HANDSHAKE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
+#if defined(BCMSUP_4WAY_HANDSHAKE)
 	uint32 sup_wpa = 1;
-#endif /* BCMSUP_4WAY_HANDSHAKE || BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
 #if defined(CUSTOM_AMPDU_BA_WSIZE) || (defined(WLAIBSS) && \
 	defined(CUSTOM_IBSS_AMPDU_BA_WSIZE))
 	uint32 ampdu_ba_wsize = 0;
@@ -11429,7 +11428,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	}
 #endif /* CUSTOM_AMSDU_AGGSF */
 
-#if defined(BCMSUP_4WAY_HANDSHAKE) || defined(BCMSUP_4WAY_HANDSHAKE_SAE)
+#if defined(BCMSUP_4WAY_HANDSHAKE)
 	/* Read 4-way handshake requirements */
 	if (dhd_use_idsup == 1) {
 		ret = dhd_iovar(dhd, 0, "sup_wpa", (char *)&sup_wpa, sizeof(sup_wpa),
@@ -11437,11 +11436,11 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		/* sup_wpa iovar returns NOTREADY status on some platforms using modularized
 		 * in-dongle supplicant.
 		 */
-		if (ret >= 0 || ret == BCME_NOTREADY)
+		if (ret != BCME_UNSUPPORTED)
 			dhd->fw_4way_handshake = TRUE;
 		DHD_TRACE(("4-way handshake mode is: %d\n", dhd->fw_4way_handshake));
 	}
-#endif /* BCMSUP_4WAY_HANDSHAKE || BCMSUP_4WAY_HANDSHAKE_SAE */
+#endif /* BCMSUP_4WAY_HANDSHAKE */
 #if defined(SUPPORT_2G_VHT) || defined(SUPPORT_5G_1024QAM_VHT)
 	ret = dhd_iovar(dhd, 0, "vht_features", (char *)&vht_features, sizeof(vht_features),
 			NULL, 0, FALSE);
