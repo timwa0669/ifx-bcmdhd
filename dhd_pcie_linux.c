@@ -989,7 +989,9 @@ static int dhdpcie_suspend_dev(struct pci_dev *dev)
 		return BCME_ERROR;
 	}
 #endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
+
 	DHD_ERROR(("%s: Enter\n", __FUNCTION__));
+
 	dhdpcie_suspend_dump_cfgregs(bus, "BEFORE_EP_SUSPEND");
 #if defined(OEM_ANDROID) && (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0))
 	dhd_dpc_tasklet_kill(bus->dhd);
@@ -1007,9 +1009,7 @@ static int dhdpcie_suspend_dev(struct pci_dev *dev)
 		DHD_ERROR(("%s: pci_set_power_state error %d\n",
 			__FUNCTION__, ret));
 	}
-#ifdef OEM_ANDROID
-	dev->state_saved = FALSE;
-#endif /* OEM_ANDROID */
+
 	dhdpcie_suspend_dump_cfgregs(bus, "AFTER_EP_SUSPEND");
 	return ret;
 }
@@ -1045,30 +1045,32 @@ static int dhdpcie_resume_dev(struct pci_dev *dev)
 	dhdpcie_info_t *pch = pci_get_drvdata(dev);
 
 	DHD_ERROR(("%s: Enter\n", __FUNCTION__));
+#if defined(OEM_ANDROID) && (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0))
+	pci_load_and_free_saved_state(dev, &pch->state);
+#endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
 
-	err = pci_set_power_state(dev, PCI_D0);
-	if (err) {
-		printf("%s:pci_set_power_state error %d \n", __FUNCTION__, err);
-		goto out;
+	/* Resture back current bar1 window */
+	OSL_PCI_WRITE_CONFIG(pch->bus->osh, PCI_BAR1_WIN, 4, pch->curr_bar1_win);
+
+#ifdef FORCE_TPOWERON
+	if (dhdpcie_chip_req_forced_tpoweron(pch->bus)) {
+		dhd_bus_set_tpoweron(pch->bus, tpoweron_scale);
 	}
+#endif /* FORCE_TPOWERON */
 	err = pci_enable_device(dev);
 	if (err) {
 		printf("%s:pci_enable_device error %d \n", __FUNCTION__, err);
 		goto out;
 	}
 	pci_set_master(dev);
-#if defined(OEM_ANDROID) && (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0))
-	pci_load_and_free_saved_state(dev, &pch->state);
-#endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
-#ifdef OEM_ANDROID
-	dev->state_saved = TRUE;
-#endif /* OEM_ANDROID */
-	pci_restore_state(dev);
-#ifdef FORCE_TPOWERON
-	if (dhdpcie_chip_req_forced_tpoweron(pch->bus)) {
-		dhd_bus_set_tpoweron(pch->bus, tpoweron_scale);
+	err = pci_set_power_state(dev, PCI_D0);
+	if (err) {
+		printf("%s:pci_set_power_state error %d \n", __FUNCTION__, err);
+		goto out;
 	}
-#endif /* FORCE_TPOWERON */
+
+	pci_restore_state(dev);
+
 	BCM_REFERENCE(pch);
 	dhdpcie_suspend_dump_cfgregs(pch->bus, "AFTER_EP_RESUME");
 out:
