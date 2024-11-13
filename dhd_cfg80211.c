@@ -560,9 +560,6 @@ s32 dhd_config_dongle(struct bcm_cfg80211 *cfg
 #endif /* WL_DHD_XR_CLIENT */
 )
 {
-#ifndef DHD_SDALIGN
-#define DHD_SDALIGN	32
-#endif // endif
 #ifndef WL_DHD_XR_CLIENT
 	struct net_device *ndev;
 #endif /* !WL_DHD_XR_CLIENT */
