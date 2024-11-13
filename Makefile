@@ -86,6 +86,7 @@ endif
 GCCVERSIONGTEQ7 := $(shell expr `$(CROSS_COMPILE)gcc -dumpversion | cut -f1 -d.` \>= 7)
 ifeq "$(GCCVERSIONGTEQ7)" "1"
 DHDCFLAGS += -Wimplicit-fallthrough=3
+DHDCFLAGS += $(call cc-disable-warning, format-truncation)
 endif
 DHDCFLAGS += $(call cc-disable-warning, date-time)
 DHDCFLAGS += $(call cc-disable-warning, stringop-overflow)

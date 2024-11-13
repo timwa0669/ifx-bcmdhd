@@ -3511,4 +3511,20 @@ extern int dhd_send_xr_cmd(dhd_pub_t *dest_dhdp, void *xr_cmd,
 	int len, struct completion *comp, bool sync);
 extern void dhd_wq_xr_cmd_handler(dhd_pub_t *dhdp, void *info);
 #endif /* WL_DHD_XR */
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0))
+#define DHD_VFS_INODE(dir) (dir->d_inode)
+#else
+#define DHD_VFS_INODE(dir) d_inode(dir)
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0) */
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0))
+#define DHD_VFS_UNLINK(dir, b, c) vfs_unlink(DHD_VFS_INODE(dir), b)
+#elif (LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0))
+#define DHD_VFS_UNLINK(dir, b, c) vfs_unlink(DHD_VFS_INODE(dir), b, c)
+#elif (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0))
+#define DHD_VFS_UNLINK(dir, b, c) vfs_unlink(&init_user_ns, DHD_VFS_INODE(dir), b, c)
+#else
+#define DHD_VFS_UNLINK(dir, b, c) vfs_unlink(&nop_mnt_idmap, DHD_VFS_INODE(dir), b, c)
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0) */
 #endif /* _dhd_h_ */

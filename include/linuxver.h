@@ -95,6 +95,9 @@
 #undef IP_TOS
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)) */
 #include <asm/io.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0))
+#include <linux/sched/clock.h>
+#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)) */
 
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2, 5, 41))
 #include <linux/workqueue.h>

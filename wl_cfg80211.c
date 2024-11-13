@@ -987,20 +987,28 @@ static s32 wl_cfg80211_get_channel(struct wiphy *wiphy, struct wireless_dev *wde
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(3, 2, 0)) || defined(WL_COMPAT_WIRELESS)
 #if (defined(CONFIG_ARCH_MSM) && defined(TDLS_MGMT_VERSION2)) || (LINUX_VERSION_CODE < \
 	KERNEL_VERSION(3, 16, 0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 15, 0))
-static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
+static s32
+wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
 	u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
 	u32 peer_capability, const u8 *buf, size_t len);
 #elif ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0)) && \
-		(LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)))
+	(LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)))
 static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
 	const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
 	u32 peer_capability, const u8 *buf, size_t len);
-#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0))
+#elif ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0)) && \
+	(LINUX_VERSION_CODE < KERNEL_VERSION(6, 5, 0)))
 static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
-       const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
-       u32 peer_capability, bool initiator, const u8 *buf, size_t len);
+	const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
+	u32 peer_capability, bool initiator, const u8 *buf, size_t len);
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0))
+static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
+	const u8 *peer, int link_id, u8 action_code, u8 dialog_token,
+	u16 status_code, u32 peer_capability, bool initiator, const u8 *buf,
+	size_t len);
 #else /* CONFIG_ARCH_MSM && TDLS_MGMT_VERSION2 */
-static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
+static s32
+wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
 	u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
 	const u8 *buf, size_t len);
 #endif /* CONFIG_ARCH_MSM && TDLS_MGMT_VERSION2 */
@@ -25848,14 +25856,20 @@ wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
 	u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
 	u32 peer_capability, const u8 *buf, size_t len)
 #elif ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0)) && \
-		(LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)))
+	(LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0)))
 static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
 	const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
 	u32 peer_capability, const u8 *buf, size_t len)
-#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0))
+#elif ((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0)) && \
+	(LINUX_VERSION_CODE < KERNEL_VERSION(6, 5, 0)))
 static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
-       const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
-       u32 peer_capability, bool initiator, const u8 *buf, size_t len)
+	const u8 *peer, u8 action_code, u8 dialog_token, u16 status_code,
+	u32 peer_capability, bool initiator, const u8 *buf, size_t len)
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0))
+static s32 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
+	const u8 *peer, int link_id, u8 action_code, u8 dialog_token,
+	u16 status_code, u32 peer_capability, bool initiator, const u8 *buf,
+	size_t len)
 #else /* CONFIG_ARCH_MSM && TDLS_MGMT_VERSION2 */
 static s32
 wl_cfg80211_tdls_mgmt(struct wiphy *wiphy, struct net_device *dev,
