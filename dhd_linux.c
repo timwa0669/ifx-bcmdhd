@@ -10699,11 +10699,9 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #ifdef DISABLE_11N_PROPRIETARY_RATES
 	uint32 ht_features = 0;
 #endif /* DISABLE_11N_PROPRIETARY_RATES */
-#ifdef CONFIG_CYW89570
 #ifdef ENABLE_MCHAN_SBDC
 	uint32 mchan_enable_sbdc = 1;
 #endif /* ENABLE_MCHAN_SBDC */
-#endif /* CONFIG_CYW89570 */
 #ifdef CUSTOM_PSPRETEND_THR
 	uint32 pspretend_thr = CUSTOM_PSPRETEND_THR;
 #endif // endif
@@ -11516,7 +11514,6 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #ifdef CUSTOM_CONTROL_OCE_DISABLE
 	dhd_control_oce_enab(dhd, FALSE);
 #endif /* CUSTOM_CONTROL_OCE_DISABLE */
-#ifdef CONFIG_CYW89570
 #ifdef ENABLE_MCHAN_SBDC
 	ret = dhd_iovar(dhd, 0, "mchan_enable_sbdc", (char *)&mchan_enable_sbdc,
 			sizeof(mchan_enable_sbdc), NULL, 0, TRUE);
@@ -11524,7 +11521,6 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		DHD_ERROR(("%s mchan sbdc enable failed %d\n", __FUNCTION__, ret));
 	}
 #endif /* ENABLE_MCHAN_SBDC */
-#endif /* CONFIG_CYW89570 */
 #ifdef CUSTOM_PSPRETEND_THR
 	/* Turn off MPC in AP mode */
 	ret = dhd_iovar(dhd, 0, "pspretend_threshold", (char *)&pspretend_thr,

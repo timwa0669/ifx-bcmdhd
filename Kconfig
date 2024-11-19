@@ -28,11 +28,6 @@ config BCMDHD_PCIE
 	depends on BCMDHD && PCI
 endchoice
 
-config CYW89570
-	bool "CYW89570 support"
-	depends on BCMDHD
-	default n
-
 config CYW43022
 	bool "CYW43022 support"
 	depends on BCMDHD

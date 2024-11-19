@@ -14940,9 +14940,8 @@ wl_cfg80211_start_ap(
 			WL_ERR(("get hogsqs command failed, err %d\n", err));
 		} else {
 			value |= 0x1003; /* Mitigate large NAV management and control frames */
-#ifdef CONFIG_CYW89570
-			value |= 0x0200; /* Mitigate large NAV trigger frames */
-#endif /* CONFIG_CYW89570 */
+			if (dhd->bus->sih->chip == CYW55560_CHIP_ID)
+				value |= 0x0200; /* Mitigate large NAV trigger frames */
 			value |= (M_HOGSQS_CFG << 16);
 			err = wldev_iovar_setint_bsscfg(dev, "hogsqs",
 				value, bssidx);
