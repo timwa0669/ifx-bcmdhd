@@ -1023,12 +1023,6 @@
 #define	WLC_BAND_2G		2	/* 2.4 Ghz */
 #define	WLC_BAND_6G		3	/* 6 Ghz */
 #define	WLC_BAND_ALL		4	/* all bands */
-
-#ifdef CONFIG_BCM43012
-#undef WLC_BAND_ALL
-#define	WLC_BAND_ALL		3	/* all bands */
-#endif // endif
-
 #define WLC_BAND_INVALID	-1	/* Invalid band */
 
 /* band range returned by band_range iovar */
