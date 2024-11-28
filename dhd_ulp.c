@@ -329,6 +329,9 @@ dhd_ulp_reset_lhl_regs(dhd_pub_t *dhdp)
 {
 	si_t *sih = dhd_bus_sih(dhdp->bus);
 
+	if (!GOODIDX(si_findcoreidx(sih, GCI_CORE_ID, 0)))
+		return;
+
 	LHL_REG(sih, lhl_top_pwrseq_ctl_adr, ~0, 0);	/* LHL Top Level Power Sequence Control */
 
 	LHL_REG(sih, gpio_int_en_port_adr[0], ~0, 0);	/* GPIO Interrupt Enable0 */
