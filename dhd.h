@@ -1437,6 +1437,9 @@ typedef struct dhd_pub {
 #ifdef WL_DHD_XR
 	void *xr_ctx;
 #endif /* WL_DHD_XR */
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	bool skip_dhd_stop;
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 } dhd_pub_t;
 
 typedef struct {

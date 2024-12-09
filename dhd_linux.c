@@ -2769,6 +2769,12 @@ _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 	s32 cfg_type = BCME_ERROR;
 #endif /* P2P_RAND */
 
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	WL_ERR(("[%s] close dev for mac changing\n", dhd_ifname(&dhd->pub, ifidx)));
+	dhd->pub.skip_dhd_stop = TRUE;
+	dev_close(dhd->iflist[ifidx]->net);
+#endif /* DHD_NOTIFY_MAC_CHANGED */
+
 	ret = dhd_iovar(&dhd->pub, ifidx, "cur_etheraddr", (char *)addr,
 			ETHER_ADDR_LEN, NULL, 0, TRUE);
 	if (ret < 0) {
@@ -2826,6 +2832,16 @@ _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 	}
 
 exit:
+#ifdef DHD_NOTIFY_MAC_CHANGED
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+	dev_open(dhd->iflist[ifidx]->net, NULL);
+#else
+	dev_open(dhd->iflist[ifidx]->net);
+#endif
+	dhd->pub.skip_dhd_stop = FALSE;
+	WL_ERR(("[%s] notify mac changed done\n", dhd_ifname(&dhd->pub, ifidx)));
+#endif /* DHD_NOTIFY_MAC_CHANGED */
+
 	return ret;
 }
 
@@ -3090,6 +3106,9 @@ dhd_set_mac_addr_handler(void *handle, void *event_info, u8 event)
 		return;
 	}
 
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	rtnl_lock();
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 	dhd_net_if_lock_local(dhd);
 	DHD_OS_WAKE_LOCK(&dhd->pub);
 	DHD_PERIM_LOCK(&dhd->pub);
@@ -3126,6 +3145,9 @@ done:
 	DHD_PERIM_UNLOCK(&dhd->pub);
 	DHD_OS_WAKE_UNLOCK(&dhd->pub);
 	dhd_net_if_unlock_local(dhd);
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	rtnl_unlock();
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 }
 
 static void
@@ -3256,6 +3278,13 @@ dhd_set_mac_address(struct net_device *dev, void *addr)
 			 * from interface create context.
 			 */
 			ETH_HW_ADDR_SET(dev, dhdif->mac_addr);
+#ifdef DHD_NOTIFY_MAC_CHANGED
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0))
+			dev_open(dev, NULL);
+#else
+			dev_open(dev);
+#endif
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 			return ret;
 		}
 #endif /* WL_STATIC_IF */
@@ -7000,8 +7029,18 @@ struct net_info *iter, *next;
 			goto exit;
 		}
 	}
-
 #endif /* WL_STATIC_IF && WL_CFG80211 */
+
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	if (!dhd->pub.hang_was_sent && dhd->pub.skip_dhd_stop) {
+		WL_ERR(("[%s] skip chip reset\n", net->name));
+		skip_reset = true;
+#if defined(WL_CFG80211)
+		wl_cfg80211_sta_ifdown(net);
+#endif /* WL_CFG80211 */
+		goto exit;
+	}
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 
 #ifdef WL_DHD_XR
 	GCC_DIAGNOSTIC_PUSH_SUPPRESS_CAST();
@@ -7680,6 +7719,13 @@ dhd_static_if_stop(struct net_device *net)
 		DHD_TRACE(("non-static interface (%s)..do nothing \n", net->name));
 		return BCME_OK;
 	}
+
+#ifdef DHD_NOTIFY_MAC_CHANGED
+	if (dhd->pub.skip_dhd_stop) {
+		WL_INFORM(("[%s] Exit skip stop\n", net->name));
+		return BCME_OK;
+	}
+#endif /* DHD_NOTIFY_MAC_CHANGED */
 
 	ret = wl_cfg80211_static_if_close(net);
 
