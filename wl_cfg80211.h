@@ -2707,6 +2707,7 @@ extern s32 wl_cfg80211_get_best_channels(struct net_device *dev, char* command,
 #endif /* WL_SUPPORT_AUTO_CHANNEL */
 extern int wl_cfg80211_ether_atoe(const char *a, struct ether_addr *n);
 extern int wl_cfg80211_hang(struct net_device *dev, u16 reason);
+extern bool wl_cfg80211_macaddr_sync_reqd(struct net_device *dev);
 extern s32 wl_mode_to_nl80211_iftype(s32 mode);
 int wl_cfg80211_do_driver_init(struct net_device *net);
 void wl_cfg80211_enable_trace(bool set, u32 level);
@@ -3202,6 +3203,7 @@ int wl_cfg80211_set_he_mode(struct net_device *dev, struct bcm_cfg80211 *cfg,
 #endif /* WL_DISABLE_HE_SOFTAP || WL_DISABLE_HE_P2P */
 extern s32 wl_cfg80211_config_suspend_events(struct net_device *ndev, bool enable);
 void wl_cfg80211_overtemp_event(struct net_device *ndev);
+extern s32 wl_cfg80211_handle_macaddr_change(struct net_device *dev, u8 *macaddr);
 
 #if defined(WL_DHD_XR) && defined(WL_6E)
 extern s32

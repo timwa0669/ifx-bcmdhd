@@ -10224,6 +10224,31 @@ static __used u32 wl_find_msb(u16 bit16)
 	return ret;
 }
 
+s32
+wl_cfg80211_handle_macaddr_change(struct net_device *dev, u8 *macaddr)
+{
+	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
+	uint8 wait_cnt = WAIT_FOR_DISCONNECT_MAX;
+	u32 status = TRUE;
+
+	if (IS_STA_IFACE(dev->ieee80211_ptr) &&
+		wl_get_drv_status(cfg, CONNECTED, dev)) {
+		/* Macaddress change in connected state. The curent
+		 * connection will become invalid. Issue disconnect
+		 * to current AP to let the AP know about link down
+		 */
+		WL_INFORM_MEM(("macaddr change in connected state. Force disassoc.\n"));
+		wl_cfg80211_disassoc(dev, WLAN_REASON_DEAUTH_LEAVING);
+
+		while ((status = wl_get_drv_status(cfg, CONNECTED, dev)) && wait_cnt) {
+			WL_DBG(("Waiting for disconnection, wait_cnt: %d\n", wait_cnt));
+			wait_cnt--;
+			OSL_SLEEP(50);
+		}
+	}
+	return BCME_OK;
+}
+
 static s32 wl_cfg80211_resume(struct wiphy *wiphy)
 {
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
@@ -14269,6 +14294,48 @@ static s32 wl_cfg80211_hostapd_sec(
 		WL_ERR(("No WPSIE in beacon \n"));
 	}
 	return 0;
+}
+
+bool
+wl_cfg80211_macaddr_sync_reqd(struct net_device *dev)
+{
+	struct wireless_dev *wdev = dev->ieee80211_ptr;
+	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
+
+	WL_DBG(("enter \n"));
+	if (!wdev) {
+		WL_ERR(("no wdev present\n"));
+		return false;
+	}
+
+	BCM_REFERENCE(cfg);
+
+#ifdef WL_STATIC_IF
+	/* In soft case too role upgrade happens
+	 * from STA to AP in some cases.These
+	 * cases will have iftype as STATION.
+	 */
+	if (is_static_iface(cfg, dev)) {
+		WL_INFORM_MEM(("STATIC interface\n"));
+		return true;
+	}
+#endif /* WL_STATIC_IF */
+
+	switch (wdev->iftype) {
+		case NL80211_IFTYPE_P2P_GO:
+		case NL80211_IFTYPE_P2P_CLIENT:
+			WL_INFORM_MEM(("P2P GO/GC interface\n"));
+			return true;
+		case NL80211_IFTYPE_STATION:
+			WL_INFORM_MEM(("STA interface\n"));
+			return true;
+		case NL80211_IFTYPE_AP:
+			WL_INFORM_MEM(("SOFTAP interface\n"));
+			return true;
+		default:
+			WL_ERR(("no macthing if type\n"));
+	}
+	return false;
 }
 
 #if defined(WL_SUPPORT_BACKPORTED_KPATCHES) || (LINUX_VERSION_CODE >= KERNEL_VERSION(3, \

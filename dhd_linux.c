@@ -503,9 +503,7 @@ module_param(host_edl_support, int, 0644);
 /* deferred handlers */
 static void dhd_ifadd_event_handler(void *handle, void *event_info, u8 event);
 static void dhd_ifdel_event_handler(void *handle, void *event_info, u8 event);
-#ifndef DHD_DIRECT_SET_MAC
 static void dhd_set_mac_addr_handler(void *handle, void *event_info, u8 event);
-#endif // endif
 static void dhd_set_mcast_list_handler(void *handle, void *event_info, u8 event);
 #ifdef WL_NATOE
 static void dhd_natoe_ct_event_hanlder(void *handle, void *event_info, u8 event);
@@ -3077,7 +3075,6 @@ done:
 	dhd_net_if_unlock_local(dhd);
 }
 
-#ifndef DHD_DIRECT_SET_MAC
 static void
 dhd_set_mac_addr_handler(void *handle, void *event_info, u8 event)
 {
@@ -3130,7 +3127,6 @@ done:
 	DHD_OS_WAKE_UNLOCK(&dhd->pub);
 	dhd_net_if_unlock_local(dhd);
 }
-#endif /* DHD_DIRECT_SET_MAC */
 
 static void
 dhd_set_mcast_list_handler(void *handle, void *event_info, u8 event)
@@ -3205,6 +3201,7 @@ dhd_set_mac_address(struct net_device *dev, void *addr)
 	struct sockaddr *sa = (struct sockaddr *)addr;
 	int ifidx;
 	dhd_if_t *dhdif;
+	bool addr_chngd = TRUE;
 #if defined(SOFTAP_RAND) || (defined(CONFIG_ANDROID_VERSION) && (CONFIG_ANDROID_VERSION \
 	>= 13))
 #ifdef WL_DHD_XR
@@ -3234,39 +3231,58 @@ dhd_set_mac_address(struct net_device *dev, void *addr)
 	dhdif = dhd->iflist[ifidx];
 
 	dhd_net_if_lock_local(dhd);
+	if (memcmp(dhdif->mac_addr, sa->sa_data, ETHER_ADDR_LEN) == 0) {
+		addr_chngd = FALSE;
+	}
 	memcpy(dhdif->mac_addr, sa->sa_data, ETHER_ADDR_LEN);
 	dhdif->set_macaddress = TRUE;
 	dhd_net_if_unlock_local(dhd);
 
-#if defined(WL_STATIC_IF) && defined(SOFTAP_RAND)
-	if (dhd_is_static_ndev(&dhd->pub, dev) &&
-		static_if_ndev_get_state(cfg, dev) == NDEV_STATE_OS_IF_CREATED) {
-		/* In case of SoftAP, save random MAC as FW interface is not created in ndev.
+#ifdef WL_CFG80211
+	/* Check wdev->iftype for the role */
+	if (wl_cfg80211_macaddr_sync_reqd(dev)) {
+		/* Supplicant and certain user layer applications expect macaddress to be
+		 * set once the context returns. so set it from the same context
 		 */
-		ETH_HW_ADDR_SET(dev, dhdif->mac_addr);
-		return ret;
-	}
-#endif /* WL_STATIC_IF && SOFTAP_RAND */
+		DHD_INFO(("%s: iftype = %d macaddr = "MACDBG"\n",
+			__FUNCTION__, dev->ieee80211_ptr->iftype, MAC2STRDBG(&dhdif->mac_addr)));
+
+#ifdef WL_STATIC_IF
+		if (dhd_is_static_ndev(&dhd->pub, dev) &&
+			static_if_ndev_get_state(cfg, dev) == NDEV_STATE_OS_IF_CREATED) {
+			/* In softap case, the macaddress will be applied before interface up
+			 * and hence curether_addr can't be done at this stage (no fw iface
+			 * available). Store the address and return. macaddr will be applied
+			 * from interface create context.
+			 */
+			ETH_HW_ADDR_SET(dev, dhdif->mac_addr);
+			return ret;
+		}
+#endif /* WL_STATIC_IF */
 
 #if defined(CONFIG_ANDROID_VERSION) && (CONFIG_ANDROID_VERSION >= 13)
 #ifdef WL_DHD_XR_MASTER
-	/* Update MAC for bond interface */
-	if (prim_ndev == dev && cfg->xr_sta_mode == XR_STA_MODE_SINGLE && cfg->xr_sta_enabled) {
-		if (memcmp(dev->dev_addr, sa->sa_data, ETHER_ADDR_LEN)) {
-			xr_send_sta_mac_change_event(cfg, dev);
+		/* Update MAC for bond interface */
+		if (prim_ndev == dev && cfg->xr_sta_mode == XR_STA_MODE_SINGLE && cfg->xr_sta_enabled) {
+			if (memcmp(dev->dev_addr, sa->sa_data, ETHER_ADDR_LEN)) {
+				xr_send_sta_mac_change_event(cfg, dev);
+			}
 		}
-	}
 #endif /* WL_DHD_XR_MASTER */
 #endif /* CONFIG_ANDROID_VERSION && CONFIG_ANDROID_VERSION >= 13 */
 
-#ifdef DHD_DIRECT_SET_MAC
-	/* It needs to update new mac address on this context */
-	ret = _dhd_set_mac_address(dhd, ifidx, dhdif->mac_addr);
-	dhdif->set_macaddress = FALSE;
-#else
+		wl_cfg80211_handle_macaddr_change(dev, dhdif->mac_addr);
+		ret = _dhd_set_mac_address(dhd, ifidx, dhdif->mac_addr);
+		if ((ret == BCME_OK) && (addr_chngd == TRUE)) {
+			/* Notify Dev/Address change to upperlayer */
+			netdev_state_change(dev);
+		}
+		return ret;
+	}
+#endif /* WL_CFG80211 */
+
 	dhd_deferred_schedule_work(dhd->dhd_deferred_wq, (void *)dhdif, DHD_WQ_WORK_SET_MAC,
 		dhd_set_mac_addr_handler, DHD_WQ_WORK_PRIORITY_LOW);
-#endif // endif
 	return ret;
 }
 
