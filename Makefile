@@ -75,8 +75,13 @@ endif
 #################
 # Common feature
 #################
+
+# WAR
+DHDCFLAGS += -DEXPLICIT_DISCIF_CLEANUP
+
 DHDCFLAGS += -DAUTOMOTIVE_FEATURE
 DHDCFLAGS += -DWL_VIRTUAL_APSTA
+
 # Dongle init fail
 DHDCFLAGS += -DDEBUG_DNGL_INIT_FAIL
 DHDCFLAGS += -DPOWERUP_MAX_RETRY=0
