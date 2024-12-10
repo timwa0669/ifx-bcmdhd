@@ -3118,10 +3118,16 @@ wl_show_host_event(dhd_pub_t *dhd_pub, wl_event_msg_t *event, void *event_data,
 			break;
 		}
 	case WLC_E_OVERTEMP:
-	{
-		DHD_EVENT(("MACEVENT: %s\n", event_name));
-		break;
-	}
+		{
+			DHD_EVENT(("MACEVENT: %s\n", event_name));
+			break;
+		}
+	case WLC_E_COUNTRY_CODE_CHANGED:
+		{
+			DHD_EVENT(("MACEVENT: %s: Country code changed to %s\n", event_name,
+					(char*)event_data));
+			break;
+		}
 	default:
 		DHD_INFO(("MACEVENT: %s %d, MAC %s, status %d, reason %d, auth %d\n",
 		       event_name, event_type, eabuf, (int)status, (int)reason,

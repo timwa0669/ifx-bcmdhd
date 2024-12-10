@@ -1765,6 +1765,7 @@ struct bcm_cfg80211 {
 #ifdef WL_SUPPORT_ACS_OFFLOAD
 	void *acs_offload;
 #endif // endif
+	u8 country[WLC_CNTRY_BUF_SZ];
 #ifdef WL_DHD_XR
 	struct wireless_dev *xr_slave_prim_wdev;
 #ifdef WL_6E

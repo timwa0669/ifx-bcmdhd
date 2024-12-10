@@ -11631,6 +11631,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #if defined(BCMPCIE) && defined(EAPOL_PKT_PRIO)
 	dhd_update_flow_prio_map(dhd, DHD_FLOW_PRIO_LLR_MAP);
 #endif /* defined(BCMPCIE) && defined(EAPOL_PKT_PRIO) */
+	setbit(eventmask, WLC_E_COUNTRY_CODE_CHANGED);
 
 	/* Write updated Event mask */
 	ret = dhd_iovar(dhd, 0, "event_msgs", eventmask, WL_EVENTING_MASK_LEN, NULL, 0, TRUE);
