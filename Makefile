@@ -26,9 +26,9 @@
 # <<Broadcom-WL-IPTag/Open:>>
 #
 
-#####################
-# Patches
-#####################
+##################
+# Logging control
+##################
 
 # SDLX_MSG(x) debug message
 #DHDCFLAGS += -DDHD_SDLX_MSG
@@ -41,9 +41,9 @@
 # SI_ERROR(args) debug message
 DHDCFLAGS += -DSI_ERROR_ENFORCE
 
-#####################
-# SDIO Basic feature
-#####################
+################
+# Basic feature
+################
 
 DHDCFLAGS += -Wall -Wstrict-prototypes -Dlinux -DLINUX -DBCMDRIVER        \
 	-DBCMDONGLEHOST -DUNRELEASEDCHIP -DBCMDMA32 -DBCMFILEIMAGE            \
