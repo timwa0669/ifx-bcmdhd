@@ -3538,13 +3538,13 @@ wl_process_host_event(dhd_pub_t *dhd_pub, int *ifidx, void *pktdata, uint pktlen
 #endif // endif
 #ifdef PROP_TXSTATUS
 		{
-			uint8* ea = &event->addr.octet[0];
-			WLFC_DBGMESG(("WLC_E_IF: idx:%d, action:%s, iftype:%s, ["MACDBG"]\n"
+			uint8 *ea = &event->addr.octet[0];
+			WLFC_DBGMESG(("WLC_E_IF: idx:%d, action:%s, iftype:%s, ["MACDBG"]\n",
 						  ifevent->ifidx,
 						  ((ifevent->opcode == WLC_E_IF_ADD) ? "ADD":"DEL"),
-						  ((ifevent->role == 0) ? "STA":"AP "),
+						  ((ifevent->role == 0) ? "STA":"AP"),
 						  MAC2STRDBG(ea)));
-			(void)ea;
+			BCM_REFERENCE(ea);
 
 			if (ifevent->opcode == WLC_E_IF_CHANGE)
 				dhd_wlfc_interface_event(dhd_pub,
