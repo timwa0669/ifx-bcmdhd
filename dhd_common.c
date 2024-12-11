@@ -5772,7 +5772,8 @@ dhd_apply_default_clm(dhd_pub_t *dhd, char *clm_path)
 		clm_blob_path = clm_path;
 		DHD_TRACE(("clm path from module param:%s\n", clm_path));
 	} else {
-		clm_blob_path = CONFIG_BCMDHD_CLM_PATH;
+		DHD_ERROR(("%s: clm path not found\n", __FUNCTION__));
+		goto exit;
 	}
 
 	/* If CLM blob file is found on the filesystem, download the file.

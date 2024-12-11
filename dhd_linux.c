@@ -448,9 +448,24 @@ uint dhd_download_fw_on_driverload = TRUE;
 /* Definitions to provide path to the firmware and nvram
  * example nvram_path[MOD_PARAM_PATHLEN]="/projects/wlan/nvram.txt"
  */
+#ifdef CONFIG_BCMDHD_FW_PATH
+char firmware_path[MOD_PARAM_PATHLEN] = CONFIG_BCMDHD_FW_PATH;
+#else /* CONFIG_BCMDHD_FW_PATH */
 char firmware_path[MOD_PARAM_PATHLEN];
+#endif /* CONFIG_BCMDHD_FW_PATH */
+
+#ifdef CONFIG_BCMDHD_NVRAM_PATH
+char nvram_path[MOD_PARAM_PATHLEN] = CONFIG_BCMDHD_NVRAM_PATH;
+#else /* CONFIG_BCMDHD_NVRAM_PATH */
 char nvram_path[MOD_PARAM_PATHLEN];
+#endif /* CONFIG_BCMDHD_NVRAM_PATH */
+
+#ifdef CONFIG_BCMDHD_CLM_PATH
+char clm_path[MOD_PARAM_PATHLEN] = CONFIG_BCMDHD_CLM_PATH;
+#else /* CONFIG_BCMDHD_CLM_PATH */
 char clm_path[MOD_PARAM_PATHLEN];
+#endif /* CONFIG_BCMDHD_CLM_PATH */
+
 #ifdef DHD_UCODE_DOWNLOAD
 char ucode_path[MOD_PARAM_PATHLEN];
 #endif /* DHD_UCODE_DOWNLOAD */
@@ -9687,16 +9702,6 @@ bool dhd_update_fw_nv_path(dhd_info_t *dhdinfo)
 	 * module parameter after it is copied. We won't update the path until the module parameter
 	 * is changed again (first character is not '\0')
 	 */
-
-	/* set default firmware and nvram path for built-in type driver */
-	if (!dhd_download_fw_on_driverload) {
-#ifdef CONFIG_BCMDHD_FW_PATH
-		fw = CONFIG_BCMDHD_FW_PATH;
-#endif /* CONFIG_BCMDHD_FW_PATH */
-#ifdef CONFIG_BCMDHD_NVRAM_PATH
-		nv = CONFIG_BCMDHD_NVRAM_PATH;
-#endif /* CONFIG_BCMDHD_NVRAM_PATH */
-	}
 
 	/* check if we need to initialize the path */
 	if (dhdinfo->fw_path[0] == '\0') {
@@ -21410,7 +21415,13 @@ void
 dhd_set_blob_support(dhd_pub_t *dhdp, char *fw_path)
 {
 	struct file *fp;
-	char *filepath = CONFIG_BCMDHD_CLM_PATH;
+	char *filepath = clm_path;
+	if (filepath[0] == '\0') {
+		DHD_ERROR(("%s: ----- null blob file path -----\n", __FUNCTION__));
+		dhdp->is_blob = FALSE;
+		return;
+	}
+
 	fp = filp_open(filepath, O_RDONLY, 0);
 	if (IS_ERR(fp)) {
 		DHD_ERROR(("%s: ----- blob file doesn't exist (%s) -----\n", __FUNCTION__,
