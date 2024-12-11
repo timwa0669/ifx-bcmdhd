@@ -40,20 +40,20 @@
 #define sd_debug(x)	do { if (sd_msglevel & SDH_DEBUG_VAL) printf x; } while (0)
 #define sd_data(x)	do { if (sd_msglevel & SDH_DATA_VAL)  printf x; } while (0)
 #define sd_ctrl(x)	do { if (sd_msglevel & SDH_CTRL_VAL)  printf x; } while (0)
-#else
+#define sd_log(x)	do { if (sd_msglevel & SDH_LOG_VAL)   printf x; } while (0)
+#define sd_dma(x)	do { if (sd_msglevel & SDH_DMA_VAL)   printf x; } while (0)
+#define sd_cost(x)	do { if (sd_msglevel & SDH_COST_VAL)  printf x; } while (0)
+#else /* DHD_DEBUG */
 #define sd_err(x)	do { if (sd_msglevel & SDH_ERROR_VAL) printf x; } while (0)
 #define sd_trace(x)
 #define sd_info(x)
 #define sd_debug(x)
 #define sd_data(x)
 #define sd_ctrl(x)
-#endif // endif
-
-#if defined(DHD_DEBUG)
-#define sd_log(x)	do { if (sd_msglevel & SDH_LOG_VAL)  printf x; } while (0)
-#else
 #define sd_log(x)
-#endif
+#define sd_dma(x)
+#define sd_cost(x)
+#endif /* DHD_DEBUG */
 
 #define SDIOH_ASSERT(exp) \
 	do { if (!(exp)) \

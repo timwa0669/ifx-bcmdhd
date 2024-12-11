@@ -1653,6 +1653,9 @@ dhd_doiovar(dhd_pub_t *dhd_pub, const bcm_iovar_t *vi, uint32 actionid, const ch
 		break;
 
 	case IOV_GVAL(IOV_DUMP):
+#if defined(BCMSDIO) && defined(PKT_STATICS)
+		dhd_bus_dump_txpktstatics(dhd_pub);
+#endif /* BCMSDIO && PKT_STATICS */
 		if (dhd_dump(dhd_pub, arg, len) <= 0)
 			bcmerror = BCME_ERROR;
 		else
@@ -1697,6 +1700,9 @@ dhd_doiovar(dhd_pub_t *dhd_pub, const bcm_iovar_t *vi, uint32 actionid, const ch
 #if defined(DHD_LB_STATS)
 		DHD_LB_STATS_RESET(dhd_pub);
 #endif /* DHD_LB_STATS */
+#if defined(BCMSDIO) && defined(PKT_STATICS)
+		dhd_bus_clear_txpktstatics(dhd_pub);
+#endif /* BCMSDIO && PKT_STATICS */
 		break;
 
 	case IOV_GVAL(IOV_IOCTLTIMEOUT): {

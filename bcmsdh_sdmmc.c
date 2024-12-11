@@ -839,19 +839,25 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 #if defined(MMC_SDIO_ABORT)
 	int sdio_abort_retry = MMC_SDIO_ABORT_RETRY_LIMIT;
 #endif // endif
+	struct osl_timespec now, before;
+	uint32 diff_us;
+
+	if (sd_msglevel & SDH_COST_VAL)
+		osl_do_gettimeofday(&before);
 
 	sd_info(("%s: rw=%d, func=%d, addr=0x%05x\n", __FUNCTION__, rw, func, regaddr));
 
 	DHD_PM_RESUME_WAIT(sdioh_request_byte_wait);
 	DHD_PM_RESUME_RETURN_ERROR(SDIOH_API_RC_FAIL);
-	if(rw) { /* CMD52 Write */
+
+	if (rw) {
+		/* CMD52 Write */
 		if (func == 0) {
 			/* Can only directly write to some F0 registers.  Handle F2 enable
 			 * as a special case.
 			 */
 			if (regaddr == SDIOD_CCCR_IOEN) {
 #if defined(BT_OVER_SDIO)
-				do {
 				if (sd->func[3]) {
 					sd_info(("bcmsdh_sdmmc F3: *byte 0x%x\n", *byte));
 
@@ -860,7 +866,7 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 
 						/* Set Function 3 Block Size */
 						err_ret = sdio_set_block_size(sd->func[3],
-						sd_f3_blocksize);
+							sd_f3_blocksize);
 						if (err_ret) {
 							sd_err(("F3 blocksize set err%d\n",
 								err_ret));
@@ -868,7 +874,7 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 
 						/* Enable Function 3 */
 						sd_info(("bcmsdh_sdmmc F3: enable F3 fn %p\n",
-						sd->func[3]));
+							sd->func[3]));
 						err_ret = sdio_enable_func(sd->func[3]);
 						if (err_ret) {
 							sd_err(("bcmsdh_sdmmc: enable F3 err:%d\n",
@@ -883,7 +889,7 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 
 						/* Disable Function 3 */
 						sd_info(("bcmsdh_sdmmc F3: disable F3 fn %p\n",
-						sd->func[3]));
+							sd->func[3]));
 						err_ret = sdio_disable_func(sd->func[3]);
 						if (err_ret) {
 							sd_err(("bcmsdh_sdmmc: Disable F3 err:%d\n",
@@ -915,10 +921,7 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 					}
 					sdio_release_host(sd->func[2]);
 				}
-#if defined(BT_OVER_SDIO)
-			} while (0);
-#endif /* defined (BT_OVER_SDIO) */
-		}
+			}
 #if defined(MMC_SDIO_ABORT)
 			/* to allow abort command through F1 */
 			else if (regaddr == SDIOD_CCCR_IOABORT) {
@@ -943,10 +946,11 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 			/* Allow write for SDIOD_CCCR_BICTRL regaddr (0x07) to set SD clock width
 			 * (1bit/4bit)
 			 */
-			else if (regaddr < 0xF0 && regaddr != SDIOD_CCCR_BICTRL) {
-#else
-			else if (regaddr < 0xF0) {
-#endif // endif
+			else if (regaddr < 0xF0 && regaddr != SDIOD_CCCR_BICTRL)
+#else /* DHD_43022 */
+			else if (regaddr < 0xF0)
+#endif /* DHD_43022 */
+			{
 				sd_err(("bcmsdh_sdmmc: F0 Wr:0x%02x: write disallowed\n", regaddr));
 			} else {
 				/* Claim host controller, perform F0 write, and release */
@@ -959,10 +963,10 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 					 */
 					sdio_writeb(sd->func[func],
 						*byte, regaddr, &err_ret);
-#else
+#else /* DHD_43022 */
 					sdio_f0_writeb(sd->func[func],
 						*byte, regaddr, &err_ret);
-#endif // endif
+#endif /* DHD_43022 */
 					sdio_release_host(sd->func[func]);
 				}
 			}
@@ -974,7 +978,8 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 				sdio_release_host(sd->func[func]);
 			}
 		}
-	} else { /* CMD52 Read */
+	} else {
+		/* CMD52 Read */
 		/* Claim host controller, perform Fn read, and release */
 		if (sd->func[func]) {
 			sdio_claim_host(sd->func[func]);
@@ -995,6 +1000,13 @@ sdioh_request_byte(sdioh_info_t *sd, uint rw, uint func, uint regaddr, uint8 *by
 		}
 	}
 
+	if (sd_msglevel & SDH_COST_VAL) {
+		osl_do_gettimeofday(&now);
+		diff_us = osl_do_gettimediff(&now, &before);
+		sd_cost(("%s: rw=%d len=1 cost = %3dms %3dus\n", __FUNCTION__,
+			rw, diff_us / 1000, diff_us % 1000));
+	}
+
 	return ((err_ret == 0) ? SDIOH_API_RC_SUCCESS : SDIOH_API_RC_FAIL);
 }
 
@@ -1009,6 +1021,14 @@ sdioh_set_mode(sdioh_info_t *sd, uint mode)
 	return (sd->txglom_mode);
 }
 
+#ifdef PKT_STATICS
+uint32
+sdioh_get_spend_time(sdioh_info_t *sd)
+{
+	return (sd->sdio_spent_time_us);
+}
+#endif /* PKT_STATICS */
+
 extern SDIOH_API_RC
 sdioh_request_word(sdioh_info_t *sd, uint cmd_type, uint rw, uint func, uint addr,
                                    uint32 *word, uint nbytes)
@@ -1017,6 +1037,11 @@ sdioh_request_word(sdioh_info_t *sd, uint cmd_type, uint rw, uint func, uint add
 #if defined(MMC_SDIO_ABORT)
 	int sdio_abort_retry = MMC_SDIO_ABORT_RETRY_LIMIT;
 #endif // endif
+	struct osl_timespec now, before;
+	uint32 diff_us;
+
+	if (sd_msglevel & SDH_COST_VAL)
+		osl_do_gettimeofday(&before);
 
 	if (func == 0) {
 		sd_err(("%s: Only CMD52 allowed to F0.\n", __FUNCTION__));
@@ -1078,6 +1103,13 @@ sdioh_request_word(sdioh_info_t *sd, uint cmd_type, uint rw, uint func, uint add
 		}
 	}
 
+	if (sd_msglevel & SDH_COST_VAL) {
+		osl_do_gettimeofday(&now);
+		diff_us = osl_do_gettimediff(&now, &before);
+		sd_cost(("%s: rw=%d, len=%d cost = %3dms %3dus\n", __FUNCTION__,
+			rw, nbytes, diff_us / 1000, diff_us % 1000));
+	}
+
 	return ((err_ret == 0) ? SDIOH_API_RC_SUCCESS : SDIOH_API_RC_FAIL);
 }
 
@@ -1103,6 +1135,13 @@ sdioh_request_packet_chain(sdioh_info_t *sd, uint fix_inc, uint write, uint func
 	uint8 *localbuf = NULL;
 	uint local_plen = 0;
 	uint pkt_len = 0;
+	struct osl_timespec now, before;
+	uint32 diff_us;
+
+#ifndef PKT_STATICS
+	if (sd_msglevel & SDH_COST_VAL)
+#endif /* !PKT_STATICS */
+		osl_do_gettimeofday(&before);
 
 	sd_trace(("%s: Enter\n", __FUNCTION__));
 	ASSERT(pkt);
@@ -1290,6 +1329,21 @@ txglomfail:
 	if (localbuf)
 		MFREE(sd->osh, localbuf, ttl_len);
 #endif
+
+#ifndef PKT_STATICS
+	if (sd_msglevel & SDH_COST_VAL)
+#endif /* PKT_STATICS */
+	{
+		osl_do_gettimeofday(&now);
+		diff_us = osl_do_gettimediff(&now, &before);
+		sd_cost(("%s: rw=%d, ttl_len=%4d cost = %3dms %3dus\n", __FUNCTION__,
+			write, ttl_len, diff_us / 1000, diff_us % 1000));
+#ifdef PKT_STATICS
+		if (write && (func == 2))
+			sd->sdio_spent_time_us = diff_us;
+#endif /* PKT_STATICS */
+	}
+
 	sd_trace(("%s: Exit\n", __FUNCTION__));
 	return SDIOH_API_RC_SUCCESS;
 }
@@ -1301,6 +1355,11 @@ sdioh_buffer_tofrom_bus(sdioh_info_t *sd, uint fix_inc, uint write, uint func,
 {
 	bool fifo = (fix_inc == SDIOH_DATA_FIX);
 	int err_ret = 0;
+	struct osl_timespec now, before;
+	uint32 diff_us;
+
+	if (sd_msglevel & SDH_COST_VAL)
+		osl_do_gettimeofday(&before);
 
 	sd_trace(("%s: Enter\n", __FUNCTION__));
 	ASSERT(buf);
@@ -1335,6 +1394,14 @@ sdioh_buffer_tofrom_bus(sdioh_info_t *sd, uint fix_inc, uint write, uint func,
 			(write) ? "TX" : "RX", buf, addr, len));
 
 	sd_trace(("%s: Exit\n", __FUNCTION__));
+
+	if (sd_msglevel & SDH_COST_VAL) {
+		osl_do_gettimeofday(&now);
+		diff_us = osl_do_gettimediff(&now, &before);
+		sd_cost(("%s: rw=%d, len=%4d cost = %3dms %3dus\n", __FUNCTION__,
+			write, len, diff_us / 1000, diff_us % 1000));
+	}
+
 	return ((err_ret == 0) ? SDIOH_API_RC_SUCCESS : SDIOH_API_RC_FAIL);
 }
 

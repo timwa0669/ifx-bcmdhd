@@ -39,25 +39,25 @@
 #define sd_debug(x)	do { if (sd_msglevel & SDH_DEBUG_VAL) printf x; } while (0)
 #define sd_data(x)	do { if (sd_msglevel & SDH_DATA_VAL)  printf x; } while (0)
 #define sd_ctrl(x)	do { if (sd_msglevel & SDH_CTRL_VAL)  printf x; } while (0)
-#else
+#define sd_log(x)	do { if (sd_msglevel & SDH_LOG_VAL)   printf x; } while (0)
+#define sd_dma(x)	do { if (sd_msglevel & SDH_DMA_VAL)   printf x; } while (0)
+#define sd_cost(x)	do { if (sd_msglevel & SDH_COST_VAL)  printf x; } while (0)
+#else /* DHD_DEBUG */
 #define sd_err(x)	do { if (sd_msglevel & SDH_ERROR_VAL) printf x; } while (0)
 #define sd_trace(x)
 #define sd_info(x)
 #define sd_debug(x)
 #define sd_data(x)
 #define sd_ctrl(x)
-#endif // endif
+#define sd_log(x)
+#define sd_dma(x)
+#define sd_cost(x)
+#endif /* DHD_DEBUG */
 
 #define sd_sync_dma(sd, read, nbytes)
 #define sd_init_dma(sd)
 #define sd_ack_intr(sd)
 #define sd_wakeup(sd);
-
-#if defined(DHD_DEBUG)
-#define sd_log(x)	do { if (sd_msglevel & SDH_LOG_VAL)  printf x; } while (0)
-#else
-#define sd_log(x)
-#endif
 
 #define SDIOH_ASSERT(exp) \
 	do { if (!(exp)) \
@@ -107,6 +107,9 @@ struct sdioh_info {
 	uint8		*copy_buf;
 #endif /* defined(BCMSDIOH_TXGLOM) && defined(BCMSDIOH_STATIC_COPY_BUF) */
 	uint		host_cap_non_removable_fixup;
+#ifdef PKT_STATICS
+	uint32		sdio_spent_time_us;
+#endif /* PKT_STATICS */
 };
 
 /************************************************************

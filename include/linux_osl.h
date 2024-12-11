@@ -632,4 +632,23 @@ extern void *osl_spin_lock_init(osl_t *osh);
 extern void osl_spin_lock_deinit(osl_t *osh, void *lock);
 extern unsigned long osl_spin_lock(void *lock);
 extern void osl_spin_unlock(void *lock, unsigned long flags);
+
+#ifndef DHD_LOG_PREFIX
+#define DHD_LOG_PREFIX "ifxdhd:"
+#endif /* !DHD_LOG_PREFIX */
+#define DHD_LOG_PREFIXS DHD_LOG_PREFIX" "
+
+typedef struct osl_timespec {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0))
+	__kernel_old_time_t	tv_sec;		/* seconds */
+#else /* KERNEL >= 5.6.0 */
+	__kernel_time_t	tv_sec;			/* seconds */
+#endif /* KERNEL >= 5.6.0 */
+	__kernel_suseconds_t	tv_usec;	/* microseconds */
+	long		tv_nsec;		/* nanoseconds */
+} osl_timespec_t;
+
+extern void osl_do_gettimeofday(struct osl_timespec *ts);
+extern void osl_get_monotonic_boottime(struct osl_timespec *ts);
+extern uint32 osl_do_gettimediff(struct osl_timespec *cur_ts, struct osl_timespec *old_ts);
 #endif	/* _linux_osl_h_ */

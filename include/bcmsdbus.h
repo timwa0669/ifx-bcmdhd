@@ -76,6 +76,24 @@
 #define SDPCM_DEFGLOM_SIZE SDPCM_MAXGLOM_SIZE
 #endif // endif
 
+#ifdef PKT_STATICS
+typedef struct pkt_statics {
+	uint16	event_count;
+	uint32	event_size;
+	uint16	ctrl_count;
+	uint32	ctrl_size;
+	uint32	data_count;
+	uint32	data_size;
+	uint32	glom_cnt[SDPCM_MAXGLOM_SIZE];
+	uint16	glom_max;
+	uint16	glom_count;
+	uint32	glom_size;
+	uint16	test_count;
+	uint32	test_size;
+	uint32	glom_cnt_us[SDPCM_MAXGLOM_SIZE];
+} pkt_statics_t;
+#endif /* PKT_STATICS */
+
 typedef int SDIOH_API_RC;
 
 /* SDio Host structure */
@@ -163,4 +181,8 @@ extern uint sdioh_set_mode(sdioh_info_t *sd, uint mode);
 /* mmc host retune control support */
 extern void sdioh_disable_clk_retune(sdioh_info_t *sd, bool on);
 extern void sdioh_enable_clk_retune(sdioh_info_t *sd, bool on);
+
+#ifdef PKT_STATICS
+extern uint32 sdioh_get_spend_time(sdioh_info_t *sd);
+#endif /* PKT_STATICS */
 #endif /* _sdio_api_h_ */

@@ -62,6 +62,8 @@ endif
 #DHDCFLAGS += -DDHD_SI_MSG
 # SI_ERROR(args) debug message
 DHDCFLAGS += -DSI_ERROR_ENFORCE
+# PKT Statistics
+#DHDCFLAGS += -DPKT_STATICS
 
 ################
 # Basic feature

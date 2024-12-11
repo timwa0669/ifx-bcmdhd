@@ -477,6 +477,9 @@ typedef struct dhd_bus {
 #endif /* defined (BT_OVER_SDIO) */
 	bool		chipidpresent;	/* ChipID is present in SDIO core enum address space */
 	bool		secureboot;		/* security related features are present */
+#ifdef PKT_STATICS
+	struct pkt_statics tx_statics;
+#endif /* PKT_STATICS */
 } dhd_bus_t;
 
 /*
@@ -2408,6 +2411,9 @@ static int dhdsdio_txpkt_preprocess(dhd_bus_t *bus, void *pkt, int chan, int txs
 	uint32 swhdr_offset;
 	bool alloc_new_pkt = FALSE;
 	uint8 sdpcm_hdrlen = bus->txglom_enable ? SDPCM_HDRLEN_TXGLOM : SDPCM_HDRLEN;
+#ifdef PKT_STATICS
+	uint16 len;
+#endif /* PKT_STATICS */
 
 	*new_pkt = NULL;
 	osh = bus->dhd->osh;
@@ -2427,6 +2433,33 @@ static int dhdsdio_txpkt_preprocess(dhd_bus_t *bus, void *pkt, int chan, int txs
 	frame = (uint8*)PKTDATA(osh, pkt);
 	pkt_len = (uint16)PKTLEN(osh, pkt);
 
+#ifdef PKT_STATICS
+	len = (uint16)PKTLEN(osh, pkt);
+	switch (chan) {
+		case SDPCM_CONTROL_CHANNEL:
+			bus->tx_statics.ctrl_count++;
+			bus->tx_statics.ctrl_size += len;
+			break;
+		case SDPCM_DATA_CHANNEL:
+			bus->tx_statics.data_count++;
+			bus->tx_statics.data_size += len;
+			break;
+		case SDPCM_GLOM_CHANNEL:
+			bus->tx_statics.glom_count++;
+			bus->tx_statics.glom_size += len;
+			break;
+		case SDPCM_EVENT_CHANNEL:
+			bus->tx_statics.event_count++;
+			bus->tx_statics.event_size += len;
+			break;
+		case SDPCM_TEST_CHANNEL:
+			bus->tx_statics.test_count++;
+			bus->tx_statics.test_size += len;
+			break;
+		default:
+			break;
+	}
+#endif /* PKT_STATICS */
 #ifdef DHD_DEBUG
 	if (PKTPRIO(pkt) < ARRAYSIZE(tx_packets))
 		tx_packets[PKTPRIO(pkt)]++;
@@ -2855,9 +2888,22 @@ dhdsdio_sendfromq(dhd_bus_t *bus, uint maxframes)
 			break;
 		if (dhdsdio_txpkt(bus, SDPCM_DATA_CHANNEL, pkts, i, TRUE) != BCME_OK)
 			dhd->tx_errors++;
-		else
+		else {
 			dhd->dstats.tx_bytes += datalen;
+#ifdef PKT_STATICS
+			bus->tx_statics.glom_cnt_us[num_pkt - 1] =
+				(bus->tx_statics.glom_cnt[num_pkt - 1] * bus->tx_statics.glom_cnt_us[num_pkt - 1]
+				+ bcmsdh_get_spend_time(bus->sdh)) / (bus->tx_statics.glom_cnt[num_pkt - 1] + 1);
+#endif /* PKT_STATICS */
+		}
 		cnt += i;
+#ifdef PKT_STATICS
+		if (num_pkt) {
+			bus->tx_statics.glom_cnt[num_pkt - 1]++;
+			if (num_pkt > bus->tx_statics.glom_max)
+				bus->tx_statics.glom_max = num_pkt;
+		}
+#endif /* PKT_STATICS */
 
 		/* In poll mode, need to check for other events */
 		if (!bus->intr && cnt)
@@ -3072,6 +3118,10 @@ dhd_bus_txctl(struct dhd_bus *bus, uchar *msg, uint msglen)
 			prhex("TxHdr", frame, MIN(len, 16));
 		}
 #endif // endif
+#ifdef PKT_STATICS
+		bus->tx_statics.ctrl_count++;
+		bus->tx_statics.ctrl_size += len;
+#endif /* PKT_STATICS */
 		ret = dhd_bcmsdh_send_buffer(bus, frame, len);
 	}
 	bus->ctrl_frame_stat = FALSE;
@@ -8059,6 +8109,77 @@ dhdsdio_isr(void *arg)
 
 }
 
+#ifdef PKT_STATICS
+void
+dhd_bus_dump_txpktstatics(dhd_pub_t *dhdp)
+{
+	dhd_bus_t *bus = dhdp->bus;
+	uint32 total = 0;
+	uint i;
+
+	printf("%s: TYPE EVENT: %d pkts (size=%d) transfered\n",
+			__FUNCTION__, bus->tx_statics.event_count, bus->tx_statics.event_size);
+	printf("%s: TYPE CTRL:  %d pkts (size=%d) transfered\n",
+			__FUNCTION__, bus->tx_statics.ctrl_count, bus->tx_statics.ctrl_size);
+	printf("%s: TYPE DATA:  %d pkts (size=%d) transfered\n",
+			__FUNCTION__, bus->tx_statics.data_count, bus->tx_statics.data_size);
+	printf("%s: Glom size distribution:\n", __FUNCTION__);
+	for (i = 0; i < bus->tx_statics.glom_max; i++) {
+		total += bus->tx_statics.glom_cnt[i];
+	}
+	printk(KERN_CONT DHD_LOG_PREFIXS);
+	for (i = 0; i < bus->tx_statics.glom_max; i++) {
+		printk(KERN_CONT "%02d: %5d", i + 1, bus->tx_statics.glom_cnt[i]);
+		if ((i + 1) % 8)
+			printk(KERN_CONT ", ");
+		else {
+			printk("\n");
+			printk(KERN_CONT DHD_LOG_PREFIXS);
+		}
+	}
+	printk("\n");
+	printk(KERN_CONT DHD_LOG_PREFIXS);
+	for (i = 0; i < bus->tx_statics.glom_max; i++) {
+		printk(KERN_CONT "%02d:%5d%%", i + 1, (bus->tx_statics.glom_cnt[i] * 100) / total);
+		if ((i + 1) % 8)
+			printk(KERN_CONT ", ");
+		else {
+			printk("\n");
+			printk(KERN_CONT DHD_LOG_PREFIXS);
+		}
+	}
+	printk("\n");
+	printf("%s: Glom spend time distribution(us):\n", __FUNCTION__);
+	printk(KERN_CONT DHD_LOG_PREFIXS);
+	for (i = 0; i < bus->tx_statics.glom_max; i++) {
+		printk(KERN_CONT "%02d: %5u", i + 1, bus->tx_statics.glom_cnt_us[i]);
+		if ((i + 1) % 8)
+			printk(KERN_CONT ", ");
+		else {
+			printk("\n");
+			printk(KERN_CONT DHD_LOG_PREFIXS);
+		}
+	}
+	printk("\n");
+	if (total) {
+		printf("%s: data(%d)/glom(%d)=%d, glom_max=%d\n",
+			__FUNCTION__, bus->tx_statics.data_count, total,
+			bus->tx_statics.data_count / total, bus->tx_statics.glom_max);
+	}
+	printf("%s: TYPE RX GLOM: %d pkts (size=%d) transfered\n",
+		__FUNCTION__, bus->tx_statics.glom_count, bus->tx_statics.glom_size);
+	printf("%s: TYPE TEST: %d pkts (size=%d) transfered\n",
+		__FUNCTION__, bus->tx_statics.test_count, bus->tx_statics.test_size);
+}
+
+void
+dhd_bus_clear_txpktstatics(dhd_pub_t *dhdp)
+{
+	dhd_bus_t *bus = dhdp->bus;
+	memset((uint8 *)&bus->tx_statics, 0, sizeof(pkt_statics_t));
+}
+#endif /* PKT_STATICS */
+
 #ifdef SDTEST
 static void
 dhdsdio_pktgen_init(dhd_bus_t *bus)
@@ -9529,6 +9650,9 @@ dhdsdio_probe_init(dhd_bus_t *bus, osl_t *osh, void *sdh)
 	/* TX first in dhdsdio_readframes() */
 	bus->dotxinrx = TRUE;
 
+#ifdef PKT_STATICS
+	dhd_bus_clear_txpktstatics(bus->dhd);
+#endif /* PKT_STATICS */
 	return TRUE;
 }
 
@@ -10751,6 +10875,9 @@ dhd_bus_devreset(dhd_pub_t *dhdp, uint8 flag)
 #endif /* defined(OEM_ANDROID) */
 		}
 	}
+#ifdef PKT_STATICS
+	dhd_bus_clear_txpktstatics(bus->dhd);
+#endif /* PKT_STATICS */
 	return bcmerror;
 }
 
