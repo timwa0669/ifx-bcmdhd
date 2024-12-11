@@ -2859,7 +2859,7 @@ wl_show_host_event(dhd_pub_t *dhd_pub, wl_event_msg_t *event, void *event_data,
 		break;
 
 	case WLC_E_IND_DOS_STATUS:
-		DHD_EVENT(("MACEVENT: %s\n", event_name));
+		DHD_TRACE(("MACEVENT: %s\n", event_name));
 		break;
 
 	case WLC_E_RSSI_LQM:
