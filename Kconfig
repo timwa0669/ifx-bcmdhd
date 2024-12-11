@@ -6,10 +6,10 @@
 #
 
 config BCMDHD
-	tristate "Broadcom FullMAC wireless cards support"
+	tristate "IFX DHD wireless cards support"
 	help
 	  This module adds support for wireless adapters based on
-	  Broadcom FullMAC chipset.
+	  IFX chipset.
 
 	  If you choose to build a module, it'll be called dhd. Say M if
 	  unsure.
@@ -28,10 +28,22 @@ config BCMDHD_PCIE
 	depends on BCMDHD && PCI
 endchoice
 
-config CYW43022
-	bool "CYW43022 support"
+choice
+	prompt "Host Wake Method"
 	depends on BCMDHD
-	default n
+	help
+	  Select chip wakeup method.
+config BCMDHD_IB_HOST_WAKE
+	bool "In-band host wake"
+	depends on BCMDHD
+	help
+	  Use the data link to wake up host.
+config BCMDHD_OOB_HOST_WAKE
+	bool "Out-of-band host wake"
+	depends on BCMDHD && BCMDHD_SDIO
+	help
+	  Use the external GPIO pin to wake up host.
+endchoice
 
 config DHD_OF_SUPPORT
 	bool "Use in-drive platform device"
@@ -56,61 +68,6 @@ config BCMDHD_CLM_PATH
 	help
 	  Path to the clm file.
 
-config BROADCOM_WIFI_RESERVED_MEM
-	bool "Reserved memory for wifi device"
-	depends on BCMDHD
-	default n
-	help
-	  Reserved memory for wifi device.
-
-config DHD_USE_STATIC_BUF
-	bool "Enable memory preallocation"
-	depends on BCMDHD
-	default n
-	help
-	  Use memory preallocated in platform.
-
-config DHD_USE_SCHED_SCAN
-	bool "Use CFG80211 sched scan"
-	depends on BCMDHD && CFG80211
-	default n
-	help
-	  Use CFG80211 sched scan.
-
-config DHD_SET_RANDOM_MAC_VAL
-	hex "Vendor OUI"
-	depends on BCMDHD
-	default 0x001A11
-	help
-	  Set vendor OUI for SoftAP
-
-config WLAIBSS
-	bool "Advanced IBSS mode"
-	depends on BCMDHD
-	default n
-	help
-	  This is a configuration for Oxygen Network.
-
-config WL_AP_IF
-	bool "Create additional AP interface during intialization"
-	default n
-	help
-	  Create additional AP interface during initialization.
-
-config BCMDHD_OOB_HOST_WAKE
-	bool "Use the external WLAN_HOST_WAKE pin"
-	depends on BCMDHD
-	default n
-	help
-	  Use the external GPIO pin to wake up host
-
-config BCMDHD_GET_OOB_STATE
-	bool "Support WLAN_HOST_WAKE pin level information"
-	depends on BCMDHD_OOB_HOST_WAKE
-	default n
-	help
-	  Support WLAN_HOST_WAKE pin level information.
-
 config BCMDHD_WPA3
 	bool "Support WPA3 feature"
 	depends on BCMDHD
@@ -127,7 +84,66 @@ config BCMDHD_WIFI6
 
 config BCMDHD_WIFI6_6E
 	bool "Support WI-Fi 6 and Wi-Fi 6E feature"
-	depends on BCMDHD
+	depends on BCMDHD && BCMDHD_WPA3
 	default n
 	help
 	  This will enable Wi-Fi 6 and Wi-Fi 6E support.
+
+config BROADCOM_WIFI_RESERVED_MEM
+	bool "Reserved memory for wifi device"
+	depends on BCMDHD
+	default n
+	help
+	  Reserved memory for wifi device.
+
+config DHD_USE_STATIC_BUF
+	bool "Enable memory preallocation"
+	depends on BCMDHD && BROADCOM_WIFI_RESERVED_MEM
+	default n
+	help
+	  Use memory preallocated in platform.
+
+config CYW43022
+	bool "Support CYW43022 chipset"
+	depends on BCMDHD
+	default n
+
+config DHD_USE_SCHED_SCAN
+	bool "Use CFG80211 sched scan"
+	depends on BCMDHD && CFG80211
+	default n
+	help
+	  Use CFG80211 sched scan.
+
+config DHD_SET_RANDOM_MAC_VAL
+	hex "Vendor OUI"
+	depends on BCMDHD
+	default 0x001A11
+	help
+	  Set vendor OUI for SoftAP
+
+config WL_AP_IF
+	bool "Create additional AP interface during intialization"
+	depends on BCMDHD
+	default n
+	help
+	  Create additional AP interface during initialization.
+
+config ENABLE_HOGSQS
+	bool "Hogger Squasher"
+	depends on BCMDHD
+	default n
+
+config BCMDHD_DPC_IN_ISR
+	bool "Trigger DPC in ISR thread"
+	depends on BCMDHD && BCMDHD_IB_HOST_WAKE
+	default n
+	help
+	  Handle data processing inside interrupt handler.
+
+config BCMDHD_GET_OOB_STATE
+	bool "Support WLAN_HOST_WAKE pin level information"
+	depends on BCMDHD && BCMDHD_OOB_HOST_WAKE
+	default n
+	help
+	  Support WLAN_HOST_WAKE pin level information.
