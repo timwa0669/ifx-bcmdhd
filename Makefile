@@ -64,6 +64,8 @@ endif
 DHDCFLAGS += -DSI_ERROR_ENFORCE
 # PKT Statistics
 #DHDCFLAGS += -DPKT_STATICS
+# Protocol debug
+#DHDCFLAGS += -DDHD_ARP_DUMP -DDHD_DHCP_DUMP -DDHD_ICMP_DUMP -DDHD_DNS_DUMP
 
 ################
 # Basic feature
