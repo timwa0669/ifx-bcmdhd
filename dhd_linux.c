@@ -10784,6 +10784,9 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #if defined(WBTEXT) && defined(WBTEXT_BTMDELTA)
 	uint32 btmdelta = WBTEXT_BTMDELTA;
 #endif /* WBTEXT && WBTEXT_BTMDELTA */
+#ifdef SUPPORT_SET_CAL_PERIOD
+	uint32 cal_period = CUSTOM_CAL_PERIOD;
+#endif /* SUPPORT_SET_CAL_PERIOD */
 	wl_wlc_version_t wlc_ver;
 
 #ifdef PKT_FILTER_SUPPORT
@@ -11126,6 +11129,14 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		}
 	}
 #endif /* DISABLE_PRUNED_SCAN */
+
+#ifdef SUPPORT_SET_CAL_PERIOD
+	ret = dhd_iovar(dhd, 0, "cal_period", (char *)&cal_period,
+			sizeof(cal_period), NULL, 0, TRUE);
+	if (ret < 0) {
+		DHD_ERROR(("%s Set cal_period failed  %d\n", __FUNCTION__, ret));
+	}
+#endif /* SUPPORT_SET_CAL_PERIOD */
 
 	DHD_ERROR(("Firmware up: op_mode=0x%04x, MAC="MACDBG"\n",
 		dhd->op_mode, MAC2STRDBG(dhd->mac.octet)));

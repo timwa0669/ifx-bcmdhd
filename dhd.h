@@ -2602,6 +2602,11 @@ extern uint dhd_force_tx_queueing;
 #endif // endif
 #endif /* OEM_ANDROID */
 
+#define DEFAULT_CAL_PERIOD			0
+#ifndef CUSTOM_CAL_PERIOD
+#define CUSTOM_CAL_PERIOD			DEFAULT_CAL_PERIOD
+#endif /* CUSTOM_CAL_PERIOD */
+
 #define NO_DTIM_SKIP 1
 #ifdef SDTEST
 /* Echo packet generator (SDIO), pkts/s */
