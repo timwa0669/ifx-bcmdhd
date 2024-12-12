@@ -12997,10 +12997,7 @@ void dhd_detach(dhd_pub_t *dhdp)
 #endif /* PROP_TXSTATUS */
 
 	if (dhd->dhd_state & DHD_ATTACH_STATE_PROT_ATTACH) {
-
-#if defined(OEM_ANDROID) || !defined(BCMSDIO)
 		dhd_bus_detach(dhdp);
-#endif /* OEM_ANDROID || !BCMSDIO */
 #ifdef OEM_ANDROID
 #ifdef BCMPCIE
 		if (is_reboot == SYS_RESTART) {
@@ -13014,10 +13011,8 @@ void dhd_detach(dhd_pub_t *dhdp)
 #endif /* BCMPCIE */
 #endif /* OEM_ANDROID */
 #ifndef PCIE_FULL_DONGLE
-#if defined(OEM_ANDROID) || !defined(BCMSDIO)
 		if (dhdp->prot)
 			dhd_prot_detach(dhdp);
-#endif /* OEM_ANDROID || !BCMSDIO */
 #endif /* !PCIE_FULL_DONGLE */
 	}
 
@@ -13093,18 +13088,12 @@ void dhd_detach(dhd_pub_t *dhdp)
 				netif_tx_disable(ifp->net);
 				dhd_unregister_net(ifp->net, TRUE);
 			}
+
 #ifdef PCIE_FULL_DONGLE
 			ifp->net = DHD_NET_DEV_NULL;
 #else
 			ifp->net = NULL;
 #endif /* PCIE_FULL_DONGLE */
-#if defined(BCMSDIO) && !defined(OEM_ANDROID)
-			dhd_bus_detach(dhdp);
-
-			if (dhdp->prot)
-				dhd_prot_detach(dhdp);
-#endif /* BCMSDIO && !OEM_ANDROID */
-
 #ifdef DHD_L2_FILTER
 			bcm_l2_filter_arp_table_update(dhdp->osh, ifp->phnd_arp_table, TRUE,
 				NULL, FALSE, dhdp->tickcnt);
