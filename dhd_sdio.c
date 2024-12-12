@@ -9735,7 +9735,7 @@ dhdsdio_release(dhd_bus_t *bus, osl_t *osh)
 		bcmsdh_intr_dereg(bus->sdh);
 
 		if (bus->dhd) {
-			dhdsdio_release_dongle(bus, osh, dongle_isolation, TRUE);
+			dhdsdio_release_dongle(bus, osh, dongle_isolation, FALSE);
 			dhd_free(bus->dhd);
 			bus->dhd = NULL;
 		}
@@ -9794,24 +9794,25 @@ dhdsdio_release_malloc(dhd_bus_t *bus, osl_t *osh)
 static void
 dhdsdio_release_dongle(dhd_bus_t *bus, osl_t *osh, bool dongle_isolation, bool reset_flag)
 {
-#if !defined(BCMLXSDMMC)
 	int32 bcmerror = BCME_ERROR;
-#endif // endif
+	uint8 cardctl;
+#ifdef BCMSPI
+	int bcmspierr;
+	uint32 regdata;
+#endif /* BCMSPI */
 
-	DHD_TRACE(("%s: Enter bus->dhd %p bus->dhd->dongle_reset %d \n", __FUNCTION__,
-		bus->dhd, bus->dhd->dongle_reset));
+	DHD_ERROR(("%s: bus->dhd %p\n", __FUNCTION__, bus->dhd));
+	DHD_ERROR(("%s: reset_flag %d\n", __FUNCTION__, reset_flag));
 
 	if ((bus->dhd && bus->dhd->dongle_reset) && reset_flag)
 		return;
 
+	DHD_ERROR(("%s: bus->dhd->dongle_reset %d\n",
+			__FUNCTION__, bus->dhd->dongle_reset));
+
 	if (bus->sih) {
-		/* In Win10, system will be BSOD if using "sysprep" to do OS image */
-		/* Skip this will not cause the BSOD. */
-#if !defined(BCMLXSDMMC)
-		if (bus->dhd) {
-			dhdsdio_clkctl(bus, CLK_AVAIL, FALSE);
-		}
 		if (KSO_ENAB(bus) && (dongle_isolation == FALSE)) {
+			dhdsdio_clkctl(bus, CLK_AVAIL, FALSE);
 #ifndef DHD_43022
 			if (bus->secureboot) {
 				/*
@@ -9827,23 +9828,13 @@ dhdsdio_release_dongle(dhd_bus_t *bus, osl_t *osh, bool dongle_isolation, bool r
 						__FUNCTION__, bcmerror));
 				}
 			}
-
-#endif /* DHD_43022 */
-#ifdef DHD_43022
-			if ((bus->chipidpresent) || (bus->secureboot)) {
-#else
-			if (bus->chipidpresent) {
-#endif /* DHD_43022 */
+#endif /* !DHD_43022 */
+			if (bus->chipidpresent && bus->secureboot) {
 				/*
 				 * Configure registers to trigger WLAN reset on
 				 * "SDIO Soft Reset", and set RES bit to trigger SDIO as
 				 * well as WLAN reset (instead of using PMU/CC Watchdog register)
 				 */
-				uint8 cardctl;
-#ifdef BCMSPI
-				int bcmspierr;
-				uint32 regdata;
-#endif /* BCMSPI */
 				cardctl = bcmsdh_cfg_read(bus->sdh, SDIO_FUNC_0,
 						SDIOD_CCCR_BRCM_CARDCTL, &bcmerror);
 				cardctl |= SDIOD_CCCR_BRCM_WLANRST_ONF0ABORT;
@@ -9851,13 +9842,12 @@ dhdsdio_release_dongle(dhd_bus_t *bus, osl_t *osh, bool dongle_isolation, bool r
 				if (bus->secureboot) {
 					cardctl |= SDIOD_CCCR_BRCM_BTRST_ONF0ABORT;
 				}
-#endif // endif
+#endif /* DHD_43022 */
 				if (!bcmerror) {
 					bcmsdh_cfg_write(bus->sdh, SDIO_FUNC_0,
 							SDIOD_CCCR_BRCM_CARDCTL, cardctl,
 							&bcmerror);
 				}
-
 #ifdef DHD_43022
 				/* For 43012/43022 bit 3 needs to be set for IO card reset. */
 				if (bus->secureboot) {
@@ -9870,19 +9860,16 @@ dhdsdio_release_dongle(dhd_bus_t *bus, osl_t *osh, bool dongle_isolation, bool r
 								&bcmerror);
 					}
 				}
-#else
+#else /* DHD_43022 */
 				if (!bcmerror) {
 					bcmerror = bcmsdh_abort(bus->sdh, SDIO_FUNC_0 | 0x8);
 					DHD_ERROR(("%s: Set WLANRST in cardctl error %d\n",
 							__FUNCTION__, bcmerror));
 				}
 #endif /* DHD_43022 */
-
 #ifdef BCMSPI
-
 				regdata = bcmsdh_cfg_read_word(bus->sdh,
 						SDIO_FUNC_0, SPID_RESET_BP, &bcmspierr);
-
 				regdata |= (RESET_ON_WLAN_BP_RESET | RESET_SPI);
 
 				if (!bcmspierr) {
@@ -9894,26 +9881,23 @@ dhdsdio_release_dongle(dhd_bus_t *bus, osl_t *osh, bool dongle_isolation, bool r
 					DHD_ERROR(("%s : SPI RESET Returns Error 0x%x\n",
 							__FUNCTION__, bcmspierr));
 				}
-
 #endif /* BCMSPI */
-
 			} else {
 				si_watchdog(bus->sih, 4);
 			}
+		}
 
-		}
-#endif /* !defined(BCMLXSDMMC) */
-		if (bus->dhd) {
-			dhdsdio_clkctl(bus, CLK_NONE, FALSE);
-		}
+		dhdsdio_clkctl(bus, CLK_NONE, FALSE);
 		si_detach(bus->sih);
 		bus->sih = NULL;
+
 		if (bus->vars && bus->varsz)
 			MFREE(osh, bus->vars, bus->varsz);
+
 		bus->vars = NULL;
 	}
 
-	DHD_TRACE(("%s: Disconnected\n", __FUNCTION__));
+	DHD_ERROR(("%s: Disconnected\n", __FUNCTION__));
 }
 
 static void

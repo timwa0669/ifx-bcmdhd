@@ -314,6 +314,12 @@ sdioh_detach(osl_t *osh, sdioh_info_t *sd)
 		if (sd->func[1]) {
 			sdio_claim_host(sd->func[1]);
 			sdio_disable_func(sd->func[1]);
+			/* Perform mmc reset */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0))
+			mmc_sw_reset(sd->func[1]->card);
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0))
+			mmc_sw_reset(sd->func[1]->card->host);
+#endif /* KERNEL >= 4.18.0 */
 			sdio_release_host(sd->func[1]);
 		}
 
