@@ -11292,10 +11292,12 @@ int dhd_bus_send_buf(void *h, uint32 addr, uint fn, uint8 *buf, uint nbytes)
 
 int dhd_bus_set_blocksize(void *h, unsigned int fun_num, unsigned int block_size)
 {
-	int bcmerr;
+	int bcmerr = BCME_OK;
+#ifdef USE_DYNAMIC_F2_BLKSIZE
 	int func_blk_size = fun_num;
 	dhd_pub_t *dhd = (dhd_pub_t *)h;
 	dhd_bus_t *bus = (dhd_bus_t *)dhd->bus;
+#endif /* USE_DYNAMIC_F2_BLKSIZE */
 
 #ifdef USE_DYNAMIC_F2_BLKSIZE
 	func_blk_size = fun_num << 16 | block_size;
@@ -11305,7 +11307,7 @@ int dhd_bus_set_blocksize(void *h, unsigned int fun_num, unsigned int block_size
 		DHD_ERROR(("%s: Set F%d Block size error\n", __FUNCTION__, fun_num));
 		return BCME_ERROR;
 	}
-#endif // endif
+#endif /* USE_DYNAMIC_F2_BLKSIZE */
 	return bcmerr;
 } EXPORT_SYMBOL(dhd_bus_set_blocksize);
 

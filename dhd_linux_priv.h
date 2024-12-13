@@ -347,7 +347,7 @@ typedef struct dhd_info {
 	struct kobject dhd_conf_file_kobj;
 	struct timer_list timesync_timer;
 #if defined(BT_OVER_SDIO)
-    char btfw_path[PATH_MAX];
+	char btfw_path[PATH_MAX];
 #endif /* defined (BT_OVER_SDIO) */
 #ifdef WL_MONITOR
 	struct net_device *monitor_dev; /* monitor pseudo device */

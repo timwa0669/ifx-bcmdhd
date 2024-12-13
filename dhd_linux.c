@@ -466,6 +466,12 @@ char clm_path[MOD_PARAM_PATHLEN] = CONFIG_BCMDHD_CLM_PATH;
 char clm_path[MOD_PARAM_PATHLEN];
 #endif /* CONFIG_BCMDHD_CLM_PATH */
 
+#ifdef CONFIG_BCMDHD_BTFW_PATH
+char btfw_path[MOD_PARAM_PATHLEN] = CONFIG_BCMDHD_BTFW_PATH;
+#else /* CONFIG_BCMDHD_BTFW_PATH */
+char btfw_path[MOD_PARAM_PATHLEN];
+#endif /* CONFIG_BCMDHD_BTFW_PATH */
+
 #ifdef DHD_UCODE_DOWNLOAD
 char ucode_path[MOD_PARAM_PATHLEN];
 #endif /* DHD_UCODE_DOWNLOAD */
@@ -566,6 +572,7 @@ module_param_string(nvram_path, nvram_path, MOD_PARAM_PATHLEN, 0660);
 #ifdef DHD_UCODE_DOWNLOAD
 module_param_string(ucode_path, ucode_path, MOD_PARAM_PATHLEN, 0660);
 #endif /* DHD_UCODE_DOWNLOAD */
+module_param_string(btfw_path, btfw_path, MOD_PARAM_PATHLEN, 0660);
 
 /* wl event forwarding */
 #ifdef WL_EVENT_ENAB
@@ -6870,7 +6877,7 @@ dhd_bus_put(wlan_bt_handle_t handle, bus_owner_t owner)
 #endif /* RTT_SUPPORT */
 #ifdef WL11AX
 		if (dhd->pub.twt_ctx) {
-			dhd_twt_deinit(&dhd->pub);
+			wl_twt_deinit(&dhd->pub);
 		}
 #endif /* WL11AX */
 		ret = dhd_bus_devreset(dhdp, TRUE);
@@ -9814,7 +9821,7 @@ bool dhd_update_fw_nv_path(dhd_info_t *dhdinfo)
 }
 
 #if defined(BT_OVER_SDIO)
-extern bool dhd_update_btfw_path(dhd_info_t *dhdinfo, char* btfw_path)
+extern bool dhd_update_btfw_path(dhd_info_t *dhdinfo)
 {
 	int fw_len;
 	const char *fw = NULL;
@@ -9829,13 +9836,6 @@ extern bool dhd_update_btfw_path(dhd_info_t *dhdinfo, char* btfw_path)
 	 * module parameter after it is copied. We won't update the path until the module parameter
 	 * is changed again (first character is not '\0')
 	 */
-
-	/* set default firmware and nvram path for built-in type driver */
-	if (!dhd_download_fw_on_driverload) {
-#ifdef CONFIG_BCMDHD_BTFW_PATH
-		fw = CONFIG_BCMDHD_BTFW_PATH;
-#endif /* CONFIG_BCMDHD_FW_PATH */
-	}
 
 	/* check if we need to initialize the path */
 	if (dhdinfo->btfw_path[0] == '\0') {
@@ -9950,14 +9950,14 @@ wlan_bt_handle_t dhd_bt_get_pub_hndl(void)
 	return (wlan_bt_handle_t) g_dhd_pub;
 } EXPORT_SYMBOL(dhd_bt_get_pub_hndl);
 
-int dhd_download_btfw(wlan_bt_handle_t handle, char* btfw_path)
+int dhd_download_btfw(wlan_bt_handle_t handle)
 {
 	int ret = -1;
 	dhd_pub_t *dhdp = (dhd_pub_t *)handle;
 	dhd_info_t *dhd = (dhd_info_t*)dhdp->info;
 
 	/* Download BT firmware image to the dongle */
-	if (dhd->pub.busstate == DHD_BUS_DATA && dhd_update_btfw_path(dhd, btfw_path)) {
+	if (dhd->pub.busstate == DHD_BUS_DATA && dhd_update_btfw_path(dhd)) {
 		DHD_INFO(("%s: download btfw from: %s\n", __FUNCTION__, dhd->btfw_path));
 		ret = dhd_bus_download_btfw(dhd->pub.bus, dhd->pub.osh, dhd->btfw_path);
 		if (ret < 0) {

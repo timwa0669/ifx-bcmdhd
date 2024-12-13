@@ -54,7 +54,7 @@ extern int dhd_bus_set_blocksize(void *h, unsigned int fun_num, unsigned int blo
 
 /* Shared Layer Init function */
 extern wlan_bt_handle_t dhd_bt_get_pub_hndl(void);
-extern int dhd_download_btfw(wlan_bt_handle_t handle, char* btfw_path);
+extern int dhd_download_btfw(wlan_bt_handle_t handle);
 extern int dhd_bus_get(wlan_bt_handle_t handle, bus_owner_t owner);
 extern int dhd_bus_put(wlan_bt_handle_t handle, bus_owner_t owner);
 
