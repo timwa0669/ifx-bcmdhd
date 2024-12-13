@@ -165,6 +165,9 @@ typedef struct wlfc_mac_descriptor {
 #endif // endif
 	struct wlfc_mac_descriptor* prev;
 	struct wlfc_mac_descriptor* next;
+#ifdef BULK_DEQUEUE
+	uint16 release_count[AC_COUNT + 1];
+#endif /* BULK_DEQUEUE */
 } wlfc_mac_descriptor_t;
 
 /** A 'commit' is the hand over of a packet from the host OS layer to the layer below (eg DBUS) */
@@ -270,6 +273,16 @@ typedef struct athost_wl_stat_counters {
 /** Mask to represent available ACs (note: BC/MC is ignored) */
 #define WLFC_AC_MASK 0xF
 
+#ifdef BULK_DEQUEUE
+#ifndef WLFC_MAX_RELEASE_CNT
+#ifdef CUSTOM_AMPDU_MPDU
+#define WLFC_MAX_RELEASE_CNT	CUSTOM_AMPDU_MPDU
+#else
+#define WLFC_MAX_RELEASE_CNT	16
+#endif /* CUSTOM_AMPDU_MPDU */
+#endif /* WLFC_MAX_RELEASE_CNT */
+#endif /* BULK_DEQUEUE */
+
 /** flow control specific information, only 1 instance during driver lifetime */
 typedef struct athost_wl_status_info {
 	uint8	last_seqid_to_wlc;
@@ -337,7 +350,9 @@ typedef struct athost_wl_status_info {
 	uint32  single_ac_timestamp;
 
 	bool	bcmc_credit_supported;
-
+#ifdef BULK_DEQUEUE
+	uint8   max_release_count;
+#endif /* BULK_DEQUEUE */
 } athost_wl_status_info_t;
 
 /** Please be mindful that total pkttag space is 32 octets only */
