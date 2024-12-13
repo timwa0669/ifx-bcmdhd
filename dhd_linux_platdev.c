@@ -943,8 +943,10 @@ end:
 #if defined(OEM_ANDROID)
 	if (err)
 		wl_android_exit();
+#if !defined(MULTIPLE_SUPPLICANT)
 	else
 		wl_android_post_init();
+#endif /* !MULTIPLE_SUPPLICANT */
 #endif /* OEM_ANDROID */
 
 	return err;

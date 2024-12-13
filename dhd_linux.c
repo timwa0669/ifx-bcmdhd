@@ -789,6 +789,10 @@ void dhd_set_role(dhd_pub_t *dhdp, int role, int bssidx)
 int g_frameburst = 1;
 #endif /* USE_WFA_CERT_CONF */
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)) && defined(MULTIPLE_SUPPLICANT)
+DEFINE_MUTEX(_dhd_mutex_lock_);
+#endif /* KERNEL >= 2.6.35 && MULTIPLE_SUPPLICANT */
+
 static int dhd_get_pend_8021x_cnt(dhd_info_t *dhd);
 
 /* DHD Perimiter lock only used in router with bypass forwarding. */
@@ -7351,15 +7355,6 @@ dhd_open(struct net_device *net)
 #endif /* SHOW_LOGTRACE */
 	}
 
-#if defined(MULTIPLE_SUPPLICANT)
-#if defined(OEM_ANDROID) && defined(BCMSDIO)
-	if (mutex_is_locked(&_dhd_sdio_mutex_lock_) != 0) {
-		DHD_ERROR(("%s : dhd_open: call dev open before insmod complete!\n", __FUNCTION__));
-	}
-	mutex_lock(&_dhd_sdio_mutex_lock_);
-#endif // endif
-#endif /* MULTIPLE_SUPPLICANT */
-
 	DHD_OS_WAKE_LOCK(&dhd->pub);
 	DHD_PERIM_LOCK(&dhd->pub);
 	dhd->pub.dongle_trap_occured = 0;
@@ -7618,12 +7613,6 @@ exit:
 	DHD_PERIM_UNLOCK(&dhd->pub);
 	DHD_OS_WAKE_UNLOCK(&dhd->pub);
 
-#if defined(MULTIPLE_SUPPLICANT)
-#if defined(OEM_ANDROID) && defined(BCMSDIO)
-	mutex_unlock(&_dhd_sdio_mutex_lock_);
-#endif // endif
-#endif /* MULTIPLE_SUPPLICANT */
-
 	return ret;
 }
 
@@ -7635,15 +7624,21 @@ dhd_pri_open(struct net_device *net)
 {
 	s32 ret;
 
+	DHD_MUTEX_IS_LOCK_RETURN();
+	DHD_MUTEX_LOCK();
+
 	ret = dhd_open(net);
 	if (unlikely(ret)) {
-		DHD_ERROR(("Failed to open primary dev ret %d\n", ret));
+		DHD_ERROR(("%s: Failed to open primary dev ret %d\n", __FUNCTION__, ret));
 		return ret;
 	}
 
 	/* Allow transmit calls */
 	netif_start_queue(net);
-	DHD_ERROR(("[%s] tx queue started\n", net->name));
+	DHD_ERROR(("%s: [%s] tx queue started\n", __FUNCTION__, net->name));
+
+	DHD_MUTEX_UNLOCK();
+
 	return ret;
 }
 
@@ -7657,11 +7652,11 @@ dhd_pri_stop(struct net_device *net)
 
 	/* stop tx queue */
 	netif_stop_queue(net);
-	DHD_ERROR(("[%s] tx queue stopped\n", net->name));
+	DHD_ERROR(("%s: [%s] tx queue stopped\n", __FUNCTION__, net->name));
 
 	ret = dhd_stop(net);
 	if (unlikely(ret)) {
-		DHD_ERROR(("dhd_stop failed: %d\n", ret));
+		DHD_ERROR(("%s: dhd_stop failed: %d\n", __FUNCTION__, ret));
 		return ret;
 	}
 
@@ -7684,6 +7679,7 @@ dhd_static_if_open(struct net_device *net)
 	dhd_info_t *dhd = DHD_DEV_INFO(net);
 	dhd_if_t *ifp;
 #endif /* SOFTAP_RAND */
+	DHD_MUTEX_LOCK();
 	cfg = wl_get_cfg(net);
 	primary_netdev = bcmcfg_to_prmry_ndev(cfg);
 
@@ -7720,6 +7716,7 @@ dhd_static_if_open(struct net_device *net)
 		netif_start_queue(net);
 	}
 done:
+	DHD_MUTEX_UNLOCK();
 	return ret;
 }
 
@@ -7773,20 +7770,15 @@ dhd_static_if_stop(struct net_device *net)
 int dhd_do_driver_init(struct net_device *net)
 {
 	dhd_info_t *dhd = NULL;
+	int ret = 0;
 
 	if (!net) {
 		DHD_ERROR(("Primary Interface not initialized \n"));
 		return -EINVAL;
 	}
 
-#ifdef MULTIPLE_SUPPLICANT
-#if defined(OEM_ANDROID) && defined(BCMSDIO)
-	if (mutex_is_locked(&_dhd_sdio_mutex_lock_) != 0) {
-		DHD_ERROR(("%s : dhdsdio_probe is already running!\n", __FUNCTION__));
-		return 0;
-	}
-#endif /* OEM_ANDROID & BCMSDIO */
-#endif /* MULTIPLE_SUPPLICANT */
+	DHD_MUTEX_IS_LOCK_RETURN();
+	DHD_MUTEX_LOCK();
 
 	/*  && defined(OEM_ANDROID) && defined(BCMSDIO) */
 	dhd = DHD_DEV_INFO(net);
@@ -7795,15 +7787,18 @@ int dhd_do_driver_init(struct net_device *net)
 	 */
 	if (dhd->pub.busstate == DHD_BUS_DATA) {
 		DHD_TRACE(("Driver already Inititalized. Nothing to do"));
-		return 0;
+		goto exit;
 	}
 
 	if (dhd_open(net) < 0) {
 		DHD_ERROR(("Driver Init Failed \n"));
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
-	return 0;
+exit:
+	DHD_MUTEX_UNLOCK();
+	return ret;
 }
 
 int
@@ -11878,10 +11873,11 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #ifdef ARP_OFFLOAD_SUPPORT
 	/* Set and enable ARP offload feature for STA only  */
 #if defined(OEM_ANDROID) && defined(SOFTAP)
-	if (arpoe && !ap_fw_loaded) {
+	if (arpoe && !ap_fw_loaded)
 #else
-	if (arpoe) {
+	if (arpoe)
 #endif /* defined(OEM_ANDROID) && defined(SOFTAP) */
+	{
 		dhd_arp_offload_enable(dhd, TRUE);
 		dhd_arp_offload_set(dhd, dhd_arp_mode);
 	} else {

@@ -208,10 +208,6 @@ static int _dhdsdio_secure_firmware_download(struct dhd_bus *bus);
 					PKTFREE(bus->dhd->osh, pkt, FALSE);
 DHD_SPINWAIT_SLEEP_INIT(sdioh_spinwait_sleep);
 
-#if defined(MULTIPLE_SUPPLICANT)
-DEFINE_MUTEX(_dhd_sdio_mutex_lock_);
-#endif // endif
-
 #ifdef SUPPORT_MULTIPLE_BOARD_REV_FROM_HW
 extern unsigned int system_hw_rev;
 #endif /* SUPPORT_MULTIPLE_BOARD_REV_FROM_HW */
@@ -8856,14 +8852,7 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 	int ret;
 	dhd_bus_t *bus;
 
-#if defined(MULTIPLE_SUPPLICANT)
-	if (mutex_is_locked(&_dhd_sdio_mutex_lock_) == 0) {
-		DHD_ERROR(("%s : no mutex held. set lock\n", __FUNCTION__));
-	} else {
-		DHD_ERROR(("%s : mutex is locked!. wait for unlocking\n", __FUNCTION__));
-	}
-	mutex_lock(&_dhd_sdio_mutex_lock_);
-#endif // endif
+	DHD_MUTEX_LOCK();
 
 	/* Init global variables at run-time, not as part of the declaration.
 	 * This is required to support init/de-init of the driver. Initialization
@@ -9044,10 +9033,10 @@ dhdsdio_probe(uint16 venid, uint16 devid, uint16 bus_no, uint16 slot,
 	bcmsdh_reg_write(bus->sdh, 0x18000628, 4, 0x00F80001);
 #endif /* BCMHOST_XTAL_PU_TIME_MOD */
 
-#if defined(MULTIPLE_SUPPLICANT)
-	mutex_unlock(&_dhd_sdio_mutex_lock_);
-	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
-#endif // endif
+#ifdef MULTIPLE_SUPPLICANT
+	wl_android_post_init(); // terence 20120530: fix critical section in dhd_open and dhdsdio_probe
+#endif /* MULTIPLE_SUPPLICANT */
+	DHD_MUTEX_UNLOCK();
 
 	return bus;
 
@@ -9055,11 +9044,7 @@ fail:
 	dhdsdio_release(bus, osh);
 
 forcereturn:
-#if defined(MULTIPLE_SUPPLICANT)
-	mutex_unlock(&_dhd_sdio_mutex_lock_);
-	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
-#endif // endif
-
+	DHD_MUTEX_UNLOCK();
 	return NULL;
 }
 
@@ -9906,15 +9891,7 @@ dhdsdio_disconnect(void *ptr)
 	dhd_bus_t *bus = (dhd_bus_t *)ptr;
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
-
-#if defined(MULTIPLE_SUPPLICANT)
-	if (mutex_is_locked(&_dhd_sdio_mutex_lock_) == 0) {
-		DHD_ERROR(("%s : no mutex held. set lock\n", __FUNCTION__));
-	} else {
-		DHD_ERROR(("%s : mutex is locked!. wait for unlocking\n", __FUNCTION__));
-	}
-	mutex_lock(&_dhd_sdio_mutex_lock_);
-#endif // endif
+	DHD_MUTEX_LOCK();
 
 	if (bus) {
 		ASSERT(bus->dhd);
@@ -9923,11 +9900,7 @@ dhdsdio_disconnect(void *ptr)
 		dhdsdio_release(bus, bus->dhd->osh);
 	}
 
-#if defined(MULTIPLE_SUPPLICANT)
-	mutex_unlock(&_dhd_sdio_mutex_lock_);
-	DHD_ERROR(("%s : the lock is released.\n", __FUNCTION__));
-#endif /* LINUX */
-
+	DHD_MUTEX_UNLOCK();
 	DHD_TRACE(("%s: Disconnected\n", __FUNCTION__));
 }
 

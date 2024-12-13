@@ -1509,6 +1509,7 @@ dhdpcie_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return -ENODEV;
 	}
 #endif /* MULTI_CHIP_SUPPORT */
+	DHD_MUTEX_LOCK();
 
 	if (dhdpcie_chipmatch (pdev->vendor, pdev->device)) {
 		DHD_ERROR(("%s: chipmatch failed!!\n", __FUNCTION__));
@@ -1563,6 +1564,7 @@ dhdpcie_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	device_disable_async_suspend(&pdev->dev);
 #endif /* BCMPCIE_DISABLE_ASYNC_SUSPEND */
 
+	DHD_MUTEX_UNLOCK();
 	DHD_TRACE(("%s: PCIe Enumeration done!!\n", __FUNCTION__));
 	return 0;
 }
@@ -1589,6 +1591,7 @@ dhdpcie_pci_remove(struct pci_dev *pdev)
 	dhd_bus_t *bus = NULL;
 
 	DHD_TRACE(("%s Enter\n", __FUNCTION__));
+	DHD_MUTEX_LOCK();
 	pch = pci_get_drvdata(pdev);
 	bus = pch->bus;
 	osh = pch->osh;
@@ -1645,6 +1648,7 @@ dhdpcie_pci_remove(struct pci_dev *pdev)
 
 	dhdpcie_init_succeeded = FALSE;
 
+	DHD_MUTEX_UNLOCK();
 	DHD_TRACE(("%s Exit\n", __FUNCTION__));
 
 	return;
@@ -2199,6 +2203,10 @@ int dhdpcie_init(struct pci_dev *pdev)
 		pm_runtime_use_autosuspend(&pdev->dev);
 		atomic_set(&bus->dhd->block_bus, FALSE);
 #endif /* DHD_PCIE_NATIVE_RUNTIMEPM */
+
+#ifdef MULTIPLE_SUPPLICANT
+		wl_android_post_init(); // terence 20120530: fix critical section in dhd_open and dhdsdio_probe
+#endif /* MULTIPLE_SUPPLICANT */
 
 		DHD_TRACE(("%s:Exit - SUCCESS \n", __FUNCTION__));
 		return 0;  /* return  SUCCESS  */

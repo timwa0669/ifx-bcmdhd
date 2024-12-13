@@ -10261,11 +10261,13 @@ void wl_android_post_init(void)
 
 #ifdef ENABLE_4335BT_WAR
 	bcm_bt_unlock(lock_cookie_wifi);
-	printk("wl_android_post_init: btlock released\n");
+	DHD_ERROR(("%s: btlock released\n", __FUNCTION__));
 #endif /* ENABLE_4335BT_WAR */
 
-	if (!dhd_download_fw_on_driverload)
+	if (!dhd_download_fw_on_driverload) {
 		g_wifi_on = FALSE;
+		DHD_ERROR(("%s: g_wifi_on %d\n", __FUNCTION__, g_wifi_on));
+	}
 }
 
 #ifdef WL_GENL

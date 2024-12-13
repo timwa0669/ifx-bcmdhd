@@ -1826,11 +1826,37 @@ typedef enum dhd_ioctl_recieved_status
 void dhd_net_if_lock(struct net_device *dev);
 void dhd_net_if_unlock(struct net_device *dev);
 
-#if defined(MULTIPLE_SUPPLICANT)
-#if defined(OEM_ANDROID) && defined(BCMSDIO)
-extern struct mutex _dhd_sdio_mutex_lock_;
-#endif // endif
+#ifdef MULTIPLE_SUPPLICANT
+extern void wl_android_post_init(void); // terence 20120530: fix critical section in dhd_open and dhdsdio_probe
 #endif /* MULTIPLE_SUPPLICANT */
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)) && defined(MULTIPLE_SUPPLICANT)
+extern struct mutex _dhd_mutex_lock_;
+#define DHD_MUTEX_IS_LOCK_RETURN() \
+	if (mutex_is_locked(&_dhd_mutex_lock_) != 0) { \
+		printf("%s : probe is already running! return.\n", __FUNCTION__); \
+		return -EBUSY;; \
+	}
+#define DHD_MUTEX_LOCK() \
+	do { \
+		if (mutex_is_locked(&_dhd_mutex_lock_) == 0) { \
+			printf("%s : no mutex held\n", __FUNCTION__); \
+		} else { \
+			printf("%s : mutex is locked!. wait for unlocking\n", __FUNCTION__); \
+		} \
+		mutex_lock(&_dhd_mutex_lock_); \
+		printf("%s : set mutex lock\n", __FUNCTION__); \
+	} while (0)
+#define DHD_MUTEX_UNLOCK() \
+	do { \
+		printf("%s : mutex is released.\n", __FUNCTION__); \
+		mutex_unlock(&_dhd_mutex_lock_); \
+	} while (0)
+#else /* KERNEL >= 2.6.35 && MULTIPLE_SUPPLICANT */
+#define DHD_MUTEX_IS_LOCK_RETURN(a)	do {} while (0)
+#define DHD_MUTEX_LOCK(a)	do {} while (0)
+#define DHD_MUTEX_UNLOCK(a)	do {} while (0)
+#endif /* KERNEL >= 2.6.35 && MULTIPLE_SUPPLICANT */
 
 typedef enum dhd_attach_states
 {
