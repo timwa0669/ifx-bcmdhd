@@ -471,9 +471,6 @@ wl_iw_set_pm(
 	error = dev_wlc_ioctl(dev, WLC_SET_PM, &pm, sizeof(pm));
 	return error;
 }
-
-#if WIRELESS_EXT > 17
-#endif /* WIRELESS_EXT > 17 */
 #endif /* WIRELESS_EXT > 12 */
 
 int
@@ -504,7 +501,7 @@ static int
 wl_iw_config_commit(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	void *zwrq,
+	union iwreq_data *zwrq,
 	char *extra
 )
 {
@@ -582,10 +579,11 @@ static int
 wl_iw_set_freq(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_freq *fwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_freq *fwrq = &wrqu->freq;
 	int error, chan;
 	uint sf = 0;
 
@@ -626,10 +624,11 @@ static int
 wl_iw_get_freq(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_freq *fwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_freq *fwrq = &wrqu->freq;
 	channel_info_t ci;
 	int error;
 
@@ -648,7 +647,7 @@ static int
 wl_iw_set_mode(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	__u32 *uwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -656,7 +655,7 @@ wl_iw_set_mode(
 
 	WL_TRACE(("%s: SIOCSIWMODE\n", dev->name));
 
-	switch (*uwrq) {
+	switch (wrqu->mode) {
 	case IW_MODE_MASTER:
 		infra = ap = 1;
 		break;
@@ -684,7 +683,7 @@ static int
 wl_iw_get_mode(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	__u32 *uwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -698,7 +697,7 @@ wl_iw_get_mode(
 
 	infra = dtoh32(infra);
 	ap = dtoh32(ap);
-	*uwrq = infra ? ap ? IW_MODE_MASTER : IW_MODE_INFRA : IW_MODE_ADHOC;
+	wrqu->mode = infra ? ap ? IW_MODE_MASTER : IW_MODE_INFRA : IW_MODE_ADHOC;
 
 	return 0;
 }
@@ -707,10 +706,11 @@ static int
 wl_iw_get_range(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	struct iw_range *range = (struct iw_range *) extra;
 	static int channels[MAXCHANNEL+1];
 	wl_uint32_list_t *list = (wl_uint32_list_t *) channels;
@@ -897,10 +897,11 @@ static int
 wl_iw_set_spy(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_iw_t *iw = IW_DEV_IF(dev);
 	struct sockaddr *addr = (struct sockaddr *) extra;
 	int i;
@@ -922,10 +923,11 @@ static int
 wl_iw_get_spy(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_iw_t *iw = IW_DEV_IF(dev);
 	struct sockaddr *addr = (struct sockaddr *) extra;
 	struct iw_quality *qual = (struct iw_quality *) &addr[iw->spy_num];
@@ -951,7 +953,7 @@ static int
 wl_iw_set_wap(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct sockaddr *awrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -959,13 +961,13 @@ wl_iw_set_wap(
 
 	WL_TRACE(("%s: SIOCSIWAP\n", dev->name));
 
-	if (awrq->sa_family != ARPHRD_ETHER) {
+	if (wrqu->ap_addr.sa_family != ARPHRD_ETHER) {
 		WL_ERROR(("%s: Invalid Header...sa_family\n", __FUNCTION__));
 		return -EINVAL;
 	}
 
 	/* Ignore "auto" or "off" */
-	if (ETHER_ISBCAST(awrq->sa_data) || ETHER_ISNULLADDR(awrq->sa_data)) {
+	if (ETHER_ISBCAST(wrqu->ap_addr.sa_data) || ETHER_ISNULLADDR(wrqu->ap_addr.sa_data)) {
 		scb_val_t scbval;
 		bzero(&scbval, sizeof(scb_val_t));
 		if ((error = dev_wlc_ioctl(dev, WLC_DISASSOC, &scbval, sizeof(scb_val_t)))) {
@@ -973,11 +975,11 @@ wl_iw_set_wap(
 		}
 		return 0;
 	}
-	/* WL_ASSOC(("Assoc to %s\n", bcm_ether_ntoa((struct ether_addr *)&(awrq->sa_data),
+	/* WL_ASSOC(("Assoc to %s\n", bcm_ether_ntoa((struct ether_addr *)&(wrqu->ap_addr.sa_data),
 	 * eabuf)));
 	 */
 	/* Reassociate to the specified AP */
-	if ((error = dev_wlc_ioctl(dev, WLC_REASSOC, awrq->sa_data, ETHER_ADDR_LEN))) {
+	if ((error = dev_wlc_ioctl(dev, WLC_REASSOC, wrqu->ap_addr.sa_data, ETHER_ADDR_LEN))) {
 		WL_ERROR(("%s: WLC_REASSOC failed (%d).\n", __FUNCTION__, error));
 		return error;
 	}
@@ -989,17 +991,17 @@ static int
 wl_iw_get_wap(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct sockaddr *awrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
 	WL_TRACE(("%s: SIOCGIWAP\n", dev->name));
 
-	awrq->sa_family = ARPHRD_ETHER;
-	memset(awrq->sa_data, 0, ETHER_ADDR_LEN);
+	wrqu->ap_addr.sa_family = ARPHRD_ETHER;
+	memset(wrqu->ap_addr.sa_data, 0, ETHER_ADDR_LEN);
 
 	/* Ignore error (may be down or disassociated) */
-	(void) dev_wlc_ioctl(dev, WLC_GET_BSSID, awrq->sa_data, ETHER_ADDR_LEN);
+	(void) dev_wlc_ioctl(dev, WLC_GET_BSSID, wrqu->ap_addr.sa_data, ETHER_ADDR_LEN);
 
 	return 0;
 }
@@ -1009,7 +1011,7 @@ static int
 wl_iw_mlme(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct sockaddr *awrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -1050,10 +1052,11 @@ static int
 wl_iw_get_aplist(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_scan_results_t *list;
 	struct sockaddr *addr = (struct sockaddr *) extra;
 	struct iw_quality qual[IW_MAX_AP];
@@ -1124,10 +1127,11 @@ static int
 wl_iw_iscan_get_aplist(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_scan_results_t *list;
 	iscan_buf_t * buf;
 	iscan_info_t *iscan = g_iscan;
@@ -1143,7 +1147,7 @@ wl_iw_iscan_get_aplist(
 		return -EINVAL;
 
 	if ((!iscan) || (iscan->sysioc_pid < 0)) {
-		return wl_iw_get_aplist(dev, info, dwrq, extra);
+		return wl_iw_get_aplist(dev, info, wrqu, extra);
 	}
 
 	buf = iscan->list_hdr;
@@ -1464,10 +1468,11 @@ static int
 wl_iw_get_scan(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	channel_info_t ci;
 	wl_scan_results_t *list;
 	struct iw_event	iwe;
@@ -1586,10 +1591,11 @@ static int
 wl_iw_iscan_get_scan(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_scan_results_t *list;
 	struct iw_event	iwe;
 	wl_bss_info_t *bi = NULL;
@@ -1606,7 +1612,7 @@ wl_iw_iscan_get_scan(
 
 	/* use backup if our thread is not successful */
 	if ((!iscan) || (iscan->sysioc_pid < 0)) {
-		return wl_iw_get_scan(dev, info, dwrq, extra);
+		return wl_iw_get_scan(dev, info, wrqu, extra);
 	}
 
 	/* Check for scan in progress */
@@ -1714,10 +1720,11 @@ static int
 wl_iw_set_essid(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wlc_ssid_t ssid;
 	int error;
 
@@ -1751,10 +1758,11 @@ static int
 wl_iw_get_essid(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wlc_ssid_t ssid;
 	int error;
 
@@ -1792,10 +1800,11 @@ static int
 wl_iw_set_nick(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_iw_t *iw = IW_DEV_IF(dev);
 	WL_TRACE(("%s: SIOCSIWNICKN\n", dev->name));
 
@@ -1816,10 +1825,11 @@ static int
 wl_iw_get_nick(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_iw_t *iw = IW_DEV_IF(dev);
 	WL_TRACE(("%s: SIOCGIWNICKN\n", dev->name));
 
@@ -1835,10 +1845,11 @@ wl_iw_get_nick(
 static int wl_iw_set_rate(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->bitrate;
 	wl_rateset_t rateset;
 	int error, rate, i, error_bg, error_a;
 
@@ -1901,10 +1912,11 @@ static int wl_iw_set_rate(
 static int wl_iw_get_rate(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->bitrate;
 	int error, rate;
 
 	WL_TRACE(("%s: SIOCGIWRATE\n", dev->name));
@@ -1922,10 +1934,11 @@ static int
 wl_iw_set_rts(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->rts;
 	int error, rts;
 
 	WL_TRACE(("%s: SIOCSIWRTS\n", dev->name));
@@ -1947,10 +1960,11 @@ static int
 wl_iw_get_rts(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->rts;
 	int error, rts;
 
 	WL_TRACE(("%s: SIOCGIWRTS\n", dev->name));
@@ -1969,10 +1983,11 @@ static int
 wl_iw_set_frag(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->frag;
 	int error, frag;
 
 	WL_TRACE(("%s: SIOCSIWFRAG\n", dev->name));
@@ -1994,10 +2009,11 @@ static int
 wl_iw_get_frag(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->frag;
 	int error, fragthreshold;
 
 	WL_TRACE(("%s: SIOCGIWFRAG\n", dev->name));
@@ -2016,10 +2032,11 @@ static int
 wl_iw_set_txpow(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->txpower;
 	int error, disable;
 	uint16 txpwrmw;
 	WL_TRACE(("%s: SIOCSIWTXPOW\n", dev->name));
@@ -2055,10 +2072,11 @@ static int
 wl_iw_get_txpow(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->txpower;
 	int error, disable, txpwrdbm;
 	uint8 result;
 
@@ -2083,10 +2101,11 @@ static int
 wl_iw_set_retry(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->retry;
 	int error, lrl, srl;
 
 	WL_TRACE(("%s: SIOCSIWRETRY\n", dev->name));
@@ -2130,10 +2149,11 @@ static int
 wl_iw_get_retry(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->retry;
 	int error, lrl, srl;
 
 	WL_TRACE(("%s: SIOCGIWRETRY\n", dev->name));
@@ -2171,10 +2191,11 @@ static int
 wl_iw_set_encode(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_wsec_key_t key;
 	int error, val, wsec;
 
@@ -2260,10 +2281,11 @@ static int
 wl_iw_get_encode(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_wsec_key_t key;
 	int error, val, wsec, auth;
 
@@ -2323,10 +2345,11 @@ static int
 wl_iw_set_power(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->power;
 	int error, pm;
 
 	WL_TRACE(("%s: SIOCSIWPOWER\n", dev->name));
@@ -2344,10 +2367,11 @@ static int
 wl_iw_get_power(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->power;
 	int error, pm;
 
 	WL_TRACE(("%s: SIOCGIWPOWER\n", dev->name));
@@ -2367,10 +2391,11 @@ static int
 wl_iw_set_wpaie(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *iwp,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *iwp = (struct iw_point *)wrqu;
 #if defined(BCMWAPI_WPI)
 	uchar buf[WLC_IOCTL_SMLEN] = {0};
 	uchar *p = buf;
@@ -2395,10 +2420,11 @@ static int
 wl_iw_get_wpaie(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *iwp,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *iwp = (struct iw_point *)wrqu;
 	WL_TRACE(("%s: SIOCGIWGENIE\n", dev->name));
 	iwp->length = 64;
 	dev_wlc_bufvar_get(dev, "wpaie", extra, iwp->length);
@@ -2409,10 +2435,11 @@ static int
 wl_iw_set_encodeext(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_point *dwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_point *dwrq = (struct iw_point *)wrqu;
 	wl_wsec_key_t key;
 	int error;
 	struct iw_encode_ext *iwe;
@@ -2559,7 +2586,7 @@ static int
 wl_iw_set_pmksa(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -2643,7 +2670,7 @@ static int
 wl_iw_get_encodeext(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
@@ -2655,10 +2682,11 @@ static int
 wl_iw_set_wpaauth(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->param;
 	int error = 0;
 	int paramid;
 	int paramval;
@@ -2896,10 +2924,11 @@ static int
 wl_iw_get_wpaauth(
 	struct net_device *dev,
 	struct iw_request_info *info,
-	struct iw_param *vwrq,
+	union iwreq_data *wrqu,
 	char *extra
 )
 {
+	struct iw_param	*vwrq = &wrqu->param;
 	int error;
 	int paramid;
 	int paramval = 0;
@@ -3066,8 +3095,6 @@ enum {
 	WL_IW_SET_LEDDC = SIOCIWFIRSTPRIV,
 	WL_IW_SET_VLANMODE,
 	WL_IW_SET_PM,
-#if WIRELESS_EXT > 17
-#endif /* WIRELESS_EXT > 17 */
 	WL_IW_SET_LAST
 };
 
@@ -3075,8 +3102,6 @@ static iw_handler wl_iw_priv_handler[] = {
 	wl_iw_set_leddc,
 	wl_iw_set_vlanmode,
 	wl_iw_set_pm,
-#if WIRELESS_EXT > 17
-#endif /* WIRELESS_EXT > 17 */
 	NULL
 };
 
@@ -3099,8 +3124,6 @@ static struct iw_priv_args wl_iw_priv_args[] = {
 		0,
 		"set_pm"
 	},
-#if WIRELESS_EXT > 17
-#endif /* WIRELESS_EXT > 17 */
 	{ 0, 0, 0, { 0 } }
 };
 
