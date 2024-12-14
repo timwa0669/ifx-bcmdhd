@@ -342,15 +342,13 @@ typedef struct dhd_bus {
 	bool	d2h_intr_method;
 #ifdef SUPPORT_LINKDOWN_RECOVERY
 #if defined(CONFIG_ARCH_MSM) || (defined(EXYNOS_PCIE_LINKDOWN_RECOVERY) && \
-	defined(CONFIG_SOC_EXYNOS8890) || defined(CONFIG_SOC_EXYNOS8895) || \
-	defined(CONFIG_SOC_EXYNOS9810) || defined(CONFIG_SOC_EXYNOS9820))
+	defined(CONFIG_ARCH_EXYNOS))
 #ifdef CONFIG_ARCH_MSM
 	uint8 no_cfg_restore;
 #endif /* CONFIG_ARCH_MSM */
 	struct_pcie_register_event pcie_event;
 #endif /* CONFIG_ARCH_MSM || (EXYNOS_PCIE_LINKDOWN_RECOVERY &&
-	* (CONFIG_SOC_EXYNOS8890 || CONFIG_SOC_EXYNOS8895 ||
-	* CONFIG_SOC_EXYNOS9810 || CONFIG_SOC_EXYNOS9820 ))
+	* (CONFIG_ARCH_EXYNOS))
 	*/
 	bool read_shm_fail;
 #endif /* SUPPORT_LINKDOWN_RECOVERY */
@@ -543,8 +541,6 @@ extern int dhdpcie_get_oob_irq_level(void);
 	defined(CONFIG_SOC_EXYNOS9820)
 #define SAMSUNG_PCIE_DEVICE_ID 0xecec
 #define SAMSUNG_PCIE_CH_NUM 0
-#else
-#error "Not supported platform"
 #endif /* CONFIG_SOC_EXYNOSXXXX & CONFIG_MACH_UNIVERSALXXXX */
 #endif /* CONFIG_ARCH_EXYNOS */
 
@@ -562,8 +558,6 @@ extern int dhdpcie_get_oob_irq_level(void);
 #define MSM_PCIE_DEVICE_ID 0x0106
 #elif defined(USE_CUSTOM_MSM_PCIE)
 #define MSM_PCIE_DEVICE_ID MSM_PCIE_CUSTOM_DEVICE_ID
-#else
-#error "Not supported platform"
 #endif // endif
 #endif /* CONFIG_ARCH_MSM */
 
@@ -585,6 +579,7 @@ extern int dhdpcie_get_oob_irq_level(void);
 #define DUMMY_PCIE_VENDOR_ID 0xffff
 #define DUMMY_PCIE_DEVICE_ID 0xffff
 
+#if 0
 #if defined(CONFIG_ARCH_EXYNOS)
 #define PCIE_RC_VENDOR_ID SAMSUNG_PCIE_VENDOR_ID
 #define PCIE_RC_DEVICE_ID SAMSUNG_PCIE_DEVICE_ID
@@ -605,11 +600,21 @@ extern int dhdpcie_get_oob_irq_level(void);
 #define PCIE_RC_VENDOR_ID DUMMY_PCIE_VENDOR_ID
 #define PCIE_RC_DEVICE_ID DUMMY_PCIE_DEVICE_ID
 #endif /* CONFIG_ARCH_EXYNOS */
+#endif /* 0 */
+
+#if defined(CONFIG_X86)
+#define PCIE_RC_VENDOR_ID X86_PCIE_VENDOR_ID
+#define PCIE_RC_DEVICE_ID X86_PCIE_DEVICE_ID
+#else
+/* Use dummy vendor and device IDs */
+#define PCIE_RC_VENDOR_ID DUMMY_PCIE_VENDOR_ID
+#define PCIE_RC_DEVICE_ID DUMMY_PCIE_DEVICE_ID
+#endif /* CONFIG_X86 */
 
 #define DHD_REGULAR_RING    0
 #define DHD_HP2P_RING    1
 
-#ifdef USE_EXYNOS_PCIE_RC_PMPATCH
+#ifdef USE_PCIE_RC_PMPATCH
 #ifdef CONFIG_MACH_UNIVERSAL5433
 extern int exynos_pcie_pm_suspend(void);
 extern int exynos_pcie_pm_resume(void);
@@ -617,7 +622,6 @@ extern int exynos_pcie_pm_resume(void);
 extern int exynos_pcie_pm_suspend(int ch_num);
 extern int exynos_pcie_pm_resume(int ch_num);
 #endif /* CONFIG_MACH_UNIVERSAL5433 */
-#endif /* USE_EXYNOS_PCIE_RC_PMPATCH */
 
 #ifdef CONFIG_ARCH_TEGRA
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0))
@@ -625,6 +629,7 @@ extern int tegra_pcie_pm_suspend(void);
 extern int tegra_pcie_pm_resume(void);
 #endif // endif
 #endif /* CONFIG_ARCH_TEGRA */
+#endif /* USE_PCIE_RC_PMPATCH */
 
 extern int dhd_buzzz_dump_dngl(dhd_bus_t *bus);
 #ifdef IDLE_TX_FLOW_MGMT

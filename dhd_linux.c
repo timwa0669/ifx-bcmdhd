@@ -3906,13 +3906,13 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 				dhd_ifname(&dhd->pub, ifidx)));
 	}
 #endif /* DHD_PSTA */
-#ifdef CONFIG_ARCH_MSM
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)) && defined(DHD_TCP_PACING_SHIFT)
 	if (skb->sk) {
-		sk_pacing_shift_update(skb->sk, 8);
+		sk_pacing_shift_update(skb->sk, DHD_DEFAULT_TCP_PACING_SHIFT);
 	}
-#endif /* LINUX_VERSION_CODE >= 4.16.0 */
-#endif /* CONFIG_ARCH_MSM */
+#endif /* LINUX_VERSION_CODE >= 4.19.0 && DHD_TCP_PACING_SHIFT */
+
 #ifdef DHDTCPSYNC_FLOOD_BLK
 	if (dhd_tcpdata_get_flag(&dhd->pub, pktbuf) == FLAG_SYNCACK) {
 		ifp->tsyncack_txed ++;
@@ -13574,22 +13574,14 @@ dhd_reboot_callback(struct notifier_block *this, unsigned long code, void *unuse
 }
 
 #if defined(CONFIG_DEFERRED_INITCALLS) && !defined(EXYNOS_PCIE_MODULE_PATCH)
-#if defined(CONFIG_MACH_UNIVERSAL7420) || defined(CONFIG_SOC_EXYNOS8890) || \
-	defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
-	defined(CONFIG_SOC_EXYNOS8895) || defined(CONFIG_SOC_EXYNOS9810) || \
-	defined(CONFIG_ARCH_SDM845) || defined(CONFIG_SOC_EXYNOS9820) || \
-	defined(CONFIG_ARCH_SM8150)
+#if defined(CONFIG_ARCH_MSM) || defined(CONFIG_ARCH_EXYNOS)
 deferred_module_init_sync(dhd_module_init);
-#else
+#else /* CONFIG_ARCH_MSM || CONFIG_ARCH_EXYNOS */
 deferred_module_init(dhd_module_init);
-#endif /* CONFIG_MACH_UNIVERSAL7420 || CONFIG_SOC_EXYNOS8890 ||
-	* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 || CONFIG_SOC_EXYNOS8895
-	* CONFIG_SOC_EXYNOS9810 || CONFIG_ARCH_SDM845 || CONFIG_SOC_EXYNOS9820
-	* CONFIG_ARCH_SM8150
-	*/
+#endif /* CONFIG_ARCH_MSM || CONFIG_ARCH_EXYNOS */
 #elif defined(USE_LATE_INITCALL_SYNC)
 late_initcall_sync(dhd_module_init);
-#else
+#else /* USE_LATE_INITCALL_SYNC */
 late_initcall(dhd_module_init);
 #endif /* USE_LATE_INITCALL_SYNC */
 

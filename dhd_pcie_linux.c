@@ -1080,9 +1080,10 @@ out:
 static int dhdpcie_resume_host_dev(dhd_bus_t *bus)
 {
 	int bcmerror = 0;
-#ifdef USE_EXYNOS_PCIE_RC_PMPATCH
+#ifdef USE_PCIE_RC_PMPATCH
+#ifdef CONFIG_ARCH_EXYNOS
 	bcmerror = exynos_pcie_pm_resume(SAMSUNG_PCIE_CH_NUM);
-#endif /* USE_EXYNOS_PCIE_RC_PMPATCH */
+#endif /* CONFIG_ARCH_EXYNOS */
 #ifdef CONFIG_ARCH_MSM
 	bcmerror = dhdpcie_start_host_pcieclock(bus);
 #endif /* CONFIG_ARCH_MSM */
@@ -1091,6 +1092,7 @@ static int dhdpcie_resume_host_dev(dhd_bus_t *bus)
 	bcmerror = tegra_pcie_pm_resume();
 #endif // endif
 #endif /* CONFIG_ARCH_TEGRA */
+#endif /* USE_PCIE_RC_PMPATCH */
 	if (bcmerror < 0) {
 		DHD_ERROR(("%s: PCIe RC resume failed!!! (%d)\n",
 			__FUNCTION__, bcmerror));
@@ -1108,7 +1110,8 @@ static int dhdpcie_resume_host_dev(dhd_bus_t *bus)
 static int dhdpcie_suspend_host_dev(dhd_bus_t *bus)
 {
 	int bcmerror = 0;
-#ifdef USE_EXYNOS_PCIE_RC_PMPATCH
+#ifdef USE_PCIE_RC_PMPATCH
+#ifdef CONFIG_ARCH_EXYNOS
 	if (bus->rc_dev) {
 		pci_save_state(bus->rc_dev);
 	} else {
@@ -1116,7 +1119,7 @@ static int dhdpcie_suspend_host_dev(dhd_bus_t *bus)
 			__FUNCTION__, PCIE_RC_VENDOR_ID, PCIE_RC_DEVICE_ID));
 	}
 	exynos_pcie_pm_suspend(SAMSUNG_PCIE_CH_NUM);
-#endif	/* USE_EXYNOS_PCIE_RC_PMPATCH */
+#endif /* CONFIG_ARCH_EXYNOS */
 #ifdef CONFIG_ARCH_MSM
 	bcmerror = dhdpcie_stop_host_pcieclock(bus);
 #endif	/* CONFIG_ARCH_MSM */
@@ -1125,6 +1128,7 @@ static int dhdpcie_suspend_host_dev(dhd_bus_t *bus)
 	bcmerror = tegra_pcie_pm_suspend();
 #endif // endif
 #endif /* CONFIG_ARCH_TEGRA */
+#endif /* USE_PCIE_RC_PMPATCH */
 	return bcmerror;
 }
 

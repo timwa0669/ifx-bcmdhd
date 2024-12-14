@@ -47,13 +47,9 @@
 #include <linux/fcntl.h>
 #include <linux/fs.h>
 #include <linux/of_gpio.h>
-#if defined(CONFIG_ARCH_MSM8996) || defined(CONFIG_ARCH_MSM8998) || \
-	defined(CONFIG_ARCH_SDM845) || defined(CONFIG_ARCH_SM8150) || \
-	defined(USE_CUSTOM_MSM_PCIE)
+#if defined(CONFIG_ARCH_MSM) || defined(USE_CUSTOM_MSM_PCIE)
 #include <linux/msm_pcie.h>
-#endif /* CONFIG_ARCH_MSM8996 || CONFIG_ARCH_MSM8998 ||
-	  CONFIG_ARCH_SDM845 || CONFIG_ARCH_SM8150
-	*/
+#endif /* CONFIG_ARCH_MSM || USE_CUSTOM_MSM_PCIE */
 
 #ifdef CONFIG_BROADCOM_WIFI_RESERVED_MEM
 extern void dhd_exit_wlan_mem(void);
