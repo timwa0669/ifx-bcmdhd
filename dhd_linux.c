@@ -3700,11 +3700,7 @@ exit:
 #ifndef DHD_MONITOR_INTERFACE
 static
 #endif /* DHD_MONITOR_INTERFACE */
-#ifdef CFI_CHECK
 netdev_tx_t BCMFASTPATH
-#else /* CFI_CHECK */
-int BCMFASTPATH
-#endif /* CFI_CHECK */
 dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 {
 	int ret;
@@ -3743,11 +3739,7 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 #endif /* WL_DHD_XR_MASTER */
 
 	if (dhd_query_bus_erros(&dhd->pub)) {
-#ifdef CFI_CHECK
 		return NETDEV_TX_BUSY;
-#else
-		return -ENODEV;
-#endif /* CFI_CHECK */
 	}
 
 	DHD_GENERAL_LOCK(&dhd->pub, flags);
@@ -4033,11 +4025,7 @@ void dhd_start_xmit_wq_adapter(struct work_struct *ptr)
 			   "error: dhd_start_xmit():%d\n", ret);
 }
 
-#ifdef CFI_CHECK
 netdev_tx_t BCMFASTPATH
-#else
-int BCMFASTPATH
-#endif /* CFI_CHECK */
 dhd_start_xmit_wrapper(struct sk_buff *skb, struct net_device *net)
 {
 	struct dhd_rx_tx_work *start_xmit_work;
@@ -4055,11 +4043,7 @@ dhd_start_xmit_wrapper(struct sk_buff *skb, struct net_device *net)
 		if (!start_xmit_work) {
 			netdev_err(net,
 				   "error: failed to alloc start_xmit_work\n");
-#ifdef CFI_CHECK
 			ret = NETDEV_TX_BUSY;
-#else
-			ret = -ENOMEM;
-#endif /* CFI_CHECK */
 			goto exit;
 		}
 
@@ -4067,21 +4051,12 @@ dhd_start_xmit_wrapper(struct sk_buff *skb, struct net_device *net)
 		start_xmit_work->skb = skb;
 		start_xmit_work->net = net;
 		queue_work(dhd->tx_wq, &start_xmit_work->work);
-#ifdef CFI_CHECK
 		ret = NETDEV_TX_OK;
-#else
-		ret = NET_XMIT_SUCCESS;
-#endif /* CFI_CHECK */
-
 	} else if (dhd->pub.busstate == DHD_BUS_DATA) {
 		ret = dhd_start_xmit(skb, net);
 	} else {
 		/* when bus is down */
-#ifdef CFI_CHECK
 		ret = NETDEV_TX_BUSY;
-#else
-		ret = -ENODEV;
-#endif /* CFI_CHECK */
 	}
 
 exit:
@@ -6159,19 +6134,11 @@ typedef struct dhd_mon_dev_priv {
 #define DHD_MON_DEV_PRIV(dev)		((dhd_mon_dev_priv_t *)DEV_PRIV(dev))
 #define DHD_MON_DEV_STATS(dev)		(((dhd_mon_dev_priv_t *)DEV_PRIV(dev))->stats)
 
-#ifdef CFI_CHECK
 static netdev_tx_t
-#else
-static int
-#endif /* CFI_CHECK */
 dhd_monitor_start(struct sk_buff *skb, struct net_device *dev)
 {
 	PKTFREE(NULL, skb, FALSE);
-#ifdef CFI_CHECK
 	return NETDEV_TX_OK;
-#else
-	return 0;
-#endif /* CFI_CHECK */
 }
 
 static int
