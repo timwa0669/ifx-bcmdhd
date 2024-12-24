@@ -11441,7 +11441,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	}
 #endif /* CUSTOM_AMPDU_BA_WSIZE || (WLAIBSS && CUSTOM_IBSS_AMPDU_BA_WSIZE) */
 
-#if defined(CUSTOM_AMPDU_MPDU)
+#if defined(CUSTOM_AMPDU_BA_WSIZE) && defined(CUSTOM_AMPDU_MPDU)
 	ampdu_mpdu = CUSTOM_AMPDU_MPDU;
 	if (ampdu_mpdu != 0 && (ampdu_mpdu <= ampdu_ba_wsize)) {
 		ret = dhd_iovar(dhd, 0, "ampdu_mpdu", (char *)&ampdu_mpdu, sizeof(ampdu_mpdu),
@@ -11451,9 +11451,9 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 				__FUNCTION__, CUSTOM_AMPDU_MPDU, ret));
 		}
 	}
-#endif /* CUSTOM_AMPDU_MPDU */
+#endif /* CUSTOM_AMPDU_BA_WSIZE && CUSTOM_AMPDU_MPDU */
 
-#if defined(CUSTOM_AMPDU_RELEASE)
+#if defined(CUSTOM_AMPDU_BA_WSIZE) && defined(CUSTOM_AMPDU_RELEASE)
 	ampdu_release = CUSTOM_AMPDU_RELEASE;
 	if (ampdu_release != 0 && (ampdu_release <= ampdu_ba_wsize)) {
 		ret = dhd_iovar(dhd, 0, "ampdu_release", (char *)&ampdu_release,
@@ -11463,7 +11463,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 				__FUNCTION__, CUSTOM_AMPDU_RELEASE, ret));
 		}
 	}
-#endif /* CUSTOM_AMPDU_RELEASE */
+#endif /* CUSTOM_AMPDU_BA_WSIZE && CUSTOM_AMPDU_RELEASE */
 
 #if defined(CUSTOM_AMSDU_AGGSF)
 	amsdu_aggsf = CUSTOM_AMSDU_AGGSF;
