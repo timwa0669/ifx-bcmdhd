@@ -10602,7 +10602,6 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	int32 amsdu_aggsf = 0;
 #endif // endif
 
-#if defined(BCMSDIO)
 #ifdef PROP_TXSTATUS
 	int wlfc_enable = TRUE;
 #ifndef DISABLE_11N
@@ -10610,7 +10609,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	uint chipid = 0;
 #endif /* DISABLE_11N */
 #endif /* PROP_TXSTATUS */
-#endif // endif
+
 #ifndef PCIE_FULL_DONGLE
 	uint32 wl_ap_isolate;
 #endif /* PCIE_FULL_DONGLE */
@@ -12021,7 +12020,6 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 	dhd_txglom_enable(dhd, TRUE);
 #endif /* BCMSDIO && !BCMSPI */
 
-#if defined(BCMSDIO)
 #ifdef PROP_TXSTATUS
 	if (disable_proptx ||
 #ifdef PROP_TXSTATUS_VSDB
@@ -12076,7 +12074,6 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #endif /* DISABLE_11N */
 
 #endif /* PROP_TXSTATUS */
-#endif /* BCMSDIO || BCMBUS */
 #ifndef PCIE_FULL_DONGLE
 	/* For FD we need all the packets at DHD to handle intra-BSS forwarding */
 	if (FW_SUPPORTED(dhd, ap)) {
@@ -17781,7 +17778,6 @@ int dhd_deepsleep(struct net_device *dev, int flag)
 #endif /* WL_CFG80211 && SUPPORT_DEEP_SLEEP */
 
 #ifdef PROP_TXSTATUS
-
 void dhd_wlfc_plat_init(void *dhd)
 {
 #ifdef USE_DYNAMIC_F2_BLKSIZE

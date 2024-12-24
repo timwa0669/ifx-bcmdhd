@@ -638,7 +638,7 @@ ifeq ($(CONFIG_BCMDHD_PCIE),y)
 DHDCFLAGS += -DPCIE_FULL_DONGLE -DBCMPCIE -DCUSTOM_DPC_PRIO_SETTING=-1
 # tput enhancement
 DHDCFLAGS += -DCUSTOM_AMPDU_BA_WSIZE=64
-DHDCFLAGS += -DPROP_TXSTATUS_VSDB
+#DHDCFLAGS += -DPROP_TXSTATUS_VSDB
 # HEAP ASLR
 DHDCFLAGS += -DBCM_ASLR_HEAP
 DHDCFLAGS += -DMAX_CNTL_TX_TIMEOUT=1
@@ -750,7 +750,7 @@ endif
 
 ifeq ($(CONFIG_BCMDHD_PCIE),y)
 DHDOFILES += dhd_pcie.o dhd_pcie_linux.o dhd_msgbuf.o dhd_flowring.o
-DHDOFILES += pcie_core.o
+DHDOFILES += pcie_core.o dhd_wlfc.o
 endif
 
 ifneq ($(filter -DDHD_LB, $(DHDCFLAGS)),)

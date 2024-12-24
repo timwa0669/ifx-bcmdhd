@@ -2546,7 +2546,6 @@ static void
 wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 {
 #ifdef PROP_TXSTATUS_VSDB
-#if defined(BCMSDIO)
 	bool wlfc_enabled = FALSE;
 	s32 err, up = 1;
 	struct net_device *primary_ndev = bcmcfg_to_prmry_ndev(cfg);
@@ -2580,7 +2579,6 @@ wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 				cfg->wlfc_on = false;
 			}
 	}
-#endif /* defined(BCMSDIO) */
 #endif /* PROP_TXSTATUS_VSDB */
 }
 
@@ -24930,7 +24928,6 @@ static s32 __wl_cfg80211_down(struct bcm_cfg80211 *cfg)
 	if (cfg->p2p_supported) {
 		wl_clr_p2p_status(cfg, GO_NEG_PHASE);
 #ifdef PROP_TXSTATUS_VSDB
-#if defined(BCMSDIO)
 		if (wl_cfgp2p_vif_created(cfg)) {
 			bool enabled = false;
 			dhd_wlfc_get_enable(dhd, &enabled);
@@ -24940,7 +24937,6 @@ static s32 __wl_cfg80211_down(struct bcm_cfg80211 *cfg)
 				cfg->wlfc_on = false;
 			}
 		}
-#endif /* defined(BCMSDIO) */
 #endif /* PROP_TXSTATUS_VSDB */
 	}
 
