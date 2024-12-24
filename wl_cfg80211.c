@@ -2549,10 +2549,13 @@ wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 #if defined(BCMSDIO)
 	bool wlfc_enabled = FALSE;
 	s32 err, up = 1;
-	dhd_pub_t *dhd;
 	struct net_device *primary_ndev = bcmcfg_to_prmry_ndev(cfg);
+#ifdef WL_DHD_XR
+	dhd_pub_t *dhd = (dhd_pub_t *)dhd_get_pub(primary_ndev);
+#else /* WL_DHD_XR */
+	dhd_pub_t *dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
 
-	dhd = (dhd_pub_t *)(cfg->pub);
 	if (!dhd) {
 		return;
 	}
@@ -2764,7 +2767,11 @@ wl_cfg80211_iface_state_ops(struct wireless_dev *wdev,
 	cfg = wiphy_priv(wdev->wiphy);
 	ndev = wdev->netdev;
 #ifdef CUSTOM_SET_CPUCORE
+#ifdef WL_DHD_XR
+	dhd = (dhd_pub_t *)dhd_get_pub(ndev);
+#else /* WL_DHD_XR */
 	dhd = (dhd_pub_t *)(cfg->pub);
+#endif /* WL_DHD_XR */
 #endif /* CUSTOM_SET_CPUCORE */
 
 	bssidx = wl_get_bssidx_by_wdev(cfg, wdev);
