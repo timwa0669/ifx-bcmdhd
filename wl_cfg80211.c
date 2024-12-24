@@ -2548,7 +2548,7 @@ wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 #ifdef PROP_TXSTATUS_VSDB
 #if defined(BCMSDIO)
 	bool wlfc_enabled = FALSE;
-	s32 err;
+	s32 err, up = 1;
 	dhd_pub_t *dhd;
 	struct net_device *primary_ndev = bcmcfg_to_prmry_ndev(cfg);
 
