@@ -403,7 +403,7 @@ int dhd_tcpack_suppress_set(dhd_pub_t *dhdp, uint8 mode)
 		goto exit;
 	}
 
-	DHD_TRACE(("%s: TCP ACK Suppress mode %d -> mode %d\n",
+	DHD_ERROR(("%s: TCP ACK Suppress mode %d -> mode %d\n",
 		__FUNCTION__, dhdp->tcpack_sup_mode, mode));
 
 	/* Pre-process routines to change a new mode as per previous mode */
