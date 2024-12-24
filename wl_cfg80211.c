@@ -6943,8 +6943,8 @@ wl_fils_toggle_roaming(struct net_device *dev, u32 auth_type)
 #endif /* !WL_FILS_ROAM_OFFLD && WL_FILS */
 #endif /* WL_FILS */
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0))
-#if defined(BCMSUP_4WAY_HANDSHAKE_SAE) || defined(WL_IDAUTH)
+#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) && defined(BCMSUP_4WAY_HANDSHAKE_SAE)) || \
+	((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)) && defined(WL_IDAUTH))
 static int
 wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 {
@@ -6974,8 +6974,8 @@ wl_set_sae_password(struct net_device *net, const u8 *pwd_data, u16 pwd_len)
 
 	return err;
 }
-#endif /* BCMSUP_4WAY_HANDSHAKE_SAE || WL_IDAUTH */
-#endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)) */
+#endif /* (KERNEL >= 5.3.0 && BCMSUP_4WAY_HANDSHAKE_SAE) ||
+	(KERNEL >= 5.9.0) && WL_IDAUTH) */
 
 static s32
 wl_set_key_mgmt(struct net_device *dev, struct cfg80211_connect_params *sme)
