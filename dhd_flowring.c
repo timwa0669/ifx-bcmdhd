@@ -1121,7 +1121,8 @@ dhd_update_interface_flow_info(dhd_pub_t *dhdp, uint8 ifindex,
 	if_flow_lkup = (if_flow_lkup_t *)dhdp->if_flow_lkup;
 
 	if (op == WLC_E_IF_ADD || op == WLC_E_IF_CHANGE) {
-
+		DHD_ERROR(("%s: ifindex:%d previous role:%d new role:%d\n",
+			__FUNCTION__, ifindex, if_flow_lkup[ifindex].role, role));
 		if_flow_lkup[ifindex].role = role;
 
 		if (role == WLC_E_IF_ROLE_WDS) {
