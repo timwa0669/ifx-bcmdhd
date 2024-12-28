@@ -1216,7 +1216,7 @@ void pcie_set_trefup_time_100us(si_t *sih);
 #define D2H_READY_WD_RESET_COUNT (200) /* ~200ms >~ BL ready time after wd rst */
 #define D2H_READY_WD_RESET_US 1000		/* 1ms */
 #define D2H_READY_TIMEOUT_US (100000) /* 100ms >~ FW download time */
-#define D2H_VALDN_DONE_TIMEOUT_US (250000) /* 250ms >~ Validation time */
+#define D2H_VALDN_DONE_TIMEOUT_US (450000) /* 450ms >~ Validation time */
 #define D2H_TRX_HDR_PARSE_DONE_TIMEOUT_US (50000) /* 50ms >~ TRX Parsing */
 #endif // endif
 

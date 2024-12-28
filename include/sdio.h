@@ -670,7 +670,7 @@ typedef volatile struct {
 #define READ_SHARED_CONSOLE_INIT_RETRY (20)
 #else
 #define D2H_READY_TIMEOUT_MS (100) /* 100ms >~ FW download time */
-#define D2H_VALDN_DONE_TIMEOUT_MS (250) /* 250ms >~ Validation time */
+#define D2H_VALDN_DONE_TIMEOUT_MS (450) /* 450ms >~ Validation time */
 #endif /* DHD_43022 */
 #define D2H_TRX_HDR_PARSE_DONE_TIMEOUT_MS (50) /* 50ms >~ TRX Parsing */
 #define D2H_READY_WD_RESET_COUNT (200) /* ~200ms >~ BL ready time after wd rst */
