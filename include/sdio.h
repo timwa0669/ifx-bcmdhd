@@ -660,18 +660,16 @@ typedef volatile struct {
 #define D2H_BP_CLK_DISABLE_REQ_TO_MS (2 * 60 * 1000)
 #define READ_SHARED_CONSOLE_INIT_RETRY (4000)
 #endif /* DHD_43022 */
-#else
+#else /* BCMQT */
 #ifdef DHD_43022
-#define D2H_READY_TIMEOUT_MS (1000 * 60) /* 1 Mins >~ FW download time */
-#define D2H_VALDN_DONE_TIMEOUT_MS (1000) /* 1000ms >~ Increased Validation time to 1s for 43022 */
-#define D2H_MV_NVRAM_DONE_TIMEOUT_MS (1000 * 60) /* 1 Mins  >~ NVRAM move to end of RAM time */
+#define D2H_MV_NVRAM_DONE_TIMEOUT_MS (100) /* 100ms >~ NVRAM move to end of RAM time */
 #define LOOP_TO_CHECK_FOR_BP_ENABLE 50000 /* Wait for 50000msec */
+/* Wait for 5000ms to get the bit set from device */
 #define D2H_BP_CLK_DISABLE_REQ_TO_MS (5 * 1000)
 #define READ_SHARED_CONSOLE_INIT_RETRY (20)
-#else
+#endif /* DHD_43022 */
 #define D2H_READY_TIMEOUT_MS (100) /* 100ms >~ FW download time */
 #define D2H_VALDN_DONE_TIMEOUT_MS (450) /* 450ms >~ Validation time */
-#endif /* DHD_43022 */
 #define D2H_TRX_HDR_PARSE_DONE_TIMEOUT_MS (50) /* 50ms >~ TRX Parsing */
 #define D2H_READY_WD_RESET_COUNT (200) /* ~200ms >~ BL ready time after wd rst */
 #define D2H_READY_WD_RESET_DBG_PRINT_MS (10) /* 10ms - DEBUG print at evry 10ms */
