@@ -1572,7 +1572,7 @@ _dhd_wlfc_pktq_flush(athost_wl_status_info_t* ctx, struct pktq *pq,
 				bool head = (p == q->head);
 				if (head)
 					q->head = PKTLINK(p);
-				else
+				else if (prev)
 					PKTSETLINK(prev, PKTLINK(p));
 				if (q_type == Q_TYPE_PSQ) {
 					if (!WLFC_GET_AFQ(dhdp->wlfc_mode) && (prec & 1)) {
