@@ -51,13 +51,11 @@
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
-#include <asm/unaligned.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0))
 #include <linux/sched/types.h>
-#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0) */
-/* The kernel threading is sdio-specific */
-struct task_struct;
-struct sched_param;
+#else /* KERNEL_VERSION >= 4.11.0 */
+#include <linux/sched.h>
+#endif /* KERNEL_VERSION >= 4.11.0 */
 #if defined(BT_OVER_SDIO)
 #include <dhd_bt_interface.h>
 #endif /* defined (BT_OVER_SDIO) */

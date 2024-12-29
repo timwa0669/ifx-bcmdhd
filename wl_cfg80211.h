@@ -182,7 +182,10 @@ extern char *dhd_log_dump_get_timestamp(void);
 	cfg80211_port_authorized(dev, bssid, gfp)
 #endif /* KERNEL_VERSION >= (6, 2, 0) */
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)) || \
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 0))
+#define CFG80211_CH_SWITCH_NOTIFY(dev, chandef, link_id, bitmap) \
+	cfg80211_ch_switch_notify(dev, chandef, link_id)
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)) || \
 	defined(DHD_ANDROID_CFG80211_BACKPORT_V3)
 #define CFG80211_CH_SWITCH_NOTIFY(dev, chandef, link_id, bitmap) \
 	cfg80211_ch_switch_notify(dev, chandef, link_id, bitmap)
@@ -2821,11 +2824,19 @@ s32 wl_cfg80211_get_station(struct wiphy *wiphy,
 	struct station_info *sinfo);
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0) */
 s32 wl_xr_slv_init_cfg_event(struct bcm_cfg80211 *cfg);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
 s32
 wl_cfg80211_change_beacon(
-       struct wiphy *wiphy,
-       struct net_device *dev,
-       struct cfg80211_beacon_data *info);
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_ap_update *ap_update)
+#else /* KERNEL_VERSION >= 6.7.0 */
+s32
+wl_cfg80211_change_beacon(
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_beacon_data *info)
+#endif /* KERNEL_VERSION >= 6.7.0 */
 int
 wl_cfg80211_channel_switch(struct wiphy *wiphy, struct net_device *dev,
        struct cfg80211_csa_settings *params);

@@ -166,10 +166,6 @@ DHDCFLAGS += -Wall -Wstrict-prototypes -Dlinux -DLINUX -DBCMDRIVER        \
 	-DDHD_RND_DEBUG                                                       \
 	-DDHD_DONOT_FORWARD_BCMEVENT_AS_NETWORK_PKT
 
-GCCVERSIONGTEQ9 := $(shell expr `$(CROSS_COMPILE)gcc -dumpversion | cut -f1 -d.` \>= 9)
-ifeq "$(GCCVERSIONGTEQ9)" "1"
-DHDCFLAGS += -Wno-error=date-time
-endif
 GCCVERSIONGTEQ7 := $(shell expr `$(CROSS_COMPILE)gcc -dumpversion | cut -f1 -d.` \>= 7)
 ifeq "$(GCCVERSIONGTEQ7)" "1"
 DHDCFLAGS += -Wimplicit-fallthrough=3
@@ -177,6 +173,8 @@ DHDCFLAGS += $(call cc-disable-warning, format-truncation)
 endif
 DHDCFLAGS += $(call cc-disable-warning, date-time)
 DHDCFLAGS += $(call cc-disable-warning, stringop-overflow)
+DHDCFLAGS += $(call cc-disable-warning, missing-prototypes)
+DHDCFLAGS += $(call cc-disable-warning, missing-declarations)
 
 #################
 # Common feature
@@ -784,8 +782,9 @@ all:
 	@$(MAKE) --no-print-directory -C $(KDIR) M=$(CURDIR) modules
 
 clean:
-	rm -rf *.o *.ko *.mod.c *~ .*.cmd *.o.cmd .*.o.cmd .*.o.d *.mod \
-	*.dwo Module.symvers modules.order .tmp_versions modules.builtin
+	rm -rf *.o *.ko *.mod.c *~ .*.o .*.cmd *.o.cmd .*.o.cmd .*.o.d \
+	*.mod *.dwo Module.symvers modules.order .tmp_versions \
+	modules.builtin
 
 install:
 	@$(MAKE) --no-print-directory -C $(KDIR) \

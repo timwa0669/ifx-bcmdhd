@@ -15307,11 +15307,19 @@ exit:
 #ifndef WL_DHD_XR
 static
 #endif /* WL_DHD_XR */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+s32
+wl_cfg80211_change_beacon(
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_ap_update *ap_update)
+#else /* KERNEL_VERSION >= 6.7.0 */
 s32
 wl_cfg80211_change_beacon(
 	struct wiphy *wiphy,
 	struct net_device *dev,
 	struct cfg80211_beacon_data *info)
+#endif /* KERNEL_VERSION >= 6.7.0 */
 {
 	s32 err = BCME_OK;
 	struct bcm_cfg80211 *cfg = wiphy_priv(wiphy);
@@ -15331,12 +15339,19 @@ wl_cfg80211_change_beacon(
 	u32 iw_ie_len = 0;
 	u8 iw_ie[IW_IES_MAX_BUF_LEN];
 #endif // endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+	struct cfg80211_beacon_data *info = &ap_update->beacon;
+#endif /* KERNEL_VERSION >= 6.7.0 */
 
 	WL_DBG(("Enter \n"));
 
 #ifdef WL_DHD_XR_MASTER
 	if (dhdxr && DHD_GET_XR_ROLE(dhdxr) == XR_SLAVE) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+		return wl_cfg80211_change_beacon_xr(cfg->pub, dhdxr, wiphy, dev, ap_update);
+#else /* KERNEL_VERSION >= 6.7.0 */
 		return wl_cfg80211_change_beacon_xr(cfg->pub, dhdxr, wiphy, dev, info);
+#endif /* KERNEL_VERSION >= 6.7.0 */
 	}
 #endif /* WL_DHD_XR_MASTER */
 

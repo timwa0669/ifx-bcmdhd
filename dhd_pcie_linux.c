@@ -250,7 +250,9 @@ static const struct dev_pm_ops dhdpcie_pm_ops = {
 #endif /* DHD_PCIE_NATIVE_RUNTIMEPM */
 
 static struct pci_driver dhdpcie_driver = {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0))
 	node:		{&dhdpcie_driver.node, &dhdpcie_driver.node},
+#endif /* KERNEL_VERSION < 6.8.0 */
 #ifndef BCMDHDX
 	name:		"pcieh",
 #else
@@ -3113,8 +3115,7 @@ dhd_print_kirqstats(dhd_pub_t *dhd, unsigned int irq_num)
 	raw_spin_lock_irqsave(&desc->lock, flags);
 	bcm_bprintf(&strbuf, "dhd irq %u:", irq_num);
 	for_each_online_cpu(i)
-		bcm_bprintf(&strbuf, "%10u ",
-			desc->kstat_irqs ? *per_cpu_ptr(desc->kstat_irqs, i) : 0);
+		bcm_bprintf(&strbuf, "%10u ", OSL_IRQ_DESC_KSTAT_CPU(desc, i));
 	if (desc->irq_data.chip) {
 		if (desc->irq_data.chip->name)
 			bcm_bprintf(&strbuf, " %8s", desc->irq_data.chip->name);

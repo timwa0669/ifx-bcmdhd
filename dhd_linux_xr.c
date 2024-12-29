@@ -79,7 +79,6 @@
 #include <linux/rtc.h>
 #include <linux/namei.h>
 #include <asm/uaccess.h>
-#include <asm/unaligned.h>
 #include <dhd_linux_priv.h>
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0))

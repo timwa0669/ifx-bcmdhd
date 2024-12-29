@@ -236,7 +236,9 @@ struct pci_device_id {
 };
 
 struct pci_driver {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0))
 	struct list_head node;
+#endif /* KERNEL_VERSION < 6.8.0 */
 	char *name;
 	const struct pci_device_id *id_table;	/* NULL if wants all devices */
 	int (*probe)(struct pci_dev *dev,

@@ -3183,8 +3183,19 @@ int xr_cmd_reply_stop_fils_6g_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 #endif /* WL_6E */
 
 /* change beacon */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
 s32
-wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy * wiphy, struct net_device * dev, struct cfg80211_beacon_data * info)
+wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_ap_update *ap_update)
+#else /* KERNEL_VERSION >= 6.7.0 */
+s32
+wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_beacon_data *info)
+#endif /* KERNEL_VERSION >= 6.7.0 */
 {
 	xr_cmd_t *cmd = NULL;
 	int size = sizeof(xr_cmd_t) + sizeof(xr_cmd_change_beacon_t);
@@ -3207,7 +3218,11 @@ wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wip
 
 	data->wiphy = wiphy;
 	data->dev = dev;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+	data->ap_update = ap_update;
+#else /* KERNEL_VERSION >= 6.7.0 */
 	data->info = info;
+#endif /* KERNEL_VERSION >= 6.7.0 */
 
 	ret = dhd_send_xr_cmd(dest_pub, cmd, size, &cmd_wait->change_beacon_wait, TRUE);
 
@@ -3283,9 +3298,13 @@ int xr_cmd_change_beacon_hndlr(dhd_pub_t *pub, xr_cmd_t *xr_cmd)
 	}
 
 	dest_pub = XR_CMD_GET_DEST_PUB(cfg, xr_role);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+	status = wl_cfg80211_change_beacon(cmd->wiphy, cmd->dev, cmd->ap_update);
+#else /* KERNEL_VERSION >= 6.7.0 */
 	status = wl_cfg80211_change_beacon(cmd->wiphy, cmd->dev, cmd->info);
+#endif /* KERNEL_VERSION >= 6.7.0 */
 
-	if(dest_pub) {
+	if (dest_pub) {
 		wl_cfg80211_change_beacon_xr_reply(dest_pub, status);
 	}
 

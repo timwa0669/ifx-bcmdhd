@@ -858,12 +858,13 @@ si_doattach(si_info_t *sii, uint devid, osl_t *osh, volatile void *regs,
 		(CHIPTYPE(sii->pub.socitype) == SOCI_NAI) ||
 		(CHIPTYPE(sii->pub.socitype) == SOCI_DVTBUS)) {
 
-		if (CHIPTYPE(sii->pub.socitype) == SOCI_AI)
+		if (CHIPTYPE(sii->pub.socitype) == SOCI_AI) {
 			SI_MSG(("Found chip type AI (0x%08x)\n", w));
-		else if (CHIPTYPE(sii->pub.socitype) == SOCI_NAI)
+		} else if (CHIPTYPE(sii->pub.socitype) == SOCI_NAI) {
 			SI_MSG(("Found chip type NAI (0x%08x)\n", w));
-		else
+		} else {
 			SI_MSG(("Found chip type DVT (0x%08x)\n", w));
+		}
 		/* pass chipc address instead of original core base */
 
 		if (sii->osh) {

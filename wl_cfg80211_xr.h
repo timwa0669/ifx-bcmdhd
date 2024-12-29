@@ -506,7 +506,11 @@ typedef struct _xr_cmd_reply_stop_fils_6g {
 typedef struct _xr_cmd_change_beacon {
 	struct wiphy *wiphy;
 	struct net_device *dev;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
+	struct cfg80211_ap_update *ap_update;
+#else /* KERNEL_VERSION >= 6.7.0 */
 	struct cfg80211_beacon_data *info;
+#endif /* KERNEL_VERSION >= 6.7.0 */
 } xr_cmd_change_beacon_t;
 
 typedef struct _xr_cmd_reply_change_beacon {
@@ -1040,13 +1044,19 @@ s32 dhd_bandsteer_update_ifaces_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 s32
 wl_stop_fils_6g_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub, struct wiphy *wiphy, struct net_device *dev, u8 fils_stop);
 #endif /* WL_6E */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
 s32
-wl_cfg80211_change_beacon_xr(
-	dhd_pub_t *src_pub,
-	dhd_pub_t *dest_pub,
+wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
+	struct wiphy *wiphy,
+	struct net_device *dev,
+	struct cfg80211_ap_update *ap_update);
+#else /* KERNEL_VERSION >= 6.7.0 */
+s32
+wl_cfg80211_change_beacon_xr(dhd_pub_t *src_pub, dhd_pub_t *dest_pub,
 	struct wiphy *wiphy,
 	struct net_device *dev,
 	struct cfg80211_beacon_data *info);
+#endif /* KERNEL_VERSION >= 6.7.0 */
 int
 wl_cfg80211_channel_switch_xr(
 	dhd_pub_t *src_pub,

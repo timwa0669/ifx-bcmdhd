@@ -1283,9 +1283,10 @@ dhdsdio_clk_kso_enab(dhd_bus_t *bus, bool on)
 		bcmsdh_cfg_write(bus->sdh, SDIO_FUNC_1, SBSDIO_FUNC1_SLEEPCSR, wr_val, &err);
 	} while (try_cnt++ < CUSTOM_MAX_KSO_ATTEMPTS);
 
-	if (try_cnt > 2)
+	if (try_cnt > 2) {
 		KSO_DBG(("%s> op:%s, try_cnt:%d, rd_val:%x, ERR:%x \n",
 			__FUNCTION__, (on ? "KSO_SET" : "KSO_CLR"), try_cnt, rd_val, err));
+	}
 
 	if (try_cnt > CUSTOM_MAX_KSO_ATTEMPTS)  {
 		DHD_ERROR(("%s> op:%s, ERROR: try_cnt:%d, rd_val:%x, ERR:%x \n",

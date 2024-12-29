@@ -651,4 +651,20 @@ typedef struct osl_timespec {
 extern void osl_do_gettimeofday(struct osl_timespec *ts);
 extern void osl_get_monotonic_boottime(struct osl_timespec *ts);
 extern uint32 osl_do_gettimediff(struct osl_timespec *cur_ts, struct osl_timespec *old_ts);
+
+/*
+ * Since Linux 6.10, the kstat_irqs has been converted to a struct.
+ * So we use irq_desc_kstat_cpu(desc, cpu) to get the status.
+ */
+
+#include <linux/irq.h>
+#include <linux/irqdesc.h>
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0))
+#define OSL_IRQ_DESC_KSTAT_CPU(desc, cpu) \
+	irq_desc_kstat_cpu(desc, cpu)
+#else /* KERNEL_VERSION >= 5.11.0 */
+#define OSL_IRQ_DESC_KSTAT_CPU(desc, cpu) \
+	(desc->kstat_irqs ? *per_cpu_ptr(desc->kstat_irqs, cpu) : 0)
+#endif /* KERNEL_VERSION >= 5.11.0 */
 #endif	/* _linux_osl_h_ */
