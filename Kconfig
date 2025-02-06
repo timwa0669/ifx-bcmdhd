@@ -108,13 +108,6 @@ config CYW43022
 	depends on BCMDHD
 	default n
 
-config DHD_USE_SCHED_SCAN
-	bool "Use CFG80211 sched scan"
-	depends on BCMDHD && CFG80211
-	default n
-	help
-	  Use CFG80211 sched scan.
-
 config DHD_SET_RANDOM_MAC_VAL
 	hex "Vendor OUI"
 	depends on BCMDHD
