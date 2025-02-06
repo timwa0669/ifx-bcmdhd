@@ -1047,6 +1047,8 @@ typedef struct dhd_pub {
 #endif /* defined(OEM_ANDROID) */
 
 #if defined(PROP_TXSTATUS) || defined(WL_DHD_XR_PCISDIO)
+	bool	wlfc_support;
+	bool	hostreorder_support;
 	bool	wlfc_enabled;
 	int	wlfc_mode;
 	void*	wlfc_state;

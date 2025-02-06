@@ -2545,6 +2545,7 @@ static chanspec_t wl_cfg80211_get_shared_freq(struct wiphy *wiphy)
 static void
 wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 {
+#ifdef PROP_TXSTATUS
 #ifdef PROP_TXSTATUS_VSDB
 	bool wlfc_enabled = FALSE;
 	s32 err, up = 1;
@@ -2564,7 +2565,10 @@ wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 			dhd_wlfc_get_enable(dhd, &wlfc_enabled);
 			if (!wlfc_enabled && dhd->op_mode != DHD_FLAG_HOSTAP_MODE &&
 				dhd->op_mode != DHD_FLAG_IBSS_MODE) {
-				dhd_wlfc_init(dhd);
+				if (dhd->wlfc_support)
+					dhd_wlfc_init(dhd);
+				else if (dhd->hostreorder_support)
+					dhd_wlfc_hostreorder_init(dhd);
 				err = wldev_ioctl_set(primary_ndev, WLC_UP, &up, sizeof(s32));
 				if (err < 0)
 					WL_ERR(("WLC_UP return err:%d\n", err));
@@ -2580,6 +2584,7 @@ wl_wlfc_enable(struct bcm_cfg80211 *cfg, bool enable)
 			}
 	}
 #endif /* PROP_TXSTATUS_VSDB */
+#endif /* PROP_TXSTATUS */
 }
 
 struct wireless_dev *

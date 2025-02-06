@@ -10602,10 +10602,11 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 #endif // endif
 
 #ifdef PROP_TXSTATUS
-	int wlfc_enable = TRUE;
 #ifndef DISABLE_11N
+#ifdef AMPDU_HOSTREORDER
 	uint32 hostreorder = 1;
 	uint chipid = 0;
+#endif /* AMPDU_HOSTREORDER */
 #endif /* DISABLE_11N */
 #endif /* PROP_TXSTATUS */
 
@@ -12026,19 +12027,21 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		(!FW_SUPPORTED(dhd, ap)) ||
 #endif /* PROP_TXSTATUS_VSDB */
 		FALSE) {
-		wlfc_enable = FALSE;
+		dhd->wlfc_support = FALSE;
+	} else {
+		dhd->wlfc_support = TRUE;
 	}
 
-#if defined(PROP_TXSTATUS)
 #ifdef USE_WFA_CERT_CONF
 	if (sec_get_param_wfa_cert(dhd, SET_PARAM_PROPTX, &proptx) == BCME_OK) {
 		DHD_ERROR(("%s , read proptx param=%d\n", __FUNCTION__, proptx));
-		wlfc_enable = proptx;
+		dhd->wlfc_support = proptx;
 	}
 #endif /* USE_WFA_CERT_CONF */
-#endif /* PROP_TXSTATUS */
 
 #ifndef DISABLE_11N
+#ifdef AMPDU_HOSTREORDER
+	dhd->hostreorder_support = TRUE;
 	ret2 = dhd_iovar(dhd, 0, "ampdu_hostreorder", (char *)&hostreorder, sizeof(hostreorder),
 			NULL, 0, TRUE);
 	chipid = dhd_bus_chip_id(dhd);
@@ -12061,18 +12064,17 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 				ret = ret2;
 		}
 		if (ret2 != BCME_OK)
-			hostreorder = 0;
+			dhd->hostreorder_support = FALSE;
 	}
+#endif /* AMPDU_HOSTREORDER */
 #endif /* DISABLE_11N */
 
-	if (wlfc_enable)
+	if (dhd->wlfc_support)
 		dhd_wlfc_init(dhd);
-#ifndef DISABLE_11N
-	else if (hostreorder)
+	else if (dhd->hostreorder_support)
 		dhd_wlfc_hostreorder_init(dhd);
-#endif /* DISABLE_11N */
-
 #endif /* PROP_TXSTATUS */
+
 #ifndef PCIE_FULL_DONGLE
 	/* For FD we need all the packets at DHD to handle intra-BSS forwarding */
 	if (FW_SUPPORTED(dhd, ap)) {
