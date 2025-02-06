@@ -12026,6 +12026,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		/* enable WLFC only if the firmware is VSDB when it is in STA mode */
 		(!FW_SUPPORTED(dhd, ap)) ||
 #endif /* PROP_TXSTATUS_VSDB */
+		(!FW_SUPPORTED(dhd, proptxstatus)) ||
 		FALSE) {
 		dhd->wlfc_support = FALSE;
 	} else {
