@@ -133,7 +133,8 @@ uint sd_use_dma = TRUE;
 #define CUSTOM_RXCHAIN 0
 #endif // endif
 
-#define COPY_BUF_SIZE	(SDPCM_MAXGLOM_SIZE * 1600)
+/* SDPCM_MAXGLOM_SIZE * 1600 is found too small */
+#define COPY_BUF_SIZE	(SDPCM_MAXGLOM_SIZE * 4096)
 
 uint sd_txglom_mode;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
 
