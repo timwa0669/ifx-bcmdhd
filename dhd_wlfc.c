@@ -933,6 +933,12 @@ _dhd_wlfc_flow_control_check(athost_wl_status_info_t* ctx, struct pktq* pq, uint
 	dhdp = (dhd_pub_t *)ctx->dhdp;
 	ASSERT(dhdp);
 
+	/* Return for the bc/mc and unknown destinations configured by
+	 * &wlfc->destination_entries.other to prevent from out-of-boundary access
+	 * in array (BRK exception) kernel panic issue. */
+	if (if_id >= WLFC_MAX_IFNUM)
+		return;
+
 	if (dhdp->skip_fc && dhdp->skip_fc((void *)dhdp, if_id))
 		return;
 
@@ -2968,7 +2974,7 @@ int dhd_wlfc_enable(dhd_pub_t *dhd)
 	}
 
 	_dhd_wlfc_mac_entry_update(wlfc, &wlfc->destination_entries.other,
-		eWLFC_MAC_ENTRY_ACTION_ADD, 0, 0, NULL, NULL, NULL);
+		eWLFC_MAC_ENTRY_ACTION_ADD, ALL_INTERFACES, 0, NULL, NULL, NULL);
 
 	wlfc->allow_credit_borrow = 0;
 	wlfc->single_ac = 0;
