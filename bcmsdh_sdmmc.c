@@ -136,7 +136,7 @@ uint sd_use_dma = TRUE;
 /* SDPCM_MAXGLOM_SIZE * 1600 is found too small */
 #define COPY_BUF_SIZE	(SDPCM_MAXGLOM_SIZE * 4096)
 
-uint sd_txglom_mode;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
+uint sd_txglom_mode = CUSTOM_RXCHAIN;		/* Txglom mode: 0 - copy, 1 - multi-descriptor */
 
 DHD_PM_RESUME_WAIT_INIT(sdioh_request_byte_wait);
 DHD_PM_RESUME_WAIT_INIT(sdioh_request_word_wait);
