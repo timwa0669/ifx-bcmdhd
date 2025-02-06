@@ -13741,7 +13741,9 @@ wl_cfg80211_bcn_bringup_ap(
 #endif /* WL_DHD_XR_CLIENT */
 #endif // endif
 #endif /* MFP */
-	s32 ap = 1;
+#if 0 /* !IGUANA_LEGACY_CHIPS */
+	s32 up = 1;
+#endif /* !IGUANA_LEGACY_CHIPS */
 
 #ifdef WL_DHD_XR
 	is_rsdb_supported = DHD_OPMODE_SUPPORTED(dhdp, DHD_FLAG_RSDB_MODE);
@@ -13846,19 +13848,14 @@ wl_cfg80211_bcn_bringup_ap(
 		}
 #endif /* SOFTAP_UAPSD_OFF */
 
-		err = wldev_ioctl_set(dev, WLC_UP, &ap, sizeof(s32));
+		/* The first STA joining process may failed on legacy chips */
+#if 0 /* !IGUANA_LEGACY_CHIPS */
+		err = wldev_ioctl_set(dev, WLC_UP, &up, sizeof(s32));
 		if (err < 0) {
 			WL_ERR(("WLC_UP error (%d)\n", err));
-#if defined(IGUANA_LEGACY_CHIPS)
-			if (wl_customer6_legacy_chip_check(cfg,
-				primary_ndev)) {
-				err = BCME_OK;
-			} else
-#endif // endif
-			{
-				goto exit;
-			}
+			goto exit;
 		}
+#endif /* !IGUANA_LEGACY_CHIPS */
 
 #ifdef MFP
 		if (cfg->bip_pos) {
