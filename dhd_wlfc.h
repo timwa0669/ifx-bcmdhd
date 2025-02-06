@@ -278,7 +278,11 @@ typedef struct athost_wl_stat_counters {
 #ifdef CUSTOM_AMPDU_MPDU
 #define WLFC_MAX_RELEASE_CNT	CUSTOM_AMPDU_MPDU
 #else
+#if 0
 #define WLFC_MAX_RELEASE_CNT	16
+#endif
+/* Max AMPDU_MPDU of CYW43438 is 11 */
+#define WLFC_MAX_RELEASE_CNT	10
 #endif /* CUSTOM_AMPDU_MPDU */
 #endif /* WLFC_MAX_RELEASE_CNT */
 #endif /* BULK_DEQUEUE */
