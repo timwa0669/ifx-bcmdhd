@@ -77,6 +77,10 @@
 
 #define IOCTL_DISABLE_TIMEOUT 0
 
+#ifndef RXCTL_RESCHED_CNT
+#define RXCTL_RESCHED_CNT 2
+#endif /* RXCTL_RESCHED_CNT */
+
 /*
  * Exported from the dhd protocol module (dhd_cdc, dhd_rndis)
  */
