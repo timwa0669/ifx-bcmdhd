@@ -1324,6 +1324,10 @@ _dhd_wlfc_deque_delayedq(athost_wl_status_info_t* ctx, int prec,
 			entry = ctx->requested_entry[i];
 		} else {
 			entry = ctx->active_entry_head;
+#ifndef BULK_DEQUEUE
+			/* move head to ensure fair round-robin */
+			ctx->active_entry_head = ctx->active_entry_head->next;
+#endif /* !BULK_DEQUEUE */
 		}
 		ASSERT(entry);
 
@@ -1393,10 +1397,12 @@ _dhd_wlfc_deque_delayedq(athost_wl_status_info_t* ctx, int prec,
 				return p;
 			}
 		}
+#ifdef BULK_DEQUEUE
 		if (!only_no_credit) {
 			/* move head to ensure fair round-robin */
 			ctx->active_entry_head = ctx->active_entry_head->next;
 		}
+#endif /* BULK_DEQUEUE */
 	}
 	return NULL;
 } /* _dhd_wlfc_deque_delayedq */
