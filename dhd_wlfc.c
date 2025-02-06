@@ -3680,6 +3680,9 @@ dhd_wlfc_init(dhd_pub_t *dhd)
 			mode = WLFC_MODE_AFQ;
 		} else {
 			WLFC_SET_AFQ(mode, WLFC_GET_AFQ(fw_caps));
+#ifdef WLFC_REUSESEQ
+			WLFC_SET_REUSESEQ(mode, WLFC_GET_REUSESEQ(fw_caps));
+#endif /* WLFC_REUSESEQ */
 			WLFC_SET_REORDERSUPP(mode, WLFC_GET_REORDERSUPP(fw_caps));
 		}
 		ret = dhd_wl_ioctl_set_intiovar(dhd, "wlfc_mode", mode, WLC_SET_VAR, TRUE, 0);
