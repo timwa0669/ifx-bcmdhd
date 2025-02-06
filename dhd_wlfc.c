@@ -3850,7 +3850,7 @@ dhd_wlfc_deinit(dhd_pub_t *dhd)
 	if (dhd->plat_deinit)
 		dhd->plat_deinit((void *)dhd);
 	return BCME_OK;
-} /* dhd_wlfc_init */
+} /* dhd_wlfc_deinit */
 
 /**
  * Called on an interface event (WLC_E_IF) indicated by firmware
