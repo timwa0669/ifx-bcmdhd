@@ -586,11 +586,6 @@ extern void set_secondary_d11_core(si_t *sih, volatile void **secmap, volatile v
 			       OFFSETOF(pmuregs_t, member), mask, val): \
 		si_pmu_corereg(si, cc_idx, OFFSETOF(chipcregs_t, member), mask, val))
 
-/* Used only for the regs present in the pmu core and not present in the old cc core */
-#define PMU_REG_NEW(si, member, mask, val) \
-		si_corereg(si, si_findcoreidx(si, PMU_CORE_ID, 0), \
-			OFFSETOF(pmuregs_t, member), mask, val)
-
 #define PMU_REG(si, member, mask, val) \
 	(AOB_ENAB(si) ? \
 		si_corereg(si, si_findcoreidx(si, PMU_CORE_ID, 0), \

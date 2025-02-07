@@ -2191,21 +2191,29 @@ si_watchdog(si_t *sih, uint ticks)
 			ticks = 2;
 		else if (ticks > maxt)
 			ticks = maxt;
+
 		if (BCM43012_CHIP(sih->chip)) {
-			PMU_REG_NEW(sih, min_res_mask, ~0, DEFAULT_43012_MIN_RES_MASK);
-			PMU_REG_NEW(sih, watchdog_res_mask, ~0, DEFAULT_43012_MIN_RES_MASK);
-			PMU_REG_NEW(sih, pmustatus, PST_WDRESET, PST_WDRESET);
-			PMU_REG_NEW(sih, pmucontrol_ext, PCTL_EXT_FASTLPO_SWENAB, 0);
+			PMU_REG(sih, min_res_mask, ~0, DEFAULT_43012_MIN_RES_MASK);
+			PMU_REG(sih, watchdog_res_mask, ~0, DEFAULT_43012_MIN_RES_MASK);
+			PMU_REG(sih, pmustatus, PST_WDRESET, PST_WDRESET);
+			PMU_REG(sih, pmucontrol_ext, PCTL_EXT_FASTLPO_SWENAB, 0);
 			SPINWAIT((PMU_REG(sih, pmustatus, 0, 0) & PST_ILPFASTLPO),
 				PMU_MAX_TRANSITION_DLY);
 		}
+
+		if (sih->chip == BCM4373_CHIP_ID) {
+			PMU_REG(sih, min_res_mask, ~0, DEFAULT_4373_MIN_RES_MASK);
+			PMU_REG(sih, watchdog_res_mask, ~0, DEFAULT_4373_MIN_RES_MASK);
+		}
+
 		if (sih->chip == CYW55500_CHIP_ID ||
-		    sih->chip == CYW55530_CHIP_ID ||
-		    sih->chip == CYW55560_CHIP_ID) {
+			sih->chip == CYW55530_CHIP_ID ||
+			sih->chip == CYW55560_CHIP_ID) {
 			si_corereg(sih, si_findcoreidx(sih, PMU_CORE_ID, 0),
 				OFFSETOF(pmuregs_t, pmuwatchdog), ~0, ticks);
 		} else {
 			pmu_corereg(sih, SI_CC_IDX, pmuwatchdog, ~0, ticks);
+			OSL_DELAY(100);
 		}
 	} else {
 		maxt = (1 << 28) - 1;

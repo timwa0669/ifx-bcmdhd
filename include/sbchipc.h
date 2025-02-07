@@ -295,7 +295,25 @@ typedef volatile struct {
 	uint32	SECI_statusmask;
 	uint32	SECI_rxnibchanged;
 
-	uint32	PAD[20];
+	/* Enhanced Coexistence Interface (ECI) registers (corerev >= 21) */
+	uint32	eci_output;	/* 0x140 */
+	uint32	eci_control;
+	uint32	eci_inputlo;
+	uint32	eci_inputmi;
+	uint32	eci_inputhi;
+	uint32	eci_inputintpolaritylo;
+	uint32	eci_inputintpolaritymi;
+	uint32	eci_inputintpolarityhi;
+	uint32	eci_intmasklo;
+	uint32	eci_intmaskmi;
+	uint32	eci_intmaskhi;
+	uint32	eci_eventlo;
+	uint32	eci_eventmi;
+	uint32	eci_eventhi;
+	uint32	eci_eventmasklo;
+	uint32	eci_eventmaskmi;
+	uint32	eci_eventmaskhi;
+	uint32	PAD[3];
 
 	/* SROM interface (corerev >= 32) */
 	uint32	sromcontrol;		/* 0x190 */
@@ -359,6 +377,7 @@ typedef volatile struct {
 	uint32	sr1_control0;		/* 0x584 */
 	uint32	sr1_control1;		/* 0x588 */
 	uint32	PAD[29];
+
 	/* PMU registers (corerev >= 20) */
 	/* Note: all timers driven by ILP clock are updated asynchronously to HT/ALP.
 	 * The CPU must read them twice, compare, and retry if different.
@@ -413,19 +432,22 @@ typedef volatile struct {
 	uint32  PAD[14];
 	uint32  pmuintstatus;		/* 0x740 */
 	uint32  extwakeupstatus;	/* 0x744 */
-	uint32	PAD[6];
-	uint32  extwakemask0;		/* 0x760 */
-	uint32	extwakemask1; /* 0x764 */
-	uint32	PAD[2];		/* 0x768-0x76C */
-	uint32	extwakereqmask[2]; /* 0x770-0x774 */
-	uint32	PAD[2];		/* 0x778-0x77C */
-	uint32  pmuintctrl0;		/* 0x780 */
-	uint32  PAD[3];			/* 0x784 - 0x78c */
-	uint32  extwakectrl[1];		/* 0x790 */
-	uint32  PAD[8];
-	uint32  fis_ctrl_status;        /* 0x7b4 */
-	uint32  fis_min_res_mask;       /* 0x7b8 */
-	uint32  PAD[17];
+	uint32	watchdog_res_mask;	/* 0x748 */
+	uint32	swscratch;			/* 0x74c */
+	uint32	PAD[3];				/* 0x750 - 0x75c */
+	uint32	extwakemask0;		/* 0x760 */
+	uint32	extwakemask1;		/* 0x764 */
+	uint32	PAD[2];				/* 0x768 - 0x76C */
+	uint32	extwakereqmask[2];	/* 0x770 - 0x774 */
+	uint32	PAD[2];				/* 0x778 - 0x77C */
+	uint32	pmuintctrl0;		/* 0x780 */
+	uint32	pmuintctrl1;		/* 0x784 */
+	uint32	PAD[2];				/* 0x788 - 0x78c */
+	uint32	extwakectrl[2];		/* 0x790 - 0x794 */
+	uint32	PAD[7];				/* 0x798 - 0x7b0 */
+	uint32	fis_ctrl_status;	/* 0x7b4 */
+	uint32	fis_min_res_mask;	/* 0x7b8 */
+	uint32	PAD[17];
 	uint16	sromotp[512];		/* 0x800 */
 #ifdef CCNFLASH_SUPPORT
 	/* Nand flash MLC controller registers (corerev >= 38) */
@@ -1255,7 +1277,10 @@ typedef volatile struct {
 #define PCTL_EXT_FASTSEQ_ENAB	0x00001000
 #define PCTL_EXT_FASTLPO_PCIE_SWENAB	0x00004000  /**< rev33 for FLL1M */
 
+/* Minimum PMU resource mask for 43012c0 */
 #define DEFAULT_43012_MIN_RES_MASK		0x0f8bfe77
+/* Minimum PMU resource mask for 4373a0 */
+#define DEFAULT_4373_MIN_RES_MASK		0x0fcaff7f
 
 /*  Retention Control */
 #define PMU_RCTL_CLK_DIV_SHIFT		0
